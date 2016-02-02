@@ -1,0 +1,22 @@
+Package: rvtable
+Type: Package
+Title: Random Variable Data Tables
+Version: 0.1
+Date: 2016-02-01
+Author: Matthew Leonwicz [aut, cre]
+Maintainer: Matthew Leonawicz <mfleonawicz@alaska.edu>
+Description: Store distributions of random variables in long format data tables
+    with the 'rvtable' class. The package provides a simplified and consistent
+    interface for managing and manipulating random variables. Random variables can
+    be conditioned on levels of categorical variables stored in a table's various
+    ID columns. Functions provide the ability to condition on/subet, marginalize/
+    integrate over, and draw random samples from a rvtable.
+License: GPL-2
+LazyData: TRUE
+Imports: 
+    data.table,
+    dplyr,
+    magrittr
+Suggests: 
+    testthat
+RoxygenNote: 5.0.1
