@@ -38,6 +38,7 @@
 #' library(data.table)
 #' x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
+#' @importFrom stats density
 #' @importFrom magrittr %>%
 #' @import data.table
 rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.args=list()){
