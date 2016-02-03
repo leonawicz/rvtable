@@ -2,7 +2,7 @@
 rvtable
 =======
 
-[![Travis-CI Build Status](https://travis-ci.org/leonawicz/rvtable.svg?branch=master)](https://travis-ci.org/leonawicz/rvtable)
+[![Travis-CI Build Status](https://travis-ci.org/leonawicz/rvtable.svg?branch=master)](https://travis-ci.org/leonawicz/rvtable) [![Coverage Status](https://img.shields.io/codecov/c/github/leonawicz/rvtable/master.svg)](https://codecov.io/github/leonawicz/rvtable?branch=master)
 
 rvtable is an R package for storing distributions of random variables in long format data tables with the 'rvtable' class. The package provides a simplified and consistent interface for managing and manipulating random variables.
 
