@@ -37,21 +37,21 @@
 #' Bootstrap resampling with replacement from a distribution of a random variable stored in an rvtable.
 #'
 #' Resample an rvtable yielding a new rvtable.
-#' This is used to convert from a distribution-based rvtable, which has \code{Val} and \code{Prob} columns representing a distribution to one with only a \code{Val} column representing samples from a distribution.
+#' This is used to convert from a distribution-based rvtable, which has Val and Prob columns representing a distribution to one with only a Val column representing samples from a distribution.
 #' This is often used preceeding plotting data in an rvtable so that samples may be passed to plot code rather than a representation of a distribution using values and associated probabilities.
 #' This function can also take a sample-based rvtable, in which case it will resample it if \code{resample=TRUE}.
 #' If is sample-based rvtable is passed and the random variable is continuous, the generation of a new continuous density prior to resampling can be controlled via \code{density.args}.
 #' All rvtable objects are either distribution-based or sample-based.
 #'
 #' @param x an \code{rvtable} object.
-#' @param resample if \code{x} is a sample-based rvtable, return \code{x} unchanged if \code{resample=FALSE}. Otherwise resample from the samples in the \code{Val} column. Ignored if rvtable is distribution-based.
+#' @param resample if \code{x} is a sample-based rvtable, return \code{x} unchanged if \code{resample=FALSE}. Otherwise resample from the samples in the Val column. Ignored if rvtable is distribution-based.
 #' @param n bootstrap sample size.
-#' @param interp linearly interpolate between observed values of \code{Val} before sampling if \code{Val} is continuous. Ignored for discrete random variables.
+#' @param interp linearly interpolate between observed values of Val before sampling if Val is continuous. Ignored for discrete random variables.
 #' @param n.interp length of sequence of interpolated sampling points if. Ignored for discrete random variables or \code{interp=FALSE}.
 #' @param decimals number of decimal places for rounding samples. Ignored for discrete random variables.
 #' @param density.args optional arguments passed to \code{density}.
 #'
-#' @return an \code{rvtable} object where \code{Val} represents samples and the \code{Prob} column is dropped.
+#' @return an \code{rvtable} object where the Val column represents samples and the Prob column is dropped.
 #' @export
 #'
 #' @examples
@@ -59,27 +59,27 @@
 #' sample_rvtable(x, n=10)
 #' x <- rvtable(sample(1:100, 50), discrete=TRUE)
 #' y <- sample_rvtable(x, n=10)
-#' sample_rvtable(n=8, resample=T)
+#' sample_rvtable(y, n=8, resample=TRUE)
 sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100000, decimals=NULL, density.args=list()){
   if(class(x)[1]!="rvtable") stop("`x` must be an rvtable.")
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
-  grp <- groups(x)
+  grp <- dplyr::groups(x)
   if(tbl=="sample"){
     if(!resample){
       message("rvtable already contains samples and resample=FALSE. Returning original rvtable.")
       return(x)
     }
-    if(discrete) x <- mutate(x, Prob=1)
+    if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
-      x <- summarise(x,
-                     Val=do.call(density, c(list(x=Val), density.args))$x,
-                     Prob=do.call(density, c(list(x=Val), density.args))$y) %>%
-        group_by_(.dots=grp)
+      x <- dplyr::summarise_(x,
+                     Val=~do.call(density, c(list(x=Val), density.args))$x,
+                     Prob=~do.call(density, c(list(x=Val), density.args))$y) %>%
+        dplyr::group_by_(.dots=grp)
     }
   }
-  x <- summarise(x, Val=.sample_rvdist(Val, Prob, n, discrete, interp, n.interp, decimals)) %>% group_by_(.dots=grp)
+  x <- dplyr::summarise_(x, Val=~.sample_rvdist(Val, Prob, n, discrete, interp, n.interp, decimals)) %>% dplyr::group_by_(.dots=grp)
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- rv
   attr(x, "tabletype") <- "sample"
