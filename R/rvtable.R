@@ -16,7 +16,7 @@
 #' @param y an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.
 #' @param Val the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.
 #' @param Prob the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.
-#' @param discrete whether the random variable is discrete when \code{x} is a numeric vector representing a sample from a distribution, i.e., no associated probabilities via atrributes or \code{y}.
+#' @param discrete whether the random variable is discrete.
 #' @param density.args optional arguments passed to \code{density}.
 #'
 #' @return an S3 object of class \code{rvtable}
@@ -78,9 +78,8 @@ rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.a
   stopifnot(min(x$Prob) >= 0)
   #stopifnot(max(x$Prob) <= 1)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
-  tmp <- dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise(Duplicated=any(duplicated(Val)))
-  tmp2 <- tmp$Duplicated
-  if(any(tmp2)) stop("Duplicated values in `Val`.")
+  tmp <- (dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise_(Duplicated=~any(duplicated(Val))))$Duplicated
+  if(any(tmp)) stop("Duplicated values in `Val`.")
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
   attr(x, "tabletype") <- "distribution"
