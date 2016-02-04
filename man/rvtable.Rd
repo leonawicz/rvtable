@@ -16,7 +16,7 @@ rvtable(x, y = NULL, Val = "Val", Prob = "Prob", discrete = FALSE,
 
 \item{Prob}{the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.}
 
-\item{discrete}{whether the random variable is discrete when \code{x} is a numeric vector representing a sample from a distribution, i.e., no associated probabilities via atrributes or \code{y}.}
+\item{discrete}{whether the random variable is discrete.}
 
 \item{density.args}{optional arguments passed to \code{density}.}
 }
