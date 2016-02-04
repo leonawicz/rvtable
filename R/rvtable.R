@@ -7,6 +7,10 @@
 #' When discrete, probabilities are true probabilities.
 #' When continuous, Val and Prob are based on \code{x} and \code{y} output from \code{density} and describe a distribution curve,
 #' and therefore values in Prob may be greater than one and may not sum to one.
+#' All rvtable objects are either distribution-based or sample-based.
+#' This primary constructor only constructs distribution-based rvtable objects, with the attribute \code{tabletype="distribution"}.
+#' Sampling on an rvtable can generate a sample-based rvtable, with the attribute \code{tabletype="sample"}.
+#' Every rvtable object also has a variable type attribute, \code{rvtype}, which is either "discrete" or "continuous".
 #'
 #' @param x a numeric vector, data frame, or data table.
 #' @param y an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.
@@ -78,5 +82,7 @@ rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.a
   tmp2 <- tmp$Duplicated
   if(any(tmp2)) stop("Duplicated values in `Val`.")
   class(x) <- unique(c("rvtable", class(x)))
+  attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
+  attr(x, "tabletype") <- "distribution"
   x
 }
