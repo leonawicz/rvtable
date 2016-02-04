@@ -61,22 +61,25 @@
 #' y <- sample_rvtable(x, n=10)
 #' sample_rvtable(y, n=8, resample=TRUE)
 sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100000, decimals=NULL, density.args=list()){
-  if(class(x)[1]!="rvtable") stop("`x` must be an rvtable.")
+  if(!("rvtable" %in% class(x))) stop("`x` must be an rvtable.")
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
+  id <- names(x)
   grp <- dplyr::groups(x)
+  grp2 <- lapply(setdiff(id, c("Val", "Prob")), as.symbol)
+  if(tbl=="sample" & !resample){
+    message("rvtable already contains samples and resample=FALSE. Returning original rvtable.")
+    return(x)
+  }
+  x <- dplyr::group_by_(x, .dots=grp2)
   if(tbl=="sample"){
-    if(!resample){
-      message("rvtable already contains samples and resample=FALSE. Returning original rvtable.")
-      return(x)
-    }
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
       x <- dplyr::summarise_(x,
                      Val=~do.call(density, c(list(x=Val), density.args))$x,
                      Prob=~do.call(density, c(list(x=Val), density.args))$y) %>%
-        dplyr::group_by_(.dots=grp)
+        dplyr::group_by_(.dots=grp2)
     }
   }
   x <- dplyr::summarise_(x, Val=~.sample_rvdist(Val, Prob, n, discrete, interp, n.interp, decimals)) %>% dplyr::group_by_(.dots=grp)
