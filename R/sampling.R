@@ -61,7 +61,7 @@
 #' y <- sample_rvtable(x, n=10)
 #' sample_rvtable(y, n=8, resample=TRUE)
 sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100000, decimals=NULL, density.args=list()){
-  if(!("rvtable" %in% class(x))) stop("`x` must be an rvtable.")
+  .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
