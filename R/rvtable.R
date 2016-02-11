@@ -1,3 +1,29 @@
+#' Check For rvtable Class
+#'
+#' Check if an object has class rvtable.
+#'
+#' @param x an R object.
+#'
+#' @return \code{TRUE} if \code{x} is an rvtable class object, otherwise \code{FALSE}.
+#' @export
+#'
+#' @examples
+#' is.rvtable(rvtable(1))
+is.rvtable <- function(x) "rvtable" %in% class(x)
+
+#' Stop Error Helper Function
+#'
+#' Return an error if \code{x} is not an rvtable.
+#'
+#' This helper function is used inside other functions to interrupt when \code{x} is not an rvtable.
+#'
+#' @param x an R object.
+#'
+#' @return
+#'
+#' @examples
+.rv_class_check <- function(x) if(!is.rvtable(x)) stop("`x` must be an rvtable.") else TRUE
+
 #' Random Variable Table
 #'
 #' Class constructor for \code{rvtable} objects.
@@ -46,7 +72,7 @@
 #' @import data.table
 rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.args=list()){
   if(missing(x)) stop("`x` is missing.")
-  if("rvtable" %in% class(x)) return(x)
+  if(is.rvtable(x)) return(x)
   if(is.numeric(x)){
     if(any(is.na(x))) stop("Missing values not permitted.")
     if(length(x)==1 && !discrete) stop("A single value for `x` with probability=1 is only allowed when discrete=TRUE")
