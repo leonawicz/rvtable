@@ -1,9 +1,33 @@
+#' Get levels of categorical variables
+#'
+#' Obtain the levels associated with categorical variables in an rvtable.
+#'
+#' All columns in an rvtable other than the Val and Prob columns are assumed to represent categorical variables.
+#' If a column is a factor, all possible levels of the factor are returned even if they do not appear in the table.
+#' For other types all unique values observed in the table are returned.
+#' If \code{variable} is \code{NULL}, a list is returned for all categorical variables.
+#' A shorter list is returned if \code{variable} is used to specify a subset of columns.
+#'
+#' @param x an rvtable.
+#' @param variable specific column name or vector of column names in \code{x}.
+#'
+#' @return \code{NULL} if there are no columns other than Val and Prob, otherwise a list.
+#' @export
+#'
+#' @examples
+#' library(data.table)
+#' x <- data.table(
+#'   id1=rep(LETTERS[1:5], each=4),
+#'   id2=factor(c("low", "high")),
+#'   id3=rep(1:2, each=2),
+#'   Val=rep(1:10, 2), Prob=c(rep(0.1, 10), sqrt(1:10))) %>% rvtable
+#' get_levels(x)
 get_levels <- function(x, variable=NULL){
   .rv_class_check(x)
   if(is.null(variable)) variable <- names(x) else if(!(variable %in% names(x))) stop("`variable` not found.")
   variable <- setdiff(variable, c("Val", "Prob"))
   if(!length(variable)) stop("invalid variable")
-  lev <- lapply(variable, function(id, d) if(is.factor(d$id)) levels(d$id) else unique(d$id), d=x)
+  lev <- lapply(variable, function(id, d) if(is.factor(d[[id]])) levels(d[[id]]) else unique(d[[id]]), d=x)
   names(lev) <- variable
   lev
 }
