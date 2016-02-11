@@ -33,6 +33,16 @@ get_levels <- function(x, variable=NULL){
 }
 
 # merge distributions using a cycle of bootstrap resampling followed by density re-estimation, based on grouping variables
+#' Title
+#'
+#' @param x
+#' @param density.args
+#' @param sample.args
+#'
+#' @return
+#' @export
+#'
+#' @examples
 merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   grp <- groups(x)
@@ -63,6 +73,18 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 }
 
 # marginalize distribution of RV over explicit categorical variables, ignores grouping variables
+#' Title
+#'
+#' @param x
+#' @param margin
+#' @param weights
+#' @param density.args
+#' @param sample.args
+#'
+#' @return
+#' @export
+#'
+#' @examples
 marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   discrete <- attr(x, "rvtype")=="discrete"
@@ -88,6 +110,18 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 
 
 # Repeat cycle of bootstrap resampling followed by density re-estimation n-1 times, assumes Prob column present
+#' Title
+#'
+#' @param x
+#' @param n
+#' @param start
+#' @param density.args
+#' @param sample.args
+#'
+#' @return
+#' @export
+#'
+#' @examples
 bootDenCycle <- function(x, n, start=NULL, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   discrete <- attr(x, "rvtype")=="discrete"
