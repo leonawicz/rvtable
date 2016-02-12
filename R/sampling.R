@@ -73,6 +73,7 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100
     return(x)
   }
   x <- dplyr::group_by_(x, .dots=grp2)
+  if(any(summarise(x, n=length(Val))$n == 1)) stop("Groups must each have multiple observation.")
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
