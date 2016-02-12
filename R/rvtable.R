@@ -80,7 +80,7 @@ rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.a
     if(is.null(y)){
       if(discrete){
         x <- table(x)
-        y <- as.numeric(x/length(x))
+        y <- as.numeric(x/sum(x))
         x <- as.numeric(names(x))
       } else {
         x <- do.call(density, args=c(list(x=x), density.args))
