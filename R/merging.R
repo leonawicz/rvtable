@@ -25,7 +25,7 @@
 get_levels <- function(x, variable=NULL){
   .rv_class_check(x)
   if(is.null(variable)) variable <- names(x) else if(!(variable %in% names(x))) stop("`variable` not found.")
-  variable <- setdiff(variable, c("Val", "Prob"))
+  variable <- dplyr::setdiff(variable, c("Val", "Prob"))
   if(!length(variable)) stop("invalid variable")
   lev <- lapply(variable, function(id, d) if(is.factor(d[[id]])) levels(d[[id]]) else unique(d[[id]]), d=x)
   names(lev) <- variable
@@ -63,7 +63,7 @@ get_levels <- function(x, variable=NULL){
 #' x %>% group_by(id1, id2) %>% merge_rvtable
 merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   .rv_class_check(x)
-  grp <- groups(x)
+  grp <- dplyr::groups(x)
   sample.args$density.args=density.args
   n <- sample.args$n
   if(is.null(n)) n <- 10000
@@ -74,21 +74,21 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   }
   if(discrete){
     if(has.weights){
-      x <- summarise(x, Val=sample(x=Val, size=n, replace=TRUE, prob=weights))
+      x <- dplyr::summarise(x, Val=sample(x=Val, size=n, replace=TRUE, prob=weights))
     } else {
-      x <- summarise(x, Val=sample(x=Val, size=n, replace=TRUE))
+      x <- dplyr::summarise(x, Val=sample(x=Val, size=n, replace=TRUE))
     }
-    x <- group_by_(x, .dots=grp) %>% summarise(Val=as.numeric(names(table(Val))), Prob=as.numeric(table(Val))/sum(table(Val)))
+    x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::summarise(Val=as.numeric(names(table(Val))), Prob=as.numeric(table(Val))/sum(table(Val)))
   } else {
     if(has.weights){
-      x <- summarise(x,
+      x <- dplyr::summarise(x,
         Val=do.call(density, c(list(x=sample(x=Val, size=n, replace=TRUE, prob=weights)), density.args))$x,
         Prob=do.call(density, c(list(x=sample(x=Val, size=n, replace=TRUE, prob=weights)), density.args))$y)
     } else {
-      x <- summarise(x, Val=do.call(density, c(list(x=Val), density.args))$x, Prob=do.call(density, c(list(x=Val), density.args))$y)
+      x <- dplyr::summarise(x, Val=do.call(density, c(list(x=Val), density.args))$x, Prob=do.call(density, c(list(x=Val), density.args))$y)
     }
   }
-  group_by_(x, .dots=grp) %>% rvtable(x, discrete=discrete)
+  dplyr::group_by_(x, .dots=grp) %>% rvtable(x, discrete=discrete)
 }
 
 #' Marginal Distribution rvtable
@@ -129,13 +129,14 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
   if(!is.null(weights) & length(margin) > 1) stop("May only marginalize over one variable at a time if using level weights.")
   if(any(!(margin %in% id))) stop("Marginalizing variable not found.")
   if(any(margin %in% c("Val", "Prob"))) stop("Invalid marginalizaing variable.")
-  grp2 <- lapply(setdiff(id, c("Val", "Prob", margin)), as.symbol)
+  grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob", margin)), as.symbol)
   if(!length(grp2)) grp2 <- NULL
-  x <- group_by_(x, .dots=grp2)
+  x <- dplyr::group_by_(x, .dots=grp2)
   if(!is.null(weights)){
     lev <- get_levels(x, margin)
     if(length(weights) != length(lev[[margin]])) stop("Number of weights does not match the number of levels in `margin`.")
-    x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~mutate(.x, weights=.y)) %>% rbindlist %>% group_by_(.dots=grp2)
+    x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~dplyr::mutate(.x, weights=.y)) %>%
+      data.table::rbindlist %>% dplyr::group_by_(.dots=grp2)
   }
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
@@ -175,21 +176,21 @@ cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=lis
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
-  grp <- groups(x)
+  grp <- dplyr::groups(x)
   if(tbl=="sample") stop("rvtable must be in distribution form, not sample form.")
   if(!("Cycle" %in% names(x))) x$Cycle <- 1
   if(is.null(start)) start <- max(x$Cycle)
   if(n<=1){
     cols <- c(as.character(grp), "Cycle", "Val")
-    x <- select_(x, .dots=lapply(c(cols, "Prob"), as.symbol)) %>%
-      group_by(Cycle, add=TRUE) %>% distinct_(.dots=lapply(cols, as.symbol))
+    x <- dplyr::select_(x, .dots=lapply(c(cols, "Prob"), as.symbol)) %>%
+      dplyr::group_by(Cycle, add=TRUE) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol))
     return(x)
   }
-  x2 <- filter(x, Cycle==start)
+  x2 <- dplyr::filter(x, Cycle==start)
   class(x2) <- unique(c("rvtable", class(x2)))
   attr(x2, "rvtype") <- rv
   attr(x2, "tabletype") <- tbl
-  x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>% mutate(Cycle=start+1)
-  bind_rows(x, x2) %>% data.table %>% group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
+  x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>% dplyr::mutate(Cycle=start+1)
+  dplyr::bind_rows(x, x2) %>% data.table::data.table %>% dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
     bootDenCycle(n-1, start+1, density.args=density.args, sample.args=sample.args)
 }
