@@ -32,17 +32,35 @@ get_levels <- function(x, variable=NULL){
   lev
 }
 
-# merge distributions using a cycle of bootstrap resampling followed by density re-estimation, based on grouping variables
-#' Title
+#' Merge RV Table Conditional Distributions
 #'
-#' @param x
-#' @param density.args
-#' @param sample.args
+#' Merge conditional distributions of a random variable in an rvtable over levels of ungrouped categorical variables.
 #'
-#' @return
+#' Distributions are merged using a cycle of bootstrap resampling followed by density re-estimation.
+#' Merging relies simply on what \code{x} is grouped by.
+#' It assumes equal weights for all levels of all grouping variables over which a random variable is being merged.
+#' This is why it is called merging rather than marginalizing.
+#' This function is also used by \code{marginalize} and can properly obtain a marginal distribution when passed an rvtable including a \code{weights} column, which \code{marginalize} provides.
+#' If calling this function directly, it is important to know that it is generally intended for simple merging.
+#' Use \code{marginalize} to ensure proper marginal distributions are obtained since it can be used with or without non-constant weights.
+#'
+#' @param x an rvtable.
+#' @param density.args optional arguments passed to \code{density}.
+#' @param sample.args optional arguments used when sampling.
+#'
+#' @return an rvtable.
 #' @export
 #'
 #' @examples
+#' library(data.table)
+#' x <- data.table(
+#'   id1=rep(LETTERS[1:5], each=4),
+#'   id2=factor(c("low", "high")),
+#'   id3=rep(1:2, each=2),
+#'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
+#' merge_rvtable(x)
+#' x %>% group_by(id1) %>% merge_rvtable
+#' x %>% group_by(id1, id2) %>% merge_rvtable
 merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   grp <- groups(x)
@@ -73,19 +91,35 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   group_by_(x, .dots=grp) %>% rvtable(x, discrete=discrete)
 }
 
-# marginalize distribution of RV over explicit categorical variables, ignores grouping variables
-#' Title
+#' Marginal Distribution rvtable
 #'
-#' @param x
-#' @param margin
-#' @param weights
-#' @param density.args
-#' @param sample.args
+#' Obtain a marginal distribution of a random variable in an rvtable.
 #'
-#' @return
+#' Grouping variables are ignoed when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
+#' \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
+#' Marginalizing over multiple variables in a single call to \code{marginalize} is only available assuming equal weights for all values of those variables.
+#' When using weights, \code{marginalize} must be called on one variable at a time.
+#' Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
+#'
+#' @param x an rvtable.
+#' @param margin variable(s) in rvtable to marginalize over.
+#' @param weights relative weights for unique values or levels of a single \code{margin} variable.
+#' @param density.args optional arguments passed to \code{density}.
+#' @param sample.args optional arguments used when sampling.
+#'
+#' @return an rvtable.
 #' @export
 #'
 #' @examples
+#' library(data.table)
+#' x <- data.table(
+#'   id1=rep(LETTERS[1:5], each=4),
+#'   id2=factor(c("low", "high")),
+#'   id3=rep(1:2, each=2),
+#'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
+#' marginalize(x, c("id1", "id2"))
+#' get_levels(x, "id1")
+#' marginalize(x, "id1", weights=c(1, 1.5, 2, 4))
 marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   discrete <- attr(x, "rvtype")=="discrete"
@@ -110,21 +144,33 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
   rvtable(x, discrete=discrete)
 }
 
-
-# Repeat cycle of bootstrap resampling followed by density re-estimation n-1 times, assumes Prob column present
-#' Title
+#' Repeated Resampling Utility
 #'
-#' @param x
-#' @param n
-#' @param start
-#' @param density.args
-#' @param sample.args
+#' Repeat cycles of bootstrap resampling followed by density re-estimation for testing purposes.
 #'
-#' @return
+#' This function repeats cycles of bootstrap resampling from a distibution followed by distribution re-estimation \code{n - 1} times.
+#' \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
+#'
+#'
+#' @param x an rvtable in distribution form only.
+#' @param n total number of iteratively estimated distributions to return, including the original from \code{x}.
+#' @param start usually \code{NULL} when first called and on subsequent recursive calls an integer representing which cycle to begin from in the updated rvtable.
+#' @param density.args optional arguments passed to \code{density}.
+#' @param sample.args optional arguments used when sampling.
+#'
+#' @return an rvtable.
 #' @export
 #'
 #' @examples
-bootDenCycle <- function(x, n, start=NULL, density.args=list(), sample.args=list()){
+#' library(data.table)
+#' x <- data.table(
+#'   id1=rep(LETTERS[1:5], each=4),
+#'   id2=factor(c("low", "high")),
+#'   id3=rep(1:2, each=2),
+#'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
+#' cycle_rvtable(x, 2)
+#' x %>% group_by(id1, id2) %>% cycle_rvtable(3)
+cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
