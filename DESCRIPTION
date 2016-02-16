@@ -18,6 +18,7 @@ LazyData: TRUE
 Imports:
     data.table,
     dplyr,
+    purrr,
     magrittr
 Suggests:
     testthat
