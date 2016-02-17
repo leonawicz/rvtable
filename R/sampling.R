@@ -67,13 +67,13 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100
   tbl <- attr(x, "tabletype")
   id <- names(x)
   grp <- dplyr::groups(x)
-  grp2 <- lapply(setdiff(id, c("Val", "Prob")), as.symbol)
+  grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob")), as.symbol)
   if(tbl=="sample" & !resample){
     message("rvtable already contains samples and resample=FALSE. Returning original rvtable.")
     return(x)
   }
   x <- dplyr::group_by_(x, .dots=grp2)
-  if(any(summarise(x, n=length(Val))$n == 1)) stop("Groups must each have multiple observation.")
+  if(any(dplyr::summarise(x, n=length(Val))$n == 1)) stop("Groups must each have multiple observation.")
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
