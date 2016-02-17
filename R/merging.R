@@ -16,6 +16,7 @@
 #'
 #' @examples
 #' library(data.table)
+#' library(dplyr)
 #' x <- data.table(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
@@ -53,6 +54,7 @@ get_levels <- function(x, variable=NULL){
 #'
 #' @examples
 #' library(data.table)
+#' library(dplyr)
 #' x <- data.table(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
@@ -112,6 +114,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #'
 #' @examples
 #' library(data.table)
+#' library(dplyr)
 #' x <- data.table(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
@@ -119,7 +122,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
 #' marginalize(x, c("id1", "id2"))
 #' get_levels(x, "id1")
-#' marginalize(x, "id1", weights=c(1, 1.5, 2, 4))
+#' marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
 marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
   .rv_class_check(x)
   discrete <- attr(x, "rvtype")=="discrete"
@@ -136,12 +139,12 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
     lev <- get_levels(x, margin)
     if(length(weights) != length(lev[[margin]])) stop("Number of weights does not match the number of levels in `margin`.")
     x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~dplyr::mutate(.x, weights=.y)) %>%
-      data.table::rbindlist %>% dplyr::group_by_(.dots=grp2)
+      data.table::rbindlist() %>% dplyr::group_by_(.dots=grp2)
   }
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
   attr(x, "tabletype") <- tbl
-  x <- merge_rvtable(x, density.args=density.args, sample.args=sample.args) %>% group_by_(.dots=grp2)
+  x <- merge_rvtable(x, density.args=density.args, sample.args=sample.args) %>% dplyr::group_by_(.dots=grp2)
   rvtable(x, discrete=discrete)
 }
 
@@ -164,6 +167,7 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #'
 #' @examples
 #' library(data.table)
+#' library(dplyr)
 #' x <- data.table(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
@@ -182,15 +186,16 @@ cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=lis
   if(is.null(start)) start <- max(x$Cycle)
   if(n<=1){
     cols <- c(as.character(grp), "Cycle", "Val")
+    grp2 <- lapply(c(as.character(grp), "Cycle"), as.symbol)
     x <- dplyr::select_(x, .dots=lapply(c(cols, "Prob"), as.symbol)) %>%
-      dplyr::group_by(Cycle, add=TRUE) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol))
+      dplyr::group_by_(.dots=grp2) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol))
     return(x)
   }
-  x2 <- dplyr::filter(x, Cycle==start)
+  x2 <- dplyr::filter_(x, .dots=list(paste0("Cycle==", start)))
   class(x2) <- unique(c("rvtable", class(x2)))
   attr(x2, "rvtype") <- rv
   attr(x2, "tabletype") <- tbl
   x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>% dplyr::mutate(Cycle=start+1)
-  dplyr::bind_rows(x, x2) %>% data.table::data.table %>% dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
-    bootDenCycle(n-1, start+1, density.args=density.args, sample.args=sample.args)
+  dplyr::bind_rows(x, x2) %>% data.table::data.table() %>% dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
+    cycle_rvtable(n-1, start+1, density.args=density.args, sample.args=sample.args)
 }
