@@ -1,3 +1,5 @@
+globalVariables(c(".", "Val"))
+
 #' Check For rvtable Class
 #'
 #' Check if an object has class rvtable.
@@ -8,7 +10,8 @@
 #' @export
 #'
 #' @examples
-#' is.rvtable(rvtable(1))
+#' is.rvtable("a")
+#' is.rvtable(rvtable(1:10))
 is.rvtable <- function(x) "rvtable" %in% class(x)
 
 #' Stop Error Helper Function
@@ -22,6 +25,8 @@ is.rvtable <- function(x) "rvtable" %in% class(x)
 #' @return
 #'
 #' @examples
+#' f <- function(x) .rv_class_check(x)
+#' f(1)
 .rv_class_check <- function(x) if(!is.rvtable(x)) stop("`x` must be an rvtable.") else TRUE
 
 #' Random Variable Table
