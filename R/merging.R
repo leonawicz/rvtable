@@ -128,7 +128,7 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
   discrete <- attr(x, "rvtype")=="discrete"
   tbl <- attr(x, "tabletype")
   id <- names(x)
-  if(!length(margin)) stop("Must specify variable(s) to marginalize over.")
+  if(missing(margin)) stop("Must specify variable(s) to marginalize over.")
   if(!is.null(weights) & length(margin) > 1) stop("May only marginalize over one variable at a time if using level weights.")
   if(any(!(margin %in% id))) stop("Marginalizing variable not found.")
   if(any(margin %in% c("Val", "Prob"))) stop("Invalid marginalizaing variable.")
