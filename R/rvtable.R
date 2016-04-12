@@ -1,4 +1,4 @@
-globalVariables(c(".", "Val"))
+globalVariables(c(".", "Val", "n", "numer", "denom"))
 
 #' Check For rvtable Class
 #'
