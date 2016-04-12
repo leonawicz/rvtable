@@ -32,8 +32,9 @@ Any other columns are ID columns and should be categorical variables. The random
 When discrete, probabilities are true probabilities.
 When continuous, Val and Prob are based on \code{x} and \code{y} output from \code{density} and describe a distribution curve,
 and therefore values in Prob may be greater than one and may not sum to one.
+Val is typically numeric but may be character when discrete such as when an rvtable object is returned from \code{inverse_pmf}.
 All rvtable objects are either distribution-based or sample-based.
-This primary constructor only constructs distribution-based rvtable objects, with the attribute \code{tabletype="distribution"}.
+This primary constructor only constructs distribution- or sample-based rvtable objects, with the attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
 Sampling on an rvtable can generate a sample-based rvtable, with the attribute \code{tabletype="sample"}.
 Every rvtable object also has a variable type attribute, \code{rvtype}, which is either "discrete" or "continuous".
 }
