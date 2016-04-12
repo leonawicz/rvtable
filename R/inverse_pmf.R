@@ -5,10 +5,10 @@
 #' This function computes the pmf of a categorical variable, providing probabilities corresponding to the levels of the variable, given a specific range of values of the continuous random variable in the rvtable.
 #' At this time the rvtable type must be continuous.
 #'
-#' @param data an rvtable.
+#' @param x an rvtable.
 #' @param val.range range of values of the continuous random variable in the rvtable.
 #' @param var.new the categorical variable for which to compute the pmf given \code{val.range}.
-#' @param density.args optional arguments passed to \code{density}.
+#' @param sample.args optional arguments used when sampling.
 #'
 #' @return an rvtable.
 #' @export
@@ -23,10 +23,10 @@
 #'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
 #' y1 <- inverse_pmf(x, c(5, 8), "id1", sample.args=list(n=5))
 #' y1
-#' y2 <- inverse_pmf(x %>% filter(id2=="low" & id3==1) %>% select(-id2, -id3) %>% rvtable, c(5,8), "id1", sample.args=list(n=5))
+#' x <- filter(x, id2=="low" & id3==1) %>% select(-id2, -id3) %>% rvtable
+#' y2 <- inverse_pmf(x, c(5,8), "id1", sample.args=list(n=5))
 #' y2
 inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
-  require(tidyr)
   .rv_class_check(x)
   stopifnot(length(val.range)==2 && val.range[1] < val.range[2])
   discrete <- attr(x, "rvtype")=="discrete"
@@ -37,20 +37,21 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   id <- names(x)
   stopifnot(var.new %in% id)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
-  if(length(dots)==1) { x <- mutate(x, dummy=1); dots2 <- lapply("dummy", as.symbol) } else dots2 <- dots[!(as.character(dots) %in% var.new)]
+  if(length(dots)==1) { x <- dplyr::mutate_(x, .dots=list("dummy"=1)); dots2 <- lapply("dummy", as.symbol) } else dots2 <- dots[!(as.character(dots) %in% var.new)]
   n.levels <- length(unique(x[[var.new]]))
-  x <- x %>% group_by_(.dots=dots2)
+  x <- x %>% dplyr::group_by_(.dots=dots2)
   uni <- unique(x[[var.new]])
-  x <- x %>% do(NEW=uni,
-    numer=group_by_(., .dots=dots) %>% summarise(numer=length(which(Val >= val.range[1] & Val <= val.range[2]))/(n.levels*n())) %>% group_by %>% select(numer),
-    denom=group_by_(., .dots=dots2) %>% summarise(denom=rep(length(which(Val >= val.range[1] & Val <= val.range[2]))/n(), n.levels)) %>% group_by %>% select(denom))
-  if("dummy" %in% names(x)) x <- select(x, -dummy)
+  x <- x %>% dplyr::do(NEW=uni,
+    numer=dplyr::group_by_(., .dots=dots) %>% dplyr::summarise(numer=length(which(Val >= val.range[1] & Val <= val.range[2]))/(n.levels*n())) %>% dplyr::group_by() %>% dplyr::select(numer),
+    denom=dplyr::group_by_(., .dots=dots2) %>% dplyr::summarise(denom=rep(length(which(Val >= val.range[1] & Val <= val.range[2]))/n(), n.levels)) %>% dplyr::group_by() %>% dplyr::select(denom))
+  if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
   id <- names(x)
   id[which(id=="NEW")] <- var.new
-  setnames(x, id)
+  data.table::setnames(x, id)
   if(nrow(x)==1){
-    x <- bind_rows(x, x) %>% unnest
-    x <- slice(x, 1:(nrow(x)/2))
-  } else x <- unnest(x)
-  x <- group_by_(x, .dots=dots) %>% summarise(Prob=numer/denom) %>% data.table %>% rvtable(Val=var.new, discrete=TRUE)
+    x <- dplyr::bind_rows(x, x)
+    x <- tidyr::unnest(x)
+    x <- dplyr::slice(x, 1:(nrow(x)/2))
+  } else x <- tidyr::unnest(x)
+  x <- dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>% data.table %>% rvtable(Val=var.new, discrete=TRUE)
 }
