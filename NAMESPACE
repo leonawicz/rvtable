@@ -2,6 +2,7 @@
 
 export(cycle_rvtable)
 export(get_levels)
+export(inverse_pmf)
 export(is.rvtable)
 export(marginalize)
 export(merge_rvtable)
