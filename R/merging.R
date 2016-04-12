@@ -90,7 +90,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
       x <- dplyr::summarise(x, Val=do.call(density, c(list(x=Val), density.args))$x, Prob=do.call(density, c(list(x=Val), density.args))$y)
     }
   }
-  dplyr::group_by_(x, .dots=grp) %>% rvtable(x, discrete=discrete)
+  dplyr::group_by_(x, .dots=grp) %>% rvtable(discrete=discrete)
 }
 
 #' Marginal Distribution rvtable
@@ -154,7 +154,6 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #'
 #' This function repeats cycles of bootstrap resampling from a distibution followed by distribution re-estimation \code{n - 1} times.
 #' \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
-#'
 #'
 #' @param x an rvtable in distribution form only.
 #' @param n total number of iteratively estimated distributions to return, including the original from \code{x}.
