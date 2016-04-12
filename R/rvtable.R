@@ -12,7 +12,7 @@ globalVariables(c(".", "Val"))
 #' @examples
 #' is.rvtable("a")
 #' is.rvtable(rvtable(1:10))
-is.rvtable <- function(x) "rvtable" %in% class(x)
+is.rvtable <- function(x) "rvtable" %in% class(x) & !is.null(attr(x, "rvtype")) & !is.null(attr(x, "tabletype"))
 
 #' Stop Error Helper Function
 #'
@@ -38,8 +38,9 @@ is.rvtable <- function(x) "rvtable" %in% class(x)
 #' When discrete, probabilities are true probabilities.
 #' When continuous, Val and Prob are based on \code{x} and \code{y} output from \code{density} and describe a distribution curve,
 #' and therefore values in Prob may be greater than one and may not sum to one.
+#' Val is typically numeric but may be character when discrete such as when an rvtable object is returned from \code{inverse_pmf}.
 #' All rvtable objects are either distribution-based or sample-based.
-#' This primary constructor only constructs distribution-based rvtable objects, with the attribute \code{tabletype="distribution"}.
+#' This primary constructor only constructs distribution- or sample-based rvtable objects, with the attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
 #' Sampling on an rvtable can generate a sample-based rvtable, with the attribute \code{tabletype="sample"}.
 #' Every rvtable object also has a variable type attribute, \code{rvtype}, which is either "discrete" or "continuous".
 #'
@@ -97,22 +98,22 @@ rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.a
     x <- data.table(Val=x, Prob=y)
   }
   if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
-  if(length(class(x))==1 && class(x)=="data.frame") x <- data.table(x)
+  if(length(class(x))==1 && class(x)!="data.table") x <- data.table(x)
   if(Val==Prob) stop("`Val` and `Prob` cannot refer to the same column.")
   id <- names(x)
   if(!(Val %in% id) && !("Val" %in% id)) stop(paste("No column called", Val))
-  if(!(Prob %in% id) && !("Prob" %in% id)) stop(paste("No column called", Prob))
+  if(!is.null(Prob) && !(Prob %in% id) && !("Prob" %in% id)) stop(paste("No column called", Prob))
   if(Val %in% id && Val != "Val") names(x)[id==Val] <- "Val"
-  if(Prob %in% id && Prob != "Prob") names(x)[id==Prob] <- "Prob"
-  stopifnot(is.numeric(x$Val) && is.numeric(x$Prob))
-  stopifnot(!any(is.na(x$Val)) && !any(is.na(x$Prob)))
-  stopifnot(min(x$Prob) >= 0)
+  if(!is.null(Prob) && Prob %in% id && Prob != "Prob") names(x)[id==Prob] <- "Prob"
+  stopifnot((is.numeric(x$Val) || discrete) && !any(is.na(x$Val)))
+  if(!is.null(Prob)) stopifnot(is.numeric(x$Prob) && !any(is.na(x$Prob)))
+  if(!is.null(Prob)) stopifnot(min(x$Prob) >= 0)
   #stopifnot(max(x$Prob) <= 1)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
   tmp <- (dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise_(Duplicated=~any(duplicated(Val))))$Duplicated
   if(any(tmp)) stop("Duplicated values in `Val`.")
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
-  attr(x, "tabletype") <- "distribution"
+  attr(x, "tabletype") <- if(is.null(Prob)) "sample" else "distribution"
   x
 }
