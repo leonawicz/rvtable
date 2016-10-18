@@ -24,6 +24,7 @@
 #'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
 #' get_levels(x)
 get_levels <- function(x, variable=NULL){
+  x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   if(is.null(variable)) variable <- names(x) else if(!(variable %in% names(x))) stop("`variable` not found.")
   variable <- dplyr::setdiff(variable, c("Val", "Prob"))
@@ -64,6 +65,7 @@ get_levels <- function(x, variable=NULL){
 #' x %>% group_by(id1) %>% merge_rvtable
 #' x %>% group_by(id1, id2) %>% merge_rvtable
 merge_rvtable <- function(x, density.args=list(), sample.args=list()){
+  x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   grp <- dplyr::groups(x)
   sample.args$density.args=density.args
@@ -76,18 +78,18 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   }
   if(discrete){
     if(has.weights){
-      x <- dplyr::summarise(x, Val=sample(x=Val, size=n, replace=TRUE, prob=weights))
+      x <- dplyr::do(x, data.table::data.table(Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)))
     } else {
-      x <- dplyr::summarise(x, Val=sample(x=Val, size=n, replace=TRUE))
+      x <- dplyr::do(x, data.table::data.table(Val=sample(x=.$Val, size=n, replace=TRUE)))
     }
-    x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::summarise(Val=as.numeric(names(table(Val))), Prob=as.numeric(table(Val))/sum(table(Val)))
+    x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::do(data.table::data.table(Val=as.numeric(names(table(.$Val))), Prob=as.numeric(table(.$Val))/sum(table(.$Val))))
   } else {
     if(has.weights){
-      x <- dplyr::summarise(x,
-        Val=do.call(density, c(list(x=sample(x=Val, size=n, replace=TRUE, prob=weights)), density.args))$x,
-        Prob=do.call(density, c(list(x=sample(x=Val, size=n, replace=TRUE, prob=weights)), density.args))$y)
+      x <- dplyr::do(x, data.table::data.table(
+                            Val=do.call(density, c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$x,
+                            Prob=do.call(density, c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$y))
     } else {
-      x <- dplyr::summarise(x, Val=do.call(density, c(list(x=Val), density.args))$x, Prob=do.call(density, c(list(x=Val), density.args))$y)
+      x <- dplyr::do(x, data.table::data.table(Val=do.call(density, c(list(x=.$Val), density.args))$x, Prob=do.call(density, c(list(x=.$Val), density.args))$y))
     }
   }
   dplyr::group_by_(x, .dots=grp) %>% rvtable(discrete=discrete)
@@ -124,6 +126,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #' get_levels(x, "id1")
 #' marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
 marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
+  x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   discrete <- attr(x, "rvtype")=="discrete"
   tbl <- attr(x, "tabletype")
@@ -175,6 +178,7 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #' cycle_rvtable(x, 2)
 #' x %>% group_by(id1, id2) %>% cycle_rvtable(3)
 cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=list()){
+  x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
