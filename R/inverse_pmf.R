@@ -42,8 +42,12 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   x <- x %>% dplyr::group_by_(.dots=dots2)
   uni <- unique(x[[var.new]])
   x <- x %>% dplyr::do(NEW=uni,
-    numer=dplyr::group_by_(., .dots=dots) %>% dplyr::summarise(numer=length(which(Val >= val.range[1] & Val <= val.range[2]))/(n.levels*n())) %>% dplyr::group_by() %>% dplyr::select(numer),
-    denom=dplyr::group_by_(., .dots=dots2) %>% dplyr::summarise(denom=rep(length(which(Val >= val.range[1] & Val <= val.range[2]))/n(), n.levels)) %>% dplyr::group_by() %>% dplyr::select(denom))
+    numer=dplyr::group_by_(., .dots=dots) %>%
+      dplyr::do(data.table::data.table(numer=length(which(.$Val >= val.range[1] & .$Val <= val.range[2]))/(n.levels*nrow(.)))) %>%
+      dplyr::group_by() %>% dplyr::select(numer),
+    denom=dplyr::group_by_(., .dots=dots2) %>%
+      dplyr::do(data.table::data.table(denom=rep(length(which(.$Val >= val.range[1] & .$Val <= val.range[2]))/nrow(.), n.levels))) %>%
+      dplyr::group_by() %>% dplyr::select(denom))
   if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
   id <- names(x)
   id[which(id=="NEW")] <- var.new
