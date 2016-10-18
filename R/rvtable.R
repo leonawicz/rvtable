@@ -1,5 +1,12 @@
 globalVariables(c(".", "Val", "n", "numer", "denom"))
 
+.has_rv_attributes <- function(x) !is.null(attr(x, "rvtype")) & !is.null(attr(x, "tabletype"))
+
+.lost_rv_class_check <- function(x){
+  if(.has_rv_attributes(x) & !("rvtable" %in% class(x))) class(x) <- unique(c("rvtable", class(x)))
+  x
+}
+
 #' Check For rvtable Class
 #'
 #' Check if an object has class rvtable.
@@ -12,7 +19,10 @@ globalVariables(c(".", "Val", "n", "numer", "denom"))
 #' @examples
 #' is.rvtable("a")
 #' is.rvtable(rvtable(1:10))
-is.rvtable <- function(x) "rvtable" %in% class(x) & !is.null(attr(x, "rvtype")) & !is.null(attr(x, "tabletype"))
+is.rvtable <- function(x){
+  has_class <- "rvtable" %in% class(x)
+  if(has_class & .has_rv_attributes(x)) TRUE else FALSE
+}
 
 #' Stop Error Helper Function
 #'
@@ -76,6 +86,7 @@ is.rvtable <- function(x) "rvtable" %in% class(x) & !is.null(attr(x, "rvtype")) 
 #' rvtable(x, Val="v1", Prob="p1")
 #' @importFrom magrittr %>%
 #' @import data.table
+#' @importFrom stats approx density
 rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.args=list()){
   if(missing(x)) stop("`x` is missing.")
   if(is.rvtable(x)) return(x)
