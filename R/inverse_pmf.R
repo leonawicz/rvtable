@@ -63,5 +63,5 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   id[which(id=="NEW")] <- var.new
   data.table::setnames(x, id)
   tidyr::unnest(x) %>% dplyr::group_by_(.dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
-    dplyr::ungroup() %>% data.table::data.table %>% rvtable(Val=var.new, discrete=TRUE)
+    dplyr::ungroup() %>% data.table::data.table() %>% rvtable(Val=var.new, discrete=TRUE)
 }
