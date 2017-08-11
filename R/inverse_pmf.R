@@ -46,24 +46,22 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   n.levels <- length(unique(x[[var.new]]))
   x <- x %>% dplyr::group_by_(.dots=dots2)
   uni <- unique(x[[var.new]])
+
   x <- x %>% dplyr::do(NEW=uni,
     numer=dplyr::group_by_(., .dots=dots) %>%
       dplyr::do(data.table::data.table(
         numer=length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / (n.levels*nrow(.)))
-        ) %>% dplyr::group_by() %>% dplyr::select(numer),
+        ) %>% dplyr::ungroup() %>% dplyr::select(numer),
     denom=dplyr::group_by_(., .dots=dots2) %>%
       dplyr::do(data.table::data.table(
         denom=rep(length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / nrow(.), n.levels))
-        ) %>% dplyr::group_by() %>% dplyr::select(denom))
+        ) %>% dplyr::ungroup() %>% dplyr::select(denom)) %>%
+    dplyr::ungroup()
+
   if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
   id <- names(x)
   id[which(id=="NEW")] <- var.new
   data.table::setnames(x, id)
-  if(nrow(x)==1){
-    x <- dplyr::bind_rows(x, x)
-    x <- tidyr::unnest(x)
-    x <- dplyr::slice(x, 1:(nrow(x)/2))
-  } else x <- tidyr::unnest(x)
-  dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
-    data.table %>% rvtable(Val=var.new, discrete=TRUE)
+  tidyr::unnest(x) %>% dplyr::group_by_(.dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
+    dplyr::ungroup() %>% data.table::data.table %>% rvtable(Val=var.new, discrete=TRUE)
 }
