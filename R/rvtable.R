@@ -120,6 +120,7 @@ rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.a
   if(!is.null(Prob)) stopifnot(is.numeric(x$Prob) && !any(is.na(x$Prob)))
   if(!is.null(Prob)) stopifnot(min(x$Prob) >= 0)
   #stopifnot(max(x$Prob) <= 1)
+  id <- names(x)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
   tmp <- (dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise_(Duplicated=~any(duplicated(Val))))$Duplicated
   if(any(tmp)) stop("Duplicated values in `Val`.")
