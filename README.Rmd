@@ -1,7 +1,5 @@
 ---
-output:
-  md_document:
-    variant: markdown_github
+output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -69,10 +67,10 @@ Functions included in the package provide the following abiities:
 
 Install the latest development version from github with
 
-    ```R
-    install.packages("devtools")
-    devtools::install_github("leonawicz/rvtable")
-    ```
+```r
+install.packages("devtools")
+devtools::install_github("leonawicz/rvtable")
+```
 
 Please file a minimal reproducible example of any clear bug at [github](https://github.com/leonawicz/rvtable/issues).
 

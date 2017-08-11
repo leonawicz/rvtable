@@ -1,3 +1,4 @@
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 rvtable
 =======
@@ -44,10 +45,10 @@ Installation and bug reporting
 
 Install the latest development version from github with
 
-    ```R
-    install.packages("devtools")
-    devtools::install_github("leonawicz/rvtable")
-    ```
+``` r
+install.packages("devtools")
+devtools::install_github("leonawicz/rvtable")
+```
 
 Please file a minimal reproducible example of any clear bug at [github](https://github.com/leonawicz/rvtable/issues).
 
@@ -61,7 +62,7 @@ License
 
 #### The MIT License (MIT)
 
-Copyright Â© 2016-2017 Scenarios Network for Alaska and Arctic Planning and others.
+Copyright © 2016-2017 Scenarios Network for Alaska and Arctic Planning and others.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
