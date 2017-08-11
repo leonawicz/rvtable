@@ -60,7 +60,8 @@
 #' x <- rvtable(sample(1:100, 50), discrete=TRUE)
 #' y <- sample_rvtable(x, n=10)
 #' sample_rvtable(y, n=8, resample=TRUE)
-sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100000, decimals=NULL, density.args=list()){
+sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
+                           n.interp=100000, decimals=NULL, density.args=list()){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
@@ -74,7 +75,8 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100
     return(x)
   }
   x <- dplyr::group_by_(x, .dots=grp2)
-  if(any(dplyr::summarise(x, n=length(Val))$n == 1)) stop("Groups must each have multiple observation.")
+  if(any(dplyr::summarise(x, n=length(Val))$n == 1))
+    stop("Groups must each have multiple observation.")
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
@@ -84,7 +86,9 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE, n.interp=100
         dplyr::group_by_(.dots=grp2)
     }
   }
-  x <- dplyr::do(x, data.table::data.table(Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals))) %>% dplyr::group_by_(.dots=grp)
+  x <- dplyr::do(x, data.table::data.table(
+    Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals))) %>%
+    dplyr::group_by_(.dots=grp)
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- rv
   attr(x, "tabletype") <- "sample"

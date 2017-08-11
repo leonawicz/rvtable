@@ -37,17 +37,24 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   id <- names(x)
   stopifnot(var.new %in% id)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
-  if(length(dots)==1) { x <- dplyr::mutate_(x, .dots=list("dummy"=1)); dots2 <- lapply("dummy", as.symbol) } else dots2 <- dots[!(as.character(dots) %in% var.new)]
+  if(length(dots)==1){
+    x <- dplyr::mutate_(x, .dots=list("dummy"=1))
+    dots2 <- lapply("dummy", as.symbol)
+  } else {
+    dots2 <- dots[!(as.character(dots) %in% var.new)]
+  }
   n.levels <- length(unique(x[[var.new]]))
   x <- x %>% dplyr::group_by_(.dots=dots2)
   uni <- unique(x[[var.new]])
   x <- x %>% dplyr::do(NEW=uni,
     numer=dplyr::group_by_(., .dots=dots) %>%
-      dplyr::do(data.table::data.table(numer=length(which(.$Val >= val.range[1] & .$Val <= val.range[2]))/(n.levels*nrow(.)))) %>%
-      dplyr::group_by() %>% dplyr::select(numer),
+      dplyr::do(data.table::data.table(
+        numer=length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / (n.levels*nrow(.)))
+        ) %>% dplyr::group_by() %>% dplyr::select(numer),
     denom=dplyr::group_by_(., .dots=dots2) %>%
-      dplyr::do(data.table::data.table(denom=rep(length(which(.$Val >= val.range[1] & .$Val <= val.range[2]))/nrow(.), n.levels))) %>%
-      dplyr::group_by() %>% dplyr::select(denom))
+      dplyr::do(data.table::data.table(
+        denom=rep(length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / nrow(.), n.levels))
+        ) %>% dplyr::group_by() %>% dplyr::select(denom))
   if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
   id <- names(x)
   id[which(id=="NEW")] <- var.new
@@ -57,5 +64,6 @@ inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
     x <- tidyr::unnest(x)
     x <- dplyr::slice(x, 1:(nrow(x)/2))
   } else x <- tidyr::unnest(x)
-  x <- dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>% data.table %>% rvtable(Val=var.new, discrete=TRUE)
+  dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
+    data.table %>% rvtable(Val=var.new, discrete=TRUE)
 }

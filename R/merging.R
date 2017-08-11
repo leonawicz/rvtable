@@ -68,7 +68,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   grp <- dplyr::groups(x)
-  sample.args$density.args=density.args
+  sample.args$density.args <- density.args
   n <- sample.args$n
   if(is.null(n)) n <- 10000
   has.weights <- "weights" %in% names(x)
@@ -78,18 +78,26 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   }
   if(discrete){
     if(has.weights){
-      x <- dplyr::do(x, data.table::data.table(Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)))
+      x <- dplyr::do(x, data.table::data.table(
+        Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)))
     } else {
-      x <- dplyr::do(x, data.table::data.table(Val=sample(x=.$Val, size=n, replace=TRUE)))
+      x <- dplyr::do(x, data.table::data.table(
+        Val=sample(x=.$Val, size=n, replace=TRUE)))
     }
-    x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::do(data.table::data.table(Val=as.numeric(names(table(.$Val))), Prob=as.numeric(table(.$Val))/sum(table(.$Val))))
+    x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::do(
+      data.table::data.table(Val=as.numeric(names(table(.$Val))),
+                             Prob=as.numeric(table(.$Val)) / sum(table(.$Val))))
   } else {
     if(has.weights){
       x <- dplyr::do(x, data.table::data.table(
-                            Val=do.call(density, c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$x,
-                            Prob=do.call(density, c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$y))
+        Val=do.call(density,
+                    c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$x,
+        Prob=do.call(density,
+                     c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$y))
     } else {
-      x <- dplyr::do(x, data.table::data.table(Val=do.call(density, c(list(x=.$Val), density.args))$x, Prob=do.call(density, c(list(x=.$Val), density.args))$y))
+      x <- dplyr::do(x, data.table::data.table(
+        Val=do.call(density, c(list(x=.$Val), density.args))$x,
+        Prob=do.call(density, c(list(x=.$Val), density.args))$y))
     }
   }
   dplyr::group_by_(x, .dots=grp) %>% rvtable(discrete=discrete)
@@ -132,7 +140,8 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
   tbl <- attr(x, "tabletype")
   id <- names(x)
   if(missing(margin)) stop("Must specify variable(s) to marginalize over.")
-  if(!is.null(weights) & length(margin) > 1) stop("May only marginalize over one variable at a time if using level weights.")
+  if(!is.null(weights) & length(margin) > 1)
+    stop("May only marginalize over one variable at a time if using level weights.")
   if(any(!(margin %in% id))) stop("Marginalizing variable not found.")
   if(any(margin %in% c("Val", "Prob"))) stop("Invalid marginalizaing variable.")
   grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob", margin)), as.symbol)
@@ -140,7 +149,8 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
   x <- dplyr::group_by_(x, .dots=grp2)
   if(!is.null(weights)){
     lev <- get_levels(x, margin)
-    if(length(weights) != length(lev[[margin]])) stop("Number of weights does not match the number of levels in `margin`.")
+    if(length(weights) != length(lev[[margin]]))
+      stop("Number of weights does not match the number of levels in `margin`.")
     x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~dplyr::mutate(.x, weights=.y)) %>%
       data.table::rbindlist() %>% dplyr::group_by_(.dots=grp2)
   }
@@ -198,7 +208,9 @@ cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=lis
   class(x2) <- unique(c("rvtable", class(x2)))
   attr(x2, "rvtype") <- rv
   attr(x2, "tabletype") <- tbl
-  x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>% dplyr::mutate(Cycle=start+1)
-  dplyr::bind_rows(x, x2) %>% data.table::data.table() %>% dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
+  x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>%
+    dplyr::mutate(Cycle=start+1)
+  dplyr::bind_rows(x, x2) %>% data.table::data.table() %>%
+    dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
     cycle_rvtable(n-1, start+1, density.args=density.args, sample.args=sample.args)
 }
