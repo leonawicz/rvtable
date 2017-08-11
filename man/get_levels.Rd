@@ -34,4 +34,3 @@ x <- data.table(
   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) \%>\% rvtable
 get_levels(x)
 }
-

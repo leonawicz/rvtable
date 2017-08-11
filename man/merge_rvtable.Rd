@@ -40,4 +40,3 @@ merge_rvtable(x)
 x \%>\% group_by(id1) \%>\% merge_rvtable
 x \%>\% group_by(id1, id2) \%>\% merge_rvtable
 }
-

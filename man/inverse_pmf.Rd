@@ -39,4 +39,3 @@ x <- filter(x, id2=="low" & id3==1) \%>\% select(-id2, -id3) \%>\% rvtable
 y2 <- inverse_pmf(x, c(5,8), "id1", sample.args=list(n=5))
 y2
 }
-

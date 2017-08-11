@@ -38,7 +38,7 @@
 #'
 #' Resample an rvtable yielding a new rvtable.
 #' This is used to convert from a distribution-based rvtable, which has Val and Prob columns representing a distribution to one with only a Val column representing samples from a distribution.
-#' This is often used preceeding plotting data in an rvtable so that samples may be passed to plot code rather than a representation of a distribution using values and associated probabilities.
+#' This is often used preceding plotting data in an rvtable so that samples may be passed to plot code rather than a representation of a distribution using values and associated probabilities.
 #' This function can also take a sample-based rvtable, in which case it will resample it if \code{resample=TRUE}.
 #' If is sample-based rvtable is passed and the random variable is continuous, the generation of a new continuous density prior to resampling can be controlled via \code{density.args}.
 #' All rvtable objects are either distribution-based or sample-based.

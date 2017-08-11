@@ -25,7 +25,7 @@ an rvtable.
 Repeat cycles of bootstrap resampling followed by density re-estimation for testing purposes.
 }
 \details{
-This function repeats cycles of bootstrap resampling from a distibution followed by distribution re-estimation \code{n - 1} times.
+This function repeats cycles of bootstrap resampling from a distribution followed by distribution re-estimation \code{n - 1} times.
 \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
 }
 \examples{
@@ -39,4 +39,3 @@ x <- data.table(
 cycle_rvtable(x, 2)
 x \%>\% group_by(id1, id2) \%>\% cycle_rvtable(3)
 }
-

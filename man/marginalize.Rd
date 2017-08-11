@@ -25,7 +25,7 @@ an rvtable.
 Obtain a marginal distribution of a random variable in an rvtable.
 }
 \details{
-Grouping variables are ignoed when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
+Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
 \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
 Marginalizing over multiple variables in a single call to \code{marginalize} is only available assuming equal weights for all values of those variables.
 When using weights, \code{marginalize} must be called on one variable at a time.
@@ -43,4 +43,3 @@ marginalize(x, c("id1", "id2"))
 get_levels(x, "id1")
 marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
 }
-

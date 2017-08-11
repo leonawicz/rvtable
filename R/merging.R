@@ -99,7 +99,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #'
 #' Obtain a marginal distribution of a random variable in an rvtable.
 #'
-#' Grouping variables are ignoed when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
+#' Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
 #' \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
 #' Marginalizing over multiple variables in a single call to \code{marginalize} is only available assuming equal weights for all values of those variables.
 #' When using weights, \code{marginalize} must be called on one variable at a time.
@@ -155,7 +155,7 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #'
 #' Repeat cycles of bootstrap resampling followed by density re-estimation for testing purposes.
 #'
-#' This function repeats cycles of bootstrap resampling from a distibution followed by distribution re-estimation \code{n - 1} times.
+#' This function repeats cycles of bootstrap resampling from a distribution followed by distribution re-estimation \code{n - 1} times.
 #' \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
 #'
 #' @param x an rvtable in distribution form only.

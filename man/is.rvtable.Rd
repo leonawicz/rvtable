@@ -19,4 +19,3 @@ Check if an object has class rvtable.
 is.rvtable("a")
 is.rvtable(rvtable(1:10))
 }
-
