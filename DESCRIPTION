@@ -2,7 +2,7 @@ Package: rvtable
 Type: Package
 Title: Random Variable Data Tables
 Version: 0.3.0
-Date: 2016-02-01
+Date: 2017-08-11
 Author: Matthew Leonwicz [aut, cre]
 Maintainer: Matthew Leonawicz <mfleonawicz@alaska.edu>
 Authors@R: person("Matthew", "Leonawicz", role = c("aut", "cre"), email = "mfleonawicz@alaska.edu")
@@ -13,8 +13,9 @@ Description: Store distributions of random variables in long format data tables
     interface for managing and manipulating random variables. Random variables can
     be conditioned on levels of categorical variables stored in a table's
     ID columns. Functions provide the ability to condition on/subset, marginalize/
-    integrate over, and draw random samples from an rvtable.
-License: MIT
+    integrate over, and draw random samples from an rvtable. Emphasis is on
+    continuous probability density functions empirically estimated from large samples.
+License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
     data.table,
@@ -24,5 +25,6 @@ Imports:
     tidyr
 Suggests:
     testthat,
-    covr
+    covr,
+    lintr
 RoxygenNote: 6.0.1
