@@ -7,3 +7,5 @@
 ^codecov\.yml$
 ^\.lintr$
 ^docs$
+^cran-comments\.md$
+^revdep$
