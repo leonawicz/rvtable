@@ -183,7 +183,7 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #' @export
 #'
 #' @examples
-#' #' \dontrun{
+#' \dontrun{
 #' library(data.table)
 #' library(dplyr)
 #' x <- data.table(

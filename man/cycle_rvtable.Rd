@@ -31,7 +31,7 @@ This function repeats cycles of bootstrap resampling from a distribution followe
 \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
 }
 \examples{
-#' \dontrun{
+\dontrun{
 library(data.table)
 library(dplyr)
 x <- data.table(
