@@ -79,6 +79,10 @@ test_that("marginalize throws correct errors", {
   expect_error(marginalize(x_d, "id1", weights=c(1, 1.5, 2, 4, 1, 5)), e[5])
 })
 
+suppressMessages({
+  library(data.table)
+  library(dplyr)
+})
 cl <- "rvtable"
 x <- data.table(
   id1=rep(LETTERS[1:5], each=4),

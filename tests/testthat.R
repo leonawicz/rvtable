@@ -1,5 +1,3 @@
-library(data.table)
-library(dplyr)
 library(testthat)
 library(rvtable)
 
