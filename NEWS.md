@@ -1,3 +1,8 @@
+# rvtable 0.3.1 (Release date: 2017-08-14)
+
+* Minor bug fixes.
+* Added additional unit tests.
+
 # rvtable 0.3.0 (Release date: 2017-08-11)
 
 * Initial release.

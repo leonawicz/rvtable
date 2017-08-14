@@ -43,7 +43,7 @@ Functions included in the package provide the following abiities:
 Installation and bug reporting
 ------------------------------
 
-Install the latest development version from github with
+Install the latest development version (0.3.1) from github:
 
 ``` r
 install.packages("devtools")

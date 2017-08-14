@@ -132,44 +132,18 @@ Call <code>get_levels</code> on an rvtable first to ensure weights are passed in
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='fu'>library</span>(<span class='no'>data.table</span>)
 <span class='fu'>library</span>(<span class='no'>dplyr</span>)
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(
   <span class='kw'>id1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>4</span>),
   <span class='kw'>id2</span><span class='kw'>=</span><span class='fu'>factor</span>(<span class='fu'>c</span>(<span class='st'>"low"</span>, <span class='st'>"high"</span>)),
   <span class='kw'>id3</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>2</span>),
   <span class='kw'>Val</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>), <span class='kw'>Prob</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>), <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>)) <span class='kw'>%&gt;%</span> <span class='no'>rvtable</span>
-<span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='fu'>c</span>(<span class='st'>"id1"</span>, <span class='st'>"id2"</span>))</div><div class='output co'>#&gt; # A tibble: 1,024 x 3
-#&gt; # Groups:   id3 [2]
-#&gt;      id3       Val         Prob
-#&gt;    &lt;int&gt;     &lt;dbl&gt;        &lt;dbl&gt;
-#&gt;  1     1 0.3350768 7.206990e-05
-#&gt;  2     1 0.3552921 9.649354e-05
-#&gt;  3     1 0.3755074 1.279308e-04
-#&gt;  4     1 0.3957227 1.679977e-04
-#&gt;  5     1 0.4159380 2.215297e-04
-#&gt;  6     1 0.4361534 2.893003e-04
-#&gt;  7     1 0.4563687 3.742380e-04
-#&gt;  8     1 0.4765840 4.796635e-04
-#&gt;  9     1 0.4967993 6.092983e-04
-#&gt; 10     1 0.5170146 7.672718e-04
-#&gt; # ... with 1,014 more rows</div><div class='input'><span class='fu'><a href='get_levels.html'>get_levels</a></span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)</div><div class='output co'>#&gt; $id1
-#&gt; [1] "A" "B" "C" "D" "E"
-#&gt; </div><div class='input'><span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='st'>"id1"</span>, <span class='kw'>weights</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>1.5</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>1</span>))</div><div class='output co'>#&gt; # A tibble: 2,048 x 4
-#&gt; # Groups:   id2, id3 [4]
-#&gt;       id2   id3          Val         Prob
-#&gt;    &lt;fctr&gt; &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt;
-#&gt;  1   high     1 -0.049091859 8.158455e-05
-#&gt;  2   high     1 -0.027371011 9.938613e-05
-#&gt;  3   high     1 -0.005650162 1.203682e-04
-#&gt;  4   high     1  0.016070687 1.463131e-04
-#&gt;  5   high     1  0.037791536 1.770863e-04
-#&gt;  6   high     1  0.059512385 2.131452e-04
-#&gt;  7   high     1  0.081233233 2.551557e-04
-#&gt;  8   high     1  0.102954082 3.038297e-04
-#&gt;  9   high     1  0.124674931 3.627396e-04
-#&gt; 10   high     1  0.146395780 4.311592e-04
-#&gt; # ... with 2,038 more rows</div></pre>
+<span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='fu'>c</span>(<span class='st'>"id1"</span>, <span class='st'>"id2"</span>))
+<span class='fu'><a href='get_levels.html'>get_levels</a></span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)
+<span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='st'>"id1"</span>, <span class='kw'>weights</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>1.5</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>1</span>))
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
