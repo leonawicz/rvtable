@@ -32,6 +32,7 @@ When using weights, \code{marginalize} must be called on one variable at a time.
 Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
 }
 \examples{
+\dontrun{
 library(data.table)
 library(dplyr)
 x <- data.table(
@@ -42,4 +43,5 @@ x <- data.table(
 marginalize(x, c("id1", "id2"))
 get_levels(x, "id1")
 marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
+}
 }

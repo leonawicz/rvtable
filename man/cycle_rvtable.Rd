@@ -5,7 +5,7 @@
 \title{Repeated Resampling Utility}
 \usage{
 cycle_rvtable(x, n, start = NULL, density.args = list(),
-  sample.args = list())
+  sample.args = list(), keep = "all")
 }
 \arguments{
 \item{x}{an rvtable in distribution form only.}
@@ -17,6 +17,8 @@ cycle_rvtable(x, n, start = NULL, density.args = list(),
 \item{density.args}{optional arguments passed to \code{density}.}
 
 \item{sample.args}{optional arguments used when sampling.}
+
+\item{keep}{character, iterations to retain in output table. Options are \code{"all"} (default) or \code{"last"}.}
 }
 \value{
 an rvtable.
@@ -29,6 +31,7 @@ This function repeats cycles of bootstrap resampling from a distribution followe
 \code{x} must be a distribution-form rvtable and not a sample-form rvtable.
 }
 \examples{
+#' \dontrun{
 library(data.table)
 library(dplyr)
 x <- data.table(
@@ -37,5 +40,6 @@ x <- data.table(
   id3=rep(1:2, each=2),
   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) \%>\% rvtable
 cycle_rvtable(x, 2)
-x \%>\% group_by(id1, id2) \%>\% cycle_rvtable(3)
+x \%>\% group_by(id1, id2) \%>\% cycle_rvtable(3, keep="last")
+}
 }

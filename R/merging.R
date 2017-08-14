@@ -54,6 +54,7 @@ get_levels <- function(x, variable=NULL){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' library(data.table)
 #' library(dplyr)
 #' x <- data.table(
@@ -64,6 +65,7 @@ get_levels <- function(x, variable=NULL){
 #' merge_rvtable(x)
 #' x %>% group_by(id1) %>% merge_rvtable
 #' x %>% group_by(id1, id2) %>% merge_rvtable
+#' }
 merge_rvtable <- function(x, density.args=list(), sample.args=list()){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
@@ -123,6 +125,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' library(data.table)
 #' library(dplyr)
 #' x <- data.table(
@@ -133,6 +136,7 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #' marginalize(x, c("id1", "id2"))
 #' get_levels(x, "id1")
 #' marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
+#' }
 marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
@@ -173,11 +177,13 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #' @param start usually \code{NULL} when first called and on subsequent recursive calls an integer representing which cycle to begin from in the updated rvtable.
 #' @param density.args optional arguments passed to \code{density}.
 #' @param sample.args optional arguments used when sampling.
+#' @param keep character, iterations to retain in output table. Options are \code{"all"} (default) or \code{"last"}.
 #'
 #' @return an rvtable.
 #' @export
 #'
 #' @examples
+#' #' \dontrun{
 #' library(data.table)
 #' library(dplyr)
 #' x <- data.table(
@@ -186,31 +192,38 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #'   id3=rep(1:2, each=2),
 #'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
 #' cycle_rvtable(x, 2)
-#' x %>% group_by(id1, id2) %>% cycle_rvtable(3)
-cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=list()){
+#' x %>% group_by(id1, id2) %>% cycle_rvtable(3, keep="last")
+#' }
+cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=list(), keep="all"){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
   grp <- dplyr::groups(x)
+  if(!keep %in% c("all", "last")) stop("keep must be 'all' or 'last'.")
   if(tbl=="sample") stop("rvtable must be in distribution form, not sample form.")
   if(!("Cycle" %in% names(x))) x$Cycle <- 1
   if(is.null(start)) start <- max(x$Cycle)
   if(n<=1){
-    cols <- c(as.character(grp), "Cycle", "Val")
-    grp2 <- lapply(c(as.character(grp), "Cycle"), as.symbol)
-    x <- dplyr::select_(x, .dots=lapply(c(cols, "Prob"), as.symbol)) %>%
-      dplyr::group_by_(.dots=grp2) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol))
+    cols <- c(as.character(grp), "Cycle", "Val", "Prob")
+    x <- dplyr::select_(x, .dots=lapply(cols, as.symbol)) %>%
+      dplyr::group_by_(.dots=grp) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol)) %>% rvtable()
     return(x)
   }
-  x2 <- dplyr::filter_(x, .dots=list(paste0("Cycle==", start)))
-  class(x2) <- unique(c("rvtable", class(x2)))
-  attr(x2, "rvtype") <- rv
-  attr(x2, "tabletype") <- tbl
-  x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>%
-    dplyr::mutate(Cycle=start+1)
-  dplyr::bind_rows(x, x2) %>% data.table::data.table() %>%
+  if(keep=="all"){
+    x2 <- dplyr::filter_(x, .dots=list(paste0("Cycle==", start)))
+    class(x2) <- unique(c("rvtable", class(x2)))
+    attr(x2, "rvtype") <- rv
+    attr(x2, "tabletype") <- tbl
+    x2 <- merge_rvtable(x2, density.args=density.args, sample.args=sample.args) %>%
+      dplyr::mutate(Cycle=start+1)
+    x <- dplyr::bind_rows(x, x2)
+  } else {
+    x <- merge_rvtable(x, density.args=density.args, sample.args=sample.args) %>%
+      dplyr::mutate(Cycle=start+1)
+  }
+  x %>% data.table::data.table() %>%
     dplyr::group_by_(.dots=grp) %>% rvtable(discrete=discrete) %>%
-    cycle_rvtable(n-1, start+1, density.args=density.args, sample.args=sample.args)
+    cycle_rvtable(n-1, start+1, density.args=density.args, sample.args=sample.args, keep=keep)
 }

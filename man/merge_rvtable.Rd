@@ -29,6 +29,7 @@ If calling this function directly, it is important to know that it is generally 
 Use \code{marginalize} to ensure proper marginal distributions are obtained since it can be used with or without non-constant weights.
 }
 \examples{
+\dontrun{
 library(data.table)
 library(dplyr)
 x <- data.table(
@@ -39,4 +40,5 @@ x <- data.table(
 merge_rvtable(x)
 x \%>\% group_by(id1) \%>\% merge_rvtable
 x \%>\% group_by(id1, id2) \%>\% merge_rvtable
+}
 }

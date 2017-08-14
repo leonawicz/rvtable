@@ -78,3 +78,40 @@ test_that("marginalize throws correct errors", {
   expect_error(marginalize(x_c, "id1", weights=c(1, 1.5, 2, 4)), e[5])
   expect_error(marginalize(x_d, "id1", weights=c(1, 1.5, 2, 4, 1, 5)), e[5])
 })
+
+cl <- "rvtable"
+x <- data.table(
+  id1=rep(LETTERS[1:5], each=4),
+  id2=factor(c("low", "high")),
+  id3=rep(1:2, each=2),
+  Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
+
+test_that("merge_rvtable unrun examples work", {
+  expect_is(merge_rvtable(x), cl)
+  y <- x %>% group_by(id1) %>% merge_rvtable
+  expect_is(y, cl)
+  y <- x %>% group_by(id1, id2) %>% merge_rvtable
+  expect_is(y, cl)
+})
+
+test_that("marginalize unrun examples work", {
+  expect_is(marginalize(x, c("id1", "id2")), cl)
+  lev <- get_levels(x, "id1")
+  expect_is(lev, "list")
+  expect_identical(lev, list(id1=LETTERS[1:5]))
+  expect_is(marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1)), cl)
+})
+
+test_that("cycle_rvtable unrun examples work", {
+  expect_is(cycle_rvtable(x, 2), cl)
+  expect_is(x %>% group_by(id1, id2) %>% cycle_rvtable(3, keep="last"), cl)
+})
+
+test_that("cycle_rvtable keep arg has consistency", {
+  set.seed(1)
+  x0 <- cycle_rvtable(x, 3) %>% filter(Cycle==3) %>% rvtable()
+  set.seed(1)
+  x1 <- cycle_rvtable(x, 3, keep="last")
+  expect_identical(x0, x1)
+  expect_error(cycle_rvtable(x, keep=1), "keep must be 'all' or 'last'.")
+})
