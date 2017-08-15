@@ -1,9 +1,28 @@
 globalVariables(c(".", "Val", "n", "numer", "denom"))
 
-.has_rv_attributes <- function(x) !is.null(attr(x, "rvtype")) & !is.null(attr(x, "tabletype"))
+.has_rv_attributes <- function(x){
+  !is.null(attr(x, "rvtype")) &
+    !is.null(attr(x, "tabletype")) &
+    !is.null(attr(x, "valcol")) &
+    !is.null(attr(x, "probcol")) &
+    !is.null(attr(x, "density.args")) &
+    !is.null(attr(x, "sample.args"))
+}
 
 .lost_rv_class_check <- function(x){
   if(.has_rv_attributes(x) & !("rvtable" %in% class(x))) class(x) <- unique(c("rvtable", class(x)))
+  x
+}
+
+.add_rvtable_class <- function(x, Val, Prob, discrete, dist, density.args=list(), sample.args=list()){
+  if(!dist & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
+  class(x) <- unique(c("rvtable", class(x)))
+  attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
+  attr(x, "tabletype") <- ifelse(dist, "distribution", "sample")
+  attr(x, "valuecol") <- Val
+  attr(x, "probcol") <- Prob
+  attr(x, "density.args") <- density.args
+  attr(x, "sample.args") <- sample.args
   x
 }
 
@@ -49,10 +68,31 @@ is.rvtable <- function(x){
 #' When continuous, Val and Prob are based on \code{x} and \code{y} output from \code{density} and describe a distribution curve,
 #' and therefore values in Prob may be greater than one and may not sum to one.
 #' Val is typically numeric but may be character when discrete such as when an rvtable object is returned from \code{inverse_pmf}.
-#' All rvtable objects are either distribution-based or sample-based.
-#' This primary constructor only constructs distribution- or sample-based rvtable objects, with the attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
-#' Sampling on an rvtable can generate a sample-based rvtable, with the attribute \code{tabletype="sample"}.
+#'
+#' For data frame inputs, Val and Prob here refer generally to whatever columns in an rvtable are specified by \code{Val} and \code{Prob}.
+#' In \code{rvtable}, if the \code{Val} argument is not supplied, Val is assumed to be \code{Val="Val"} and \code{rvtable}
+#' will search the names of a data frame for this column, throwing an error if it is not found, like with any other value of \code{Val}.
+#' When \code{Prob} is missing, however, this is analogous to when \code{x} is numeric and
+#' \code{y} and \code{x} probability attributes are both NULL: the data in the \code{Val} column are assumed to be a direct sample
+#' from a distribution rather than a vector of values that describes a distribution in conjunction with a \code{Prob} column.
+#' When \code{x} is numeric, a supplied \code{Val} will substitute for rvtable names \code{x} and \code{y} in the output, respectively.
+#'
+#' All rvtable objects are in one of two forms: distribution-type or sample-type.
+#' This primary constructor constructs distribution- or sample-type rvtable objects,
+#' with the corresponding attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
+#' Sampling on an rvtable can generate a sample-type rvtable, with the attribute \code{tabletype="sample"}.
+#' Other operations like merging or marginalizing distributions typically yield rvtables in distribution form.
+#' This is the common form and rvtables are usually kept in this form until a final step in a processing chain
+#' where samples are needed.
+#'
 #' Every rvtable object also has a variable type attribute, \code{rvtype}, which is either "discrete" or "continuous".
+#' Other attributes assigned during rvtable construction include \code{valcol} and \code{probcol}, the names of the Val and Prob columns,
+#' and a \code{density.args} attribute that lists any most recent arguments passed to \code{density} in the process
+#' of making the rvtable.
+#'
+#' If an rvtable is already of class \code{rvtable}, the \code{rvtable} function simply returns
+#' the rvtable as is; any other arguments passed to \code{rvtable} are ignored and
+#' neither the table nor its attributes are updated or altered in any way.
 #'
 #' @param x a numeric vector, data frame, or data table.
 #' @param y an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.
@@ -60,8 +100,10 @@ is.rvtable <- function(x){
 #' @param Prob the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.
 #' @param discrete whether the random variable is discrete.
 #' @param density.args optional arguments passed to \code{density}.
+#' @param force.dist logical, force distribution-type rvtable output if \code{Prob} is missing, i.e., \code{Val} is assumed to be a sample.
+#' Defaults to \code{TRUE}.
 #'
-#' @return an S3 object of class \code{rvtable}
+#' @return an object of class \code{rvtable}.
 #' @export
 #'
 #' @examples
@@ -81,50 +123,81 @@ is.rvtable <- function(x){
 #' # an existing data frame or data table
 #' x <- data.frame(Val=1:10, Prob=0.1)
 #' rvtable(x)
-#' library(data.table)
-#' x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
+#' x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
 #' @importFrom magrittr %>%
-#' @import data.table
 #' @importFrom stats approx density
-rvtable <- function(x, y=NULL, Val="Val", Prob="Prob", discrete=FALSE, density.args=list()){
+rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
   if(is.rvtable(x)) return(x)
-  if(is.numeric(x)){
-    if(any(is.na(x))) stop("Missing values not permitted.")
-    if(length(x)==1 && !discrete) stop("A single value for `x` with probability=1 is only allowed when discrete=TRUE")
-    if(is.null(y)) y <- attr(x, "prob")
-    if(is.null(y)){
-      if(discrete){
-        x <- table(x)
-        y <- as.numeric(x/sum(x))
-        x <- as.numeric(names(x))
-      } else {
-        x <- do.call(density, args=c(list(x=x), density.args))
-        y <- x$y
-        x <- x$x
-      }
-    }
-    if(length(x) != length(y)) stop("Values and probabilities do not have equal length.")
-    x <- data.table(Val=x, Prob=y)
-  }
-  if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
-  if(length(class(x))==1 && class(x)!="data.table") x <- data.table(x)
+  vpmissing <- c(missing(Val), missing(Prob))
+  if(vpmissing[1]) Val <- "Val"
+  if(vpmissing[2]) Prob <- "Prob"
   if(Val==Prob) stop("`Val` and `Prob` cannot refer to the same column.")
+  dist <- !vpmissing[2] | force.dist
+  forced <- vpmissing[2] & force.dist
+  if(!dist) Prob <- NULL
+  if(is.numeric(x))
+    return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
+  if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
+  .rvtable_df(x, Val, Prob, discrete, density.args, dist, forced)
+}
+
+.rvtable_df <- function(x, Val, Prob, discrete, density.args, dist, forced){
+  if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
   id <- names(x)
-  if(!(Val %in% id) && !("Val" %in% id)) stop(paste("No column called", Val))
-  if(!is.null(Prob) && !(Prob %in% id) && !("Prob" %in% id)) stop(paste("No column called", Prob))
-  if(Val %in% id && Val != "Val") names(x)[id==Val] <- "Val"
-  if(!is.null(Prob) && Prob %in% id && Prob != "Prob") names(x)[id==Prob] <- "Prob"
-  stopifnot((is.numeric(x$Val) || discrete) && !any(is.na(x$Val)))
-  if(!is.null(Prob)) stopifnot(is.numeric(x$Prob) && !any(is.na(x$Prob)))
-  if(!is.null(Prob)) stopifnot(min(x$Prob) >= 0)
-  id <- names(x)
-  dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
-  tmp <- (dplyr::group_by_(x, .dots=dots) %>% dplyr::summarise_(Duplicated=~any(duplicated(Val))))$Duplicated
-  if(any(tmp)) stop("Duplicated values in `Val`.")
-  class(x) <- unique(c("rvtable", class(x)))
-  attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
-  attr(x, "tabletype") <- if(is.null(Prob)) "sample" else "distribution"
-  x
+  if(!(Val %in% id)) stop(paste("No column called", Val))
+  if(dist && !(Prob %in% id)) stop(paste("No column called", Prob))
+  stopifnot((is.numeric(x[[Val]]) || discrete) && !any(is.na(x[[Val]])))
+  if(dist){
+    stopifnot(is.numeric(x[[Prob]]) && !any(is.na(x[[Prob]])))
+    stopifnot(min(x[[Prob]]) >= 0)
+  }
+  dots <- lapply(id[!(id %in% c(Val, Prob))], as.symbol)
+  if(dist){
+    if(forced){
+      x <- .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list()) %>%
+        .rvtable_makedist(x)
+    }
+    tmp <- (
+      dplyr::group_by_(x, .dots=dots) %>%
+        dplyr::summarise_(Duplicated=lazyeval::interp(~any(duplicated(var)), var=as.name(Val)))
+    )$Duplicated
+    if(any(tmp)) stop(paste0("Duplicated values in ", Val, "."))
+  }
+  .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list())
+}
+
+.rvtable_numeric <- function(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing){
+  if(any(is.na(x))) stop("Missing values not permitted.")
+  if(length(x)==1 && !discrete)
+    stop("A single value for `x` with probability=1 is only allowed when discrete=TRUE")
+  if(is.null(y)) y <- attr(x, "prob")
+  dist <- TRUE
+  if(force.dist & is.null(y)){
+    if(discrete){
+      x <- table(x)
+      y <- as.numeric(x/sum(x))
+      x <- as.numeric(names(x))
+    } else {
+      x <- do.call(density, args=c(list(x=x), density.args))
+      y <- x$y
+      x <- x$x
+    }
+  } else if(is.null(y)){
+    dist <- FALSE
+  }
+
+  if(dist && length(x) != length(y))
+    stop("Values and probabilities do not have equal length.")
+  x <- if(dist) data.frame(x=x, y=y) else data.frame(x=x)
+  x <- dplyr::table_df(x)
+  if(vpmissing[1]) Val <- "x"
+  if(dist){
+    if(vpmissing[2]) Prob <- "y"
+    if(any(!vpmissing)) names(x) <- c(Val, Prob)
+  } else {
+    if(!vpmissing[1]) names(x) <- Val
+  }
+  .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list())
 }

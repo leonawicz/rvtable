@@ -47,8 +47,8 @@ get_levels <- function(x, variable=NULL){
 #' Use \code{marginalize} to ensure proper marginal distributions are obtained since it can be used with or without non-constant weights.
 #'
 #' @param x an rvtable.
-#' @param density.args optional arguments passed to \code{density}.
-#' @param sample.args optional arguments used when sampling.
+#' @param density.args optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.
+#' @param sample.args optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.
 #'
 #' @return an rvtable.
 #' @export
@@ -66,18 +66,47 @@ get_levels <- function(x, variable=NULL){
 #' x %>% group_by(id1) %>% merge_rvtable
 #' x %>% group_by(id1, id2) %>% merge_rvtable
 #' }
-merge_rvtable <- function(x, density.args=list(), sample.args=list()){
+merge_rvtable <- function(x, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   grp <- dplyr::groups(x)
-  sample.args$density.args <- density.args
-  n <- sample.args$n
-  if(is.null(n)) n <- 10000
-  has.weights <- "weights" %in% names(x)
-  discrete <- attr(x, "rvtype")=="discrete"
+  if(missing(density.args)) density.args <- attr(x, "density.args")
+  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
   if(attr(x, "tabletype")=="distribution"){
+    if(is.null(sample.args$n)) sample.args$n <- 10000
+    attr(x, "sample.args") <- sample.args
+    sample.args$density.args <- density.args
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
   }
+  x <- .rvtable_makedist(x)
+  x <- dplyr::group_by_(x, .dots=grp)
+  .lost_rv_class_check(x)
+}
+
+.rvtable_rename <- function(x, vp){
+  x <- .lost_rv_class_check(x)
+  .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  if(vp=="to"){
+    if(Val != "Val") x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
+    if(Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
+  } else if(vp=="from"){
+    if(Val != "Val") x <- dplyr::rename_(x, .dots=stats::setNames("Val", Val))
+    if(Prob != "Prob") x <- dplyr::rename_(x, .dots=stats::setNames("Prob", Prob))
+  }
+  .lost_rv_class_check(x)
+}
+
+.rvtable_makedist <- function(x){
+  .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  discrete <- attr(x, "rvtype")=="discrete"
+  has.weights <- "weights" %in% names(x)
+  density.args <- attr(x, "density.args")
+  sample.args <- attr(x, "sample.args")
+  x <- .rvtable_rename(x, "to")
   if(discrete){
     if(has.weights){
       x <- dplyr::do(x, data.table::data.table(
@@ -102,24 +131,27 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
         Prob=do.call(density, c(list(x=.$Val), density.args))$y))
     }
   }
-  dplyr::group_by_(x, .dots=grp) %>% rvtable(discrete=discrete)
+  x <- .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, sample.args)
+  .rvtable_rename(x, "from")
 }
 
 #' Marginal Distribution rvtable
 #'
 #' Obtain a marginal distribution of a random variable in an rvtable.
 #'
-#' Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
+#' Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables.
+#' \code{margin} must be explicit.
 #' \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
-#' Marginalizing over multiple variables in a single call to \code{marginalize} is only available assuming equal weights for all values of those variables.
+#' Marginalizing over multiple variables in a single call to \code{marginalize}
+#' is only available assuming equal weights for all values of those variables.
 #' When using weights, \code{marginalize} must be called on one variable at a time.
 #' Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
 #'
 #' @param x an rvtable.
 #' @param margin variable(s) in rvtable to marginalize over.
 #' @param weights relative weights for unique values or levels of a single \code{margin} variable.
-#' @param density.args optional arguments passed to \code{density}.
-#' @param sample.args optional arguments used when sampling.
+#' @param density.args optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.
+#' @param sample.args optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.
 #'
 #' @return an rvtable.
 #' @export
@@ -137,11 +169,16 @@ merge_rvtable <- function(x, density.args=list(), sample.args=list()){
 #' get_levels(x, "id1")
 #' marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
 #' }
-marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.args=list()){
+marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
   discrete <- attr(x, "rvtype")=="discrete"
   tbl <- attr(x, "tabletype")
+  if(missing(density.args)) density.args <- attr(x, "density.args")
+  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
+  x <- .rvtable_rename(x, "to")
   id <- names(x)
   if(missing(margin)) stop("Must specify variable(s) to marginalize over.")
   if(!is.null(weights) & length(margin) > 1)
@@ -158,11 +195,9 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
     x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~dplyr::mutate(.x, weights=.y)) %>%
       data.table::rbindlist() %>% dplyr::group_by_(.dots=grp2)
   }
-  class(x) <- unique(c("rvtable", class(x)))
-  attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
-  attr(x, "tabletype") <- tbl
-  x <- merge_rvtable(x, density.args=density.args, sample.args=sample.args) %>% dplyr::group_by_(.dots=grp2)
-  rvtable(x, discrete=discrete)
+  .rvtable_rename(x, "from")
+  x <- .add_rvtable_class(x, Val, Prob, discrete, tbl=="distribution", density.args, sample.args)
+  x <- merge_rvtable(x) %>% dplyr::group_by_(.dots=grp2) %>% .lost_rv_class_check()
 }
 
 #' Repeated Resampling Utility
@@ -175,8 +210,8 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #' @param x an rvtable in distribution form only.
 #' @param n total number of iteratively estimated distributions to return, including the original from \code{x}.
 #' @param start usually \code{NULL} when first called and on subsequent recursive calls an integer representing which cycle to begin from in the updated rvtable.
-#' @param density.args optional arguments passed to \code{density}.
-#' @param sample.args optional arguments used when sampling.
+#' @param density.args optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.
+#' @param sample.args optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.
 #' @param keep character, iterations to retain in output table. Options are \code{"all"} (default) or \code{"last"}.
 #'
 #' @return an rvtable.
@@ -194,12 +229,14 @@ marginalize <- function(x, margin, weights=NULL, density.args=list(), sample.arg
 #' cycle_rvtable(x, 2)
 #' x %>% group_by(id1, id2) %>% cycle_rvtable(3, keep="last")
 #' }
-cycle_rvtable <- function(x, n, start=NULL, density.args=list(), sample.args=list(), keep="all"){
+cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all"){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
+  if(missing(density.args)) density.args <- attr(x, "density.args")
+  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
   grp <- dplyr::groups(x)
   if(!keep %in% c("all", "last")) stop("keep must be 'all' or 'last'.")
   if(tbl=="sample") stop("rvtable must be in distribution form, not sample form.")

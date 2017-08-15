@@ -49,7 +49,7 @@
 #' @param interp linearly interpolate between observed values of Val before sampling if Val is continuous. Ignored for discrete random variables.
 #' @param n.interp length of sequence of interpolated sampling points if. Ignored for discrete random variables or \code{interp=FALSE}.
 #' @param decimals number of decimal places for rounding samples. Ignored for discrete random variables.
-#' @param density.args optional arguments passed to \code{density}.
+#' @param density.args optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.
 #'
 #' @return an \code{rvtable} object where the Val column represents samples and the Prob column is dropped.
 #' @export
@@ -61,12 +61,16 @@
 #' y <- sample_rvtable(x, n=10)
 #' sample_rvtable(y, n=8, resample=TRUE)
 sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
-                           n.interp=100000, decimals=NULL, density.args=list()){
+                           n.interp=100000, decimals=NULL, density.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  if(missing(density.args)) density.args <- attr(x, "density.args")
+  x <- .rvtable_rename(x, "to")
   id <- names(x)
   grp <- dplyr::groups(x)
   grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob")), as.symbol)
@@ -76,21 +80,19 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   }
   x <- dplyr::group_by_(x, .dots=grp2)
   if(any(dplyr::summarise(x, n=length(Val))$n == 1))
-    stop("Groups must each have multiple observation.")
+    stop("Groups must each have multiple observations.")
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
       x <- dplyr::do(x, data.table::data.table(
-                             Val=do.call(density, c(list(x=.$Val), density.args))$x,
-                             Prob=do.call(density, c(list(x=.$Val), density.args))$y)) %>%
+        Val=do.call(density, c(list(x=.$Val), density.args))$x,
+        Prob=do.call(density, c(list(x=.$Val), density.args))$y)) %>%
         dplyr::group_by_(.dots=grp2)
     }
   }
   x <- dplyr::do(x, data.table::data.table(
     Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals))) %>%
     dplyr::group_by_(.dots=grp)
-  class(x) <- unique(c("rvtable", class(x)))
-  attr(x, "rvtype") <- rv
-  attr(x, "tabletype") <- "sample"
-  x
+  x <- .rvtable_rename(x, "from")
+  .add_rvtable_class(x, Val, Prob, discrete, FALSE, density.args)
 }
