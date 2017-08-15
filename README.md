@@ -55,7 +55,11 @@ Please file a minimal reproducible example of any clear bug at [github](https://
 Learning rvtable
 ----------------
 
-Vignettes for rvtable are not yet available. Familiarity with data.table and dplyr is recommended.
+Familiarity with data.table and dplyr is recommended. An introduction vignette for rvtable is [available online](http://leonawicz.github.io/rvtable/articles/rvtable.html) or:
+
+``` r
+browseVignettes(package = "rvtable")
+```
 
 License
 -------

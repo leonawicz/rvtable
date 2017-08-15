@@ -76,7 +76,8 @@ Please file a minimal reproducible example of any clear bug at [github](https://
 
 ## Learning rvtable
 
-Familiarity with data.table and dplyr is recommended. An introduction vignette for rvtable is available:
+Familiarity with data.table and dplyr is recommended. 
+An introduction vignette for rvtable is [available online](http://leonawicz.github.io/rvtable/articles/rvtable.html) or:
 
 ``` r
 browseVignettes(package = "rvtable")
