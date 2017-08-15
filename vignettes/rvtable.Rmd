@@ -1,0 +1,297 @@
+---
+title: "Introduction to rvtable"
+author: "Matthew Leonawicz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+  fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Introduction to rvtable}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!-- rvtable.md is generated from rvtable.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse=TRUE, comment="#>", message=F, warning=F, error=F, eval=F, tidy=T) # for html_vignette only
+```
+
+The `rvtable` package provides a data frame-based object format and functionality for storing and manipulating
+random variables. The emphasis is on continuous random variables though discrete random variables are also handled.
+The `rvtable`-class object is a special type of data frame or data table that
+contains a column defining values representing or sampled from a probability distribution and a column of respective probabilities.
+Additional columns are ID columns and represent factors or categorical variables.
+While the package makes generous use of `dplyr`, `rvtable`-class objects also share the class, `data.table`,
+which is useful for efficiently working with large tables.
+
+It is helpful to make the connection between operations performed by code and the probability concepts they parallel.
+The entirety of an rvtable as described above represents a joint probability distribution of
+the continuous random variable whose values and probabilities are represented by the values and probabilities columns
+and any categrorical variables whose levels propogate the ID columns.
+
+Filtering rows of an rvtable to specific combinations of ID variable levels yields a subset of the original table
+that represents a conditional distribution of the continuous random variable.
+Similarly, integrating out, marginalizing over, or collapsing the table over the unique levels of an ID variable
+is analogous to calculating a marginal distribution of the continuous random variable.
+
+This package offers a collection of functions that assist with manipulating tables of continuous random variables
+in these and other ways. There is a function for generating rvtables from different kinds of input data.
+An rvtable can be in probability distribution or sample form.
+This means that an rvtable will contain `Val` and `Prob` columns (default names) when representing a distribution,
+but only the `Val` column once sampled from. Form is tracked by object attributes.
+Functions available in the package offer seamless transitions between forms, carrying out various operations
+such as sampling from densities and marginalizing over levels of categorical variables in an rvtable.
+Users can maintain control over the resolution of the data via function arguments that correspond to any
+sampling or empirical density estimation steps that a function may perform.
+
+This introduction covers the following topics:
+
+- Create variuous rvtable objects.
+- Sample from a distribution-type rvtable, yielding a new, sample-type rvtable.
+- Compute marginal distributions on an rvtable.
+- Compute an inverse empirical probability mass function from an rvtable.
+
+## Creating rvtable objects
+
+There are several ways to create an rvtable from the constructor function, `rvtable`.
+Below are examples of continuous and discrete random variables stored in rvtables.
+In the first example, the input, `x`, is simply a numeric vector representing a sample.
+If `density.args` is not specified, the defaults are those used by `density`.
+See the help documentation for `density` for details.
+The second call below limits the sample from `n=512` to `n=50` and smooths the distribution
+by setting `adjust=2`. We can also check to see if an object has the `rvtable` class.
+
+
+```{r rvtable_objects1}
+library(rvtable)
+# basic samples from continuous and discrete RVs
+x <- rnorm(100)
+rvtable(x)
+rvtable(x, density.args=list(n=50, adjust=2))
+is.rvtable(rvtable(x))
+```
+
+This reveals that when working with "continuous" random variables, the distribution is
+always discretized to some degree. When high fidelity is required, increase `n`.
+This is increasingly important when working with a long data manipulation chain requiring 
+many iterations of density estimation or sampling, such as marginalizing over multiple
+categorical variables or if it is critical to maintain the shape of a multimodal distribution
+with high precision.
+
+The default is to assume `x` is continuous. In the next case, it is more ambiguous.
+While all values in this example are clearly discrete integers, they are still treated as
+samples from a continuous probability distribution and will be modeled internally by `density` as such
+unless `discrete=TRUE`.
+
+For discrete random variables, probabilities associated with values of `x` can be passed to `y`.
+Alternatively, `x` can be passed without `y` for the same purpose if `x` has the attribute `probabilities`.
+Note that in either case, it is no longer necessary to explicitly pass `discrete=TRUE`.
+The discrete nature of `x` is inferred either from its attributes or from `y`.
+When `x` is a numeric vector, `discrete=TRUE` is only required when probabilities are not passed by `y`
+or by `x` attributes and `x` is a basic unweighted sample (but possibly with repeating values).
+At any time use `attributes` to inspect the attributes of an rvtable.
+
+
+```{r rvtable_objects2}
+x <- sample(1:10, size=10000, replace=TRUE, prob=sqrt(10:1))
+rvtable(x, discrete=TRUE) # required
+x <- 1:5
+probs <- c(0.1, 0.2, 0.3, 0.15, 0.25)
+rvtable(x, y=probs) # discreteness inferred from y
+attr(x, "probabilities") <- probs
+rv <- rvtable(x) # discreteness inferred from attributes
+rv
+attributes(rv)
+```
+
+Also note above that probabilities need not sum to one in the discrete case.
+They are relative weights and will be rescaled internally by `sample` rather than
+passed to `density` as is the case with continous random variables.
+
+Increasingly the complexity of the input to `rvtable`,
+we arrive at the more common ways to constuct an rvtable: from and existing data frame or data table.
+First is a data frame of values with equal probability.
+
+Note that by leaving out `discrete=TRUE` in the call to `rvtable` below,
+as with a numeric input, `x`, the data frame input is also assumed to represent a continuous
+random variable sample. It will be estimated as if a tiny sample from a
+uniform pdf rather than a fully represented uniform pmf.
+
+```{r rvtable_objects3}
+x <- data.frame(Val=1:10, Prob=0.1)
+rv1 <- rvtable(x)
+rv1
+attributes(rv1)
+rv2 <- rvtable(x, discrete=TRUE)
+rv2
+attributes(rv2)
+```
+
+Lastly, we load the `data.table` package so we can make a data table instead of a data frame.
+It doesn't change anything in terms of rvtables since the package always applies the `data.table` class.
+The key change here is the addition of an ID column, `id`, representing a categorical variable.
+The column names referring to values and their associated probabilities can also be changed.
+
+```{r rvtable_objects4}
+library(data.table)
+x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
+rv <- rvtable(x, Val="v1", Prob="p1")
+rv
+attributes(rv)
+```
+
+In concluding, here are three important properites of `rvtable` worth being clear on:
+
+- An rvtable is not created from a data frame or data table that contains a values column
+but no corresponding probabilities column, as can be done when x is a basic numeric samples vector.
+
+Creating an rvtable from an existing data frame or data table requires a distribution-type
+input. The user is required to provide a table with both columns.
+
+- `rvtable` always creates an rvtable in distribution form, regardless of input.
+
+- `rvtable` ignores grouping. 
+
+If you pass a data frame or data table whose rows have been grouped by any categorical variables, 
+for example using `dplyr::group_by`, this grouping information is ignored.
+Instead, `rvtable` forcibly groups by all categorical variables present in the input, regardless.
+It is reasonable to assume that any present categorical variables are already distinguishing
+different sets of values and probabilities in a table and it is not intended for the
+`rvtable` constructor to also apply any maginalizing operations.
+`rvtable` always separates all apparent combinations of ID variables' levels.
+
+## Sampling rvtables
+
+Sampling on an rvtable requires a density-type rvtable.
+This is the more common form. Sampling results in a new rvtable object that is of sampling-type, meaning its
+`Val` column represents raw sample values and there is no corresponding `Prob` column of probabilities tied to values.
+This is the less common rvtable type and tends to be explicitly created and used at the end of a chain of
+data manipulation steps when it finally comes time to do something with the data such as plot it or pass samples to
+an analysis.
+
+Sampling is done using `sample_rvtable`. Below, small samples are drawn from rvtables containing
+continous and discrete random variables, respectively.
+
+```{r sample_rvtable1}
+# continuous RV
+x <- rvtable(rnorm(1000))
+x
+attributes(x)$tabletype
+y <- sample_rvtable(x, n=10)
+y
+attributes(y)$tabletype
+
+# discrete RV
+x <- rvtable(sample(1:100, 50), discrete=TRUE)
+y <- sample_rvtable(x, n=10)
+sample_rvtable(y, n=8, resample=TRUE)
+```
+
+In the above example, the `tabletype` entry in the attributes of `y` is different from that in `x`.
+After sampling from the density-type rvtable, the resultant rvtable is in sample form.
+In the discrete example, `sample_rvtable` is called on an rvtable that is already in sample form.
+In this case samples are taken directly from the rvtable `Val` column unless `resample=TRUE`, which
+forces the additonal step of re-estimation of the pmf or pdf prior to resampling.
+This is especially useful in the continuous case when the user requires more control over the 
+sampling distribution via `density.args` prior to resampling.
+
+Returning to the data table from eariler, sampling is performed by group.
+
+```{r sample_rvtable2}
+x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
+rv <- rvtable(x, Val="v1", Prob="p1")
+sample_rvtable(rv, n=5)
+```
+
+Aside from `x`, other arguments to `sample_rvtable` include:
+
+- `resample` as described.
+- `n`, the sample size.
+
+The sample size defaults to 10,000 because the typical context for the `rvtable` package is 
+emprical estimation of continuous probability distributions
+with high-fidelity/flexibility. While sampling comes after density estimation, it is also helpful to retain
+larger samples if densities are subsequently re-estimated.
+
+- `interp`, which defaults to `TRUE`, applies linear interpolation between samples prior to sampling.
+- `n.interp`, the sample size resulting from `interp=TRUE`, defaults to 100,000.
+- `decimals` is available for rounding samples.
+- `density.args` takes a list of arguments to pass to `density` to override defaults, just as in `rvtable`.
+
+Like the constructor, `rvtable`, `sample_rvtable` also forcibly applies its sampling to each identifiable group
+and does not acknowledge any existing grouping information that has been added to a table.
+For singling out or collapsing over ID variables, we turn to the next section.
+
+## Computing marginal distributions on rvtables
+
+There is not much to say about conditional distributions because this is relatively trivial.
+A conditional distribution of the random variable described by `Val` and `Prob` given, say, an ID variable being
+equal to one or some subset of some of its levels, is obtained by simply subsetting the rvtable to those rows.
+
+On the other hand, marginalizing over levels of an ID variable
+to yield a marginal distribution of the random variable decribed by `Val` and `Prob`, is more complex.
+This is done with `marginalize`, which is a wrapper around `merge_rvtable`.
+While the latter is exported by the `rvtable` package and can make sense to use directly,
+it is typical to use `marginalize`, specifically.
+
+Below, `marginalize` is used to collapse an rvtable by integrating out or marginalizing over
+categrorical variables. The `margin` argument describes which variables to marginalize over.
+In the first example, `marginalize` collapses the rvtable over the levels of `id1` and `id2`.
+
+```{r marginalize1}
+x <- data.table(
+  id1=rep(LETTERS[1:5], each=4),
+  id2=factor(c("low", "high")),
+  id3=rep(1:2, each=2),
+  Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20))
+rv <- rvtable(x)
+marginalize(rv, margin=c("id1", "id2"))
+```
+
+`get_levels` can be used to quickly check the unique levels of an ID variable.
+Note that ID columns do not have to be of class `factor` to be treated as ID/categorical/factor variables, etc.
+Character vectors suffice.
+
+A reason this is helpful is because when marginalizing over an ID variable,
+it is possible to pass a vector of weights or probabilities when integration should account for weighted samples.
+For example, an rvtable may have equal numbers of rows describing the probability distribution of a continuous
+random variable conditional on each of two ID variable levels. However, it may be known by the user that
+each of these levels do not contribute equally to the marginal distribution.
+Weights must be passed in the same orders as the levels returned by `get_levels`.
+
+```{r marginalize2}
+get_levels(rv, "id1")
+marginalize(rv, "id1", weights=c(1, 1.5, 2, 4, 1))
+```
+
+When weights need to be specified, `marginalize` can only collapse over one ID variable at a time.
+If multiple variables must be integrated out, this can usually be done with a single call as shown,
+but when weights are supplied, then `marginalize` must be called successively.
+The current implementation of `marginalize` does not allow `weights` to take a list of weights vectors 
+for each of multiple ID variables.
+
+## Computing an inverse pmf
+
+An inverse pmf can be computed using `inverse_pmf`.
+Continuing with the previous rvtable, we obtain the pdf of `id1` conditioned on a range of values
+of the continuous random variable described by the original rvtable as well as the other present
+factors.
+The `val` column is now categorical and takes on the levels associated with `id1` in the input.
+
+```{r inverse_pmf}
+y1 <- inverse_pmf(rv, val.range=c(5, 8), "id1")
+y1
+
+library(dplyr)
+x2 <- filter(rv, id2=="low" & id3==1) %>% select(-id2, -id3) %>% rvtable
+y2 <- inverse_pmf(x2, c(5,8), "id1")
+y2
+```
+
+The difference between the two calls to `inverse_pmf` above is that in the second call,
+the rvtable has first been subset to one combination of levels of `id2` and `id3`.
+In both cases, the pmf of `id1` is conditional on values of `id2`, `id3` and the continuous
+rnadom variable represented by `Val` and `Prob` in the original rvtable;
+it is merely not including all levels of `id2` and `id3` in the second example.
+
+For more information about the `rvtable` package, see the [help documentation](http://leonawicz.github.io/rvtable/)
