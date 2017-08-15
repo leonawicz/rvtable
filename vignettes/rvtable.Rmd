@@ -13,7 +13,7 @@ vignette: >
 <!-- rvtable.md is generated from rvtable.Rmd. Please edit that file -->
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(collapse=TRUE, comment="#>", message=F, warning=F, error=F, eval=F, tidy=T) # for html_vignette only
+knitr::opts_chunk$set(comment="#>", message=FALSE, warning=FALSE, error=FALSE, eval=FALSE, tidy=TRUE) # for html_vignette only
 ```
 
 The `rvtable` package provides a data frame-based object format and functionality for storing and manipulating
