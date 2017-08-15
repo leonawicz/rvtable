@@ -141,12 +141,14 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(!dist) Prob <- NULL
   if(is.numeric(x))
     return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
-  if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
+  if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
+  #if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
   .rvtable_df(x, Val, Prob, discrete, density.args, dist, forced)
 }
 
 .rvtable_df <- function(x, Val, Prob, discrete, density.args, dist, forced){
-  if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
+  if(length(class(x))==1 && class(x)!="data.table") x <- data.table::data.table(x)
+  #if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
   id <- names(x)
   if(!(Val %in% id)) stop(paste("No column called", Val))
   if(dist && !(Prob %in% id)) stop(paste("No column called", Prob))
@@ -192,8 +194,9 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
 
   if(dist && length(x) != length(y))
     stop("Values and probabilities do not have equal length.")
-  x <- if(dist) data.frame(x=x, y=y) else data.frame(x=x)
-  x <- dplyr::table_df(x)
+  x <- if(dist) data.table(x=x, y=y) else data.table(x=x)
+  #x <- if(dist) data.frame(x=x, y=y) else data.frame(x=x)
+  #x <- dplyr::table_df(x)
   if(vpmissing[1]) Val <- "x"
   if(dist){
     if(vpmissing[2]) Prob <- "y"
