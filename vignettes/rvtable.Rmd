@@ -2,7 +2,7 @@
 title: "Introduction to rvtable"
 author: "Matthew Leonawicz"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_vignette:
   fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Introduction to rvtable}
