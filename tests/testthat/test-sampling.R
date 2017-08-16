@@ -5,7 +5,7 @@ y <- sample_rvtable(x, n=100)
 z <- sample_rvtable(y, n=50, resample=TRUE)
 d <- rvtable(sample(1:100, 50), discrete=TRUE)
 d2 <- sample_rvtable(d, n=100, resample=TRUE)
-d3 <- data.table(X=LETTERS[1:2], Y=factor(c("aaa", "aaa", "bbb", "bbb")),
+d3 <- data.frame(X=LETTERS[1:2], Y=factor(c("aaa", "aaa", "bbb", "bbb")),
                  Val=rep(1:100, each=4), Prob=rep(1:100, each=4)) %>%
   dplyr::group_by(X) %>% rvtable
 cl <- "rvtable"
