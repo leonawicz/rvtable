@@ -8,13 +8,13 @@ rvtable(x, y = NULL, Val, Prob, discrete = FALSE, density.args = list(),
   force.dist = TRUE)
 }
 \arguments{
-\item{x}{a numeric vector, data frame, or data table.}
+\item{x}{a numeric vector or data frame.}
 
 \item{y}{an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.}
 
-\item{Val}{the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.}
+\item{Val}{the column name of \code{x} referring to random variable values when \code{x} is a data frame.}
 
-\item{Prob}{the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.}
+\item{Prob}{the column name of \code{x} referring to random variable values when \code{x} is a data frame.}
 
 \item{discrete}{whether the random variable is discrete.}
 
@@ -79,7 +79,6 @@ rvtable(x) # discrete inferred from attributes
 # an existing data frame or data table
 x <- data.frame(Val=1:10, Prob=0.1)
 rvtable(x)
-library(data.table)
-x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
+x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 rvtable(x, Val="v1", Prob="p1")
 }

@@ -25,12 +25,10 @@ If \code{variable} is \code{NULL}, a list is returned for all categorical variab
 A shorter list is returned if \code{variable} is used to specify a subset of columns.
 }
 \examples{
-library(data.table)
-library(dplyr)
-x <- data.table(
+x <- rvtable(data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
-  Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) \%>\% rvtable
+  Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)))
 get_levels(x)
 }

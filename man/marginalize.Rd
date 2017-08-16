@@ -34,9 +34,8 @@ Call \code{get_levels} on an rvtable first to ensure weights are passed in the c
 }
 \examples{
 \dontrun{
-library(data.table)
 library(dplyr)
-x <- data.table(
+x <- data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
