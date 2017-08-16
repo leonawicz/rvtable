@@ -48,7 +48,7 @@ test_that("test different input classes", {
   expect_true(all(c("x", "y") %in% names(d)))
   expect_equal(sum(d$y), 1)
 
-  x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
+  x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
   d <- rvtable(x, Val="v1", Prob="p1")
 
   expect_is(d, "tbl_df")
@@ -79,5 +79,5 @@ test_that("test error handling", {
   expect_error(rvtable(data.frame(x=1:10, y=1)), "No column called Val")
   expect_error(rvtable(data.frame(Val=1:10, y=1)), "No column called Prob")
   expect_error(rvtable(data.frame(Val=1:10)), "No column called Prob")
-  expect_error(rvtable(data.table(x=rep(1, 2), y=1), Val="x", Prob="y"), "Duplicated values in `x`.")
+  expect_error(rvtable(data.frame(x=rep(1, 2), y=1), Val="x", Prob="y"), "Duplicated values in `x`.")
 })

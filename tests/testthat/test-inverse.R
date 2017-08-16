@@ -2,7 +2,7 @@ context("inverse")
 
 suppressMessages(library(dplyr))
 set.seed(1)
-x <- data.table(
+x <- data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),

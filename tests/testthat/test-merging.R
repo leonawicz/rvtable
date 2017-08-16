@@ -1,6 +1,6 @@
 context("merging")
 
-x <- data.table(
+x <- data.frame(
  id1=rep(LETTERS[1:5], each=4),
  id2=factor(c("low", "high")),
  id3=rep(1:2, each=2),
@@ -79,12 +79,9 @@ test_that("marginalize throws correct errors", {
   expect_error(marginalize(x_d, "id1", weights=c(1, 1.5, 2, 4, 1, 5)), e[5])
 })
 
-suppressMessages({
-  library(data.table)
-  library(dplyr)
-})
+suppressMessages(library(dplyr))
 cl <- "rvtable"
-x <- data.table(
+x <- data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
