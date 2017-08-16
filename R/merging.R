@@ -24,9 +24,13 @@
 get_levels <- function(x, variable=NULL){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  if(is.null(variable)) variable <- names(x) else if(!(variable %in% names(x))) stop("`variable` not found.")
+  novar <- is.null(variable)
+  if(novar) variable <- names(x) else if(!(variable %in% names(x))) stop("`variable` not found.")
   variable <- dplyr::setdiff(variable, c("Val", "Prob"))
-  if(!length(variable)) stop("invalid variable")
+  if(!length(variable)){
+    if(novar) return(NULL)
+    stop("invalid variable")
+  }
   lev <- lapply(variable, function(id, d) if(is.factor(d[[id]])) levels(d[[id]]) else unique(d[[id]]), d=x)
   names(lev) <- variable
   lev
