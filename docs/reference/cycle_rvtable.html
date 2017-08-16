@@ -93,8 +93,7 @@
     <p>Repeat cycles of bootstrap resampling followed by density re-estimation for testing purposes.</p>
     
 
-    <pre class="usage"><span class='fu'>cycle_rvtable</span>(<span class='no'>x</span>, <span class='no'>n</span>, <span class='kw'>start</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(),
-  <span class='kw'>sample.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>keep</span> <span class='kw'>=</span> <span class='st'>"all"</span>)</pre>
+    <pre class="usage"><span class='fu'>cycle_rvtable</span>(<span class='no'>x</span>, <span class='no'>n</span>, <span class='kw'>start</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>density.args</span>, <span class='no'>sample.args</span>, <span class='kw'>keep</span> <span class='kw'>=</span> <span class='st'>"all"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -113,11 +112,11 @@
     </tr>
     <tr>
       <th>density.args</th>
-      <td><p>optional arguments passed to <code>density</code>.</p></td>
+      <td><p>optional arguments passed to <code>density</code>. If supplied, overrides the <code>density.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     <tr>
       <th>sample.args</th>
-      <td><p>optional arguments used when sampling.</p></td>
+      <td><p>optional arguments used when sampling. If supplied, overrides the <code>sample.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     <tr>
       <th>keep</th>

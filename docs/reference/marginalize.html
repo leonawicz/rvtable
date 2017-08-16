@@ -93,8 +93,7 @@
     <p>Obtain a marginal distribution of a random variable in an rvtable.</p>
     
 
-    <pre class="usage"><span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='no'>margin</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(),
-  <span class='kw'>sample.args</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='no'>margin</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>density.args</span>, <span class='no'>sample.args</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -113,11 +112,11 @@
     </tr>
     <tr>
       <th>density.args</th>
-      <td><p>optional arguments passed to <code>density</code>.</p></td>
+      <td><p>optional arguments passed to <code>density</code>. If supplied, overrides the <code>density.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     <tr>
       <th>sample.args</th>
-      <td><p>optional arguments used when sampling.</p></td>
+      <td><p>optional arguments used when sampling. If supplied, overrides the <code>sample.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     </table>
     
@@ -127,9 +126,11 @@
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables. <code>margin</code> must be explicit.
+    <p>Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables.
+<code>margin</code> must be explicit.
 <code>weights</code> only applies in the clear case of marginalizing over a single categorical variable.
-Marginalizing over multiple variables in a single call to <code>marginalize</code> is only available assuming equal weights for all values of those variables.
+Marginalizing over multiple variables in a single call to <code>marginalize</code>
+is only available assuming equal weights for all values of those variables.
 When using weights, <code>marginalize</code> must be called on one variable at a time.
 Call <code>get_levels</code> on an rvtable first to ensure weights are passed in the correct order.</p>
     

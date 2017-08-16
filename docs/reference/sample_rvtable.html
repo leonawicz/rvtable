@@ -94,7 +94,7 @@
     
 
     <pre class="usage"><span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>resample</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>interp</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>n.interp</span> <span class='kw'>=</span> <span class='fl'>1e+05</span>, <span class='kw'>decimals</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+  <span class='kw'>n.interp</span> <span class='kw'>=</span> <span class='fl'>1e+05</span>, <span class='kw'>decimals</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>density.args</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -125,7 +125,7 @@
     </tr>
     <tr>
       <th>density.args</th>
-      <td><p>optional arguments passed to <code>density</code>.</p></td>
+      <td><p>optional arguments passed to <code>density</code>. If supplied, overrides the <code>density.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     </table>
     
@@ -146,7 +146,7 @@ All rvtable objects are either distribution-based or sample-based.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rvtable.html'>rvtable</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>1000</span>))
 <span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>10</span>)</div><div class='output co'>#&gt; # A tibble: 10 x 1
-#&gt;            Val
+#&gt;              x
 #&gt;          &lt;dbl&gt;
 #&gt;  1  0.06765750
 #&gt;  2  0.88746804
@@ -160,7 +160,7 @@ All rvtable objects are either distribution-based or sample-based.</p>
 #&gt; 10 -1.26295332</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rvtable.html'>rvtable</a></span>(<span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>100</span>, <span class='fl'>50</span>), <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
 <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>10</span>)
 <span class='fu'>sample_rvtable</span>(<span class='no'>y</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>8</span>, <span class='kw'>resample</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; # A tibble: 8 x 1
-#&gt;     Val
+#&gt;       x
 #&gt;   &lt;dbl&gt;
 #&gt; 1    70
 #&gt; 2     6

@@ -93,8 +93,8 @@
     <p>Class constructor for <code>rvtable</code> objects.</p>
     
 
-    <pre class="usage"><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>Val</span> <span class='kw'>=</span> <span class='st'>"Val"</span>, <span class='kw'>Prob</span> <span class='kw'>=</span> <span class='st'>"Prob"</span>, <span class='kw'>discrete</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>Val</span>, <span class='no'>Prob</span>, <span class='kw'>discrete</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(),
+  <span class='kw'>force.dist</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -123,11 +123,16 @@
       <th>density.args</th>
       <td><p>optional arguments passed to <code>density</code>.</p></td>
     </tr>
+    <tr>
+      <th>force.dist</th>
+      <td><p>logical, force distribution-type rvtable output if <code>Prob</code> is missing, i.e., <code>Val</code> is assumed to be a sample.
+Defaults to <code>TRUE</code>.</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>an S3 object of class <code>rvtable</code></p>
+    <p>an object of class <code>rvtable</code>.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -136,238 +141,141 @@ Any other columns are ID columns and should be categorical variables. The random
 When discrete, probabilities are true probabilities.
 When continuous, Val and Prob are based on <code>x</code> and <code>y</code> output from <code>density</code> and describe a distribution curve,
 and therefore values in Prob may be greater than one and may not sum to one.
-Val is typically numeric but may be character when discrete such as when an rvtable object is returned from <code>inverse_pmf</code>.
-All rvtable objects are either distribution-based or sample-based.
-This primary constructor only constructs distribution- or sample-based rvtable objects, with the attribute <code>tabletype="distribution"</code> or <code>tabletype="sample"</code>.
-Sampling on an rvtable can generate a sample-based rvtable, with the attribute <code>tabletype="sample"</code>.
-Every rvtable object also has a variable type attribute, <code>rvtype</code>, which is either "discrete" or "continuous".</p>
+Val is typically numeric but may be character when discrete such as when an rvtable object is returned from <code>inverse_pmf</code>.</p>
+<p>For data frame inputs, Val and Prob here refer generally to whatever columns in an rvtable are specified by <code>Val</code> and <code>Prob</code>.
+In <code>rvtable</code>, if the <code>Val</code> argument is not supplied, Val is assumed to be <code>Val="Val"</code> and <code>rvtable</code>
+will search the names of a data frame for this column, throwing an error if it is not found, like with any other value of <code>Val</code>.
+When <code>Prob</code> is missing, however, this is analogous to when <code>x</code> is numeric and
+<code>y</code> and <code>x</code> probability attributes are both NULL: the data in the <code>Val</code> column are assumed to be a direct sample
+from a distribution rather than a vector of values that describes a distribution in conjunction with a <code>Prob</code> column.
+When <code>x</code> is numeric, a supplied <code>Val</code> will substitute for rvtable names <code>x</code> and <code>y</code> in the output, respectively.</p>
+<p>All rvtable objects are in one of two forms: distribution-type or sample-type.
+This primary constructor constructs distribution- or sample-type rvtable objects,
+with the corresponding attribute <code>tabletype="distribution"</code> or <code>tabletype="sample"</code>.
+Sampling on an rvtable can generate a sample-type rvtable, with the attribute <code>tabletype="sample"</code>.
+Other operations like merging or marginalizing distributions typically yield rvtables in distribution form.
+This is the common form and rvtables are usually kept in this form until a final step in a processing chain
+where samples are needed.</p>
+<p>Every rvtable object also has a variable type attribute, <code>rvtype</code>, which is either "discrete" or "continuous".
+Other attributes assigned during rvtable construction include <code>valcol</code> and <code>probcol</code>, the names of the Val and Prob columns,
+and a <code>density.args</code> attribute that lists any most recent arguments passed to <code>density</code> in the process
+of making the rvtable.</p>
+<p>If an rvtable is already of class <code>rvtable</code>, the <code>rvtable</code> function simply returns
+the rvtable as is; any other arguments passed to <code>rvtable</code> are ignored and
+neither the table nor its attributes are updated or altered in any way.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># basic samples from continuous and discrete RVs</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>rnorm</span>(<span class='fl'>100</span>)
-<span class='fu'>rvtable</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt;            Val         Prob
-#&gt;   1: -3.454880 0.0002131446
-#&gt;   2: -3.438980 0.0002396017
-#&gt;   3: -3.423080 0.0002688230
-#&gt;   4: -3.407179 0.0003023149
-#&gt;   5: -3.391279 0.0003388508
-#&gt;  ---                       
-#&gt; 508:  4.606558 0.0001635291
-#&gt; 509:  4.622458 0.0001469351
-#&gt; 510:  4.638358 0.0001316073
-#&gt; 511:  4.654258 0.0001180818
-#&gt; 512:  4.670159 0.0001057418</div><div class='input'><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>density.args</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>n</span><span class='kw'>=</span><span class='fl'>50</span>, <span class='kw'>adjust</span><span class='kw'>=</span><span class='fl'>2</span>))</div><div class='output co'>#&gt;             Val         Prob
-#&gt;  1: -4.73353012 1.913517e-04
-#&gt;  2: -4.51552321 4.282042e-04
-#&gt;  3: -4.29751629 9.063360e-04
-#&gt;  4: -4.07950938 1.811232e-03
-#&gt;  5: -3.86150247 3.421668e-03
-#&gt;  6: -3.64349556 6.136505e-03
-#&gt;  7: -3.42548865 1.043900e-02
-#&gt;  8: -3.20748174 1.689552e-02
-#&gt;  9: -2.98947483 2.608865e-02
-#&gt; 10: -2.77146792 3.849002e-02
-#&gt; 11: -2.55346101 5.442074e-02
-#&gt; 12: -2.33545410 7.389227e-02
-#&gt; 13: -2.11744719 9.653380e-02
-#&gt; 14: -1.89944028 1.215849e-01
-#&gt; 15: -1.68143337 1.478483e-01
-#&gt; 16: -1.46342646 1.738532e-01
-#&gt; 17: -1.24541955 1.980107e-01
-#&gt; 18: -1.02741264 2.189284e-01
-#&gt; 19: -0.80940573 2.356044e-01
-#&gt; 20: -0.59139882 2.475857e-01
-#&gt; 21: -0.37339191 2.549854e-01
-#&gt; 22: -0.15538500 2.581914e-01
-#&gt; 23:  0.06262191 2.576780e-01
-#&gt; 24:  0.28062882 2.537518e-01
-#&gt; 25:  0.49863573 2.464408e-01
-#&gt; 26:  0.71664264 2.356778e-01
-#&gt; 27:  0.93464955 2.214267e-01
-#&gt; 28:  1.15265646 2.038732e-01
-#&gt; 29:  1.37066337 1.835915e-01
-#&gt; 30:  1.58867028 1.614397e-01
-#&gt; 31:  1.80667719 1.384907e-01
-#&gt; 32:  2.02468410 1.158589e-01
-#&gt; 33:  2.24269101 9.455010e-02
-#&gt; 34:  2.46069792 7.533454e-02
-#&gt; 35:  2.67870483 5.868086e-02
-#&gt; 36:  2.89671174 4.478701e-02
-#&gt; 37:  3.11471865 3.354767e-02
-#&gt; 38:  3.33272556 2.469774e-02
-#&gt; 39:  3.55073247 1.788525e-02
-#&gt; 40:  3.76873938 1.271563e-02
-#&gt; 41:  3.98674629 8.851253e-03
-#&gt; 42:  4.20475320 6.006452e-03
-#&gt; 43:  4.42276011 3.949674e-03
-#&gt; 44:  4.64076702 2.505003e-03
-#&gt; 45:  4.85877393 1.523635e-03
-#&gt; 46:  5.07678084 8.839484e-04
-#&gt; 47:  5.29478775 4.883929e-04
-#&gt; 48:  5.51279467 2.555986e-04
-#&gt; 49:  5.73080158 1.264016e-04
-#&gt; 50:  5.94880849 5.910205e-05
-#&gt;             Val         Prob</div><div class='input'><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>) <span class='co'># incorrect: x is a continuous RV</span></div><div class='output co'>#&gt;              Val Prob
-#&gt;   1: -2.17623045 0.01
-#&gt;   2: -2.11969978 0.01
-#&gt;   3: -1.86738529 0.01
-#&gt;   4: -1.86592370 0.01
-#&gt;   5: -1.85088977 0.01
-#&gt;   6: -1.80025993 0.01
-#&gt;   7: -1.78106193 0.01
-#&gt;   8: -1.64290624 0.01
-#&gt;   9: -1.46864337 0.01
-#&gt;  10: -1.42565951 0.01
-#&gt;  11: -1.37076122 0.01
-#&gt;  12: -1.31633764 0.01
-#&gt;  13: -1.27781992 0.01
-#&gt;  14: -1.24619198 0.01
-#&gt;  15: -1.14312848 0.01
-#&gt;  16: -1.08900955 0.01
-#&gt;  17: -0.97967535 0.01
-#&gt;  18: -0.96767371 0.01
-#&gt;  19: -0.95260348 0.01
-#&gt;  20: -0.94410166 0.01
-#&gt;  21: -0.92066340 0.01
-#&gt;  22: -0.86072428 0.01
-#&gt;  23: -0.82776894 0.01
-#&gt;  24: -0.80534353 0.01
-#&gt;  25: -0.78938814 0.01
-#&gt;  26: -0.78447669 0.01
-#&gt;  27: -0.78207767 0.01
-#&gt;  28: -0.77928540 0.01
-#&gt;  29: -0.77705556 0.01
-#&gt;  30: -0.77219209 0.01
-#&gt;  31: -0.71605867 0.01
-#&gt;  32: -0.71128732 0.01
-#&gt;  33: -0.70859443 0.01
-#&gt;  34: -0.69120544 0.01
-#&gt;  35: -0.68326687 0.01
-#&gt;  36: -0.67909543 0.01
-#&gt;  37: -0.66756477 0.01
-#&gt;  38: -0.63969296 0.01
-#&gt;  39: -0.46251911 0.01
-#&gt;  40: -0.43219524 0.01
-#&gt;  41: -0.32849189 0.01
-#&gt;  42: -0.28362275 0.01
-#&gt;  43: -0.28045548 0.01
-#&gt;  44: -0.23854626 0.01
-#&gt;  45: -0.23564615 0.01
-#&gt;  46: -0.23276176 0.01
-#&gt;  47: -0.21714460 0.01
-#&gt;  48: -0.20889688 0.01
-#&gt;  49:  0.04433469 0.01
-#&gt;  50:  0.11759261 0.01
-#&gt;  51:  0.13191018 0.01
-#&gt;  52:  0.19439244 0.01
-#&gt;  53:  0.20538939 0.01
-#&gt;  54:  0.26726762 0.01
-#&gt;  55:  0.29738725 0.01
-#&gt;  56:  0.35227917 0.01
-#&gt;  57:  0.38624909 0.01
-#&gt;  58:  0.40152349 0.01
-#&gt;  59:  0.40427794 0.01
-#&gt;  60:  0.42123042 0.01
-#&gt;  61:  0.46205231 0.01
-#&gt;  62:  0.49790884 0.01
-#&gt;  63:  0.57991478 0.01
-#&gt;  64:  0.58807712 0.01
-#&gt;  65:  0.63747287 0.01
-#&gt;  66:  0.67638957 0.01
-#&gt;  67:  0.69362435 0.01
-#&gt;  68:  0.70005531 0.01
-#&gt;  69:  0.70359786 0.01
-#&gt;  70:  0.71540139 0.01
-#&gt;  71:  0.71752478 0.01
-#&gt;  72:  0.73762945 0.01
-#&gt;  73:  0.74786883 0.01
-#&gt;  74:  0.77599004 0.01
-#&gt;  75:  0.79245114 0.01
-#&gt;  76:  0.91107847 0.01
-#&gt;  77:  0.91187392 0.01
-#&gt;  78:  0.94433756 0.01
-#&gt;  79:  1.05542231 0.01
-#&gt;  80:  1.13891313 0.01
-#&gt;  81:  1.15208976 0.01
-#&gt;  82:  1.20402895 0.01
-#&gt;  83:  1.21450968 0.01
-#&gt;  84:  1.33985992 0.01
-#&gt;  85:  1.38950587 0.01
-#&gt;  86:  1.45054321 0.01
-#&gt;  87:  1.53944942 0.01
-#&gt;  88:  1.58499677 0.01
-#&gt;  89:  1.59617200 0.01
-#&gt;  90:  1.60994296 0.01
-#&gt;  91:  1.61938957 0.01
-#&gt;  92:  1.74471328 0.01
-#&gt;  93:  1.81503083 0.01
-#&gt;  94:  1.86113580 0.01
-#&gt;  95:  1.95716996 0.01
-#&gt;  96:  2.04300891 0.01
-#&gt;  97:  2.13270193 0.01
-#&gt;  98:  2.58443224 0.01
-#&gt;  99:  2.73610845 0.01
-#&gt; 100:  3.39150882 0.01
-#&gt;              Val Prob</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>size</span><span class='kw'>=</span><span class='fl'>30</span>, <span class='kw'>replace</span><span class='kw'>=</span><span class='fl'>TRUE</span>, <span class='kw'>prob</span><span class='kw'>=</span><span class='fu'>sqrt</span>(<span class='fl'>10</span>:<span class='fl'>1</span>))
-<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>) <span class='co'># discrete=T only needed if ambiguous</span></div><div class='output co'>#&gt;    Val       Prob
-#&gt; 1:   1 0.16666667
-#&gt; 2:   2 0.10000000
-#&gt; 3:   3 0.13333333
-#&gt; 4:   4 0.03333333
-#&gt; 5:   5 0.16666667
-#&gt; 6:   6 0.13333333
-#&gt; 7:   7 0.13333333
-#&gt; 8:   8 0.06666667
-#&gt; 9:   9 0.06666667</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>5</span>
+<span class='fu'>rvtable</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; # A tibble: 512 x 2
+#&gt;            x            y
+#&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+#&gt;  1 -3.454880 0.0002131446
+#&gt;  2 -3.438980 0.0002396017
+#&gt;  3 -3.423080 0.0002688230
+#&gt;  4 -3.407179 0.0003023149
+#&gt;  5 -3.391279 0.0003388508
+#&gt;  6 -3.375379 0.0003785400
+#&gt;  7 -3.359479 0.0004238740
+#&gt;  8 -3.343578 0.0004736674
+#&gt;  9 -3.327678 0.0005276445
+#&gt; 10 -3.311778 0.0005875779
+#&gt; # ... with 502 more rows</div><div class='input'><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>density.args</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>n</span><span class='kw'>=</span><span class='fl'>50</span>, <span class='kw'>adjust</span><span class='kw'>=</span><span class='fl'>2</span>))</div><div class='output co'>#&gt; # A tibble: 50 x 2
+#&gt;            x            y
+#&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+#&gt;  1 -4.733530 0.0001913517
+#&gt;  2 -4.515523 0.0004282042
+#&gt;  3 -4.297516 0.0009063360
+#&gt;  4 -4.079509 0.0018112319
+#&gt;  5 -3.861502 0.0034216676
+#&gt;  6 -3.643496 0.0061365053
+#&gt;  7 -3.425489 0.0104390024
+#&gt;  8 -3.207482 0.0168955187
+#&gt;  9 -2.989475 0.0260886455
+#&gt; 10 -2.771468 0.0384900217
+#&gt; # ... with 40 more rows</div><div class='input'><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>) <span class='co'># incorrect: x is a continuous RV</span></div><div class='output co'>#&gt; # A tibble: 100 x 2
+#&gt;            x     y
+#&gt;        &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 -2.176230  0.01
+#&gt;  2 -2.119700  0.01
+#&gt;  3 -1.867385  0.01
+#&gt;  4 -1.865924  0.01
+#&gt;  5 -1.850890  0.01
+#&gt;  6 -1.800260  0.01
+#&gt;  7 -1.781062  0.01
+#&gt;  8 -1.642906  0.01
+#&gt;  9 -1.468643  0.01
+#&gt; 10 -1.425660  0.01
+#&gt; # ... with 90 more rows</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>size</span><span class='kw'>=</span><span class='fl'>30</span>, <span class='kw'>replace</span><span class='kw'>=</span><span class='fl'>TRUE</span>, <span class='kw'>prob</span><span class='kw'>=</span><span class='fu'>sqrt</span>(<span class='fl'>10</span>:<span class='fl'>1</span>))
+<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>) <span class='co'># discrete=T only needed if ambiguous</span></div><div class='output co'>#&gt; # A tibble: 9 x 2
+#&gt;       x          y
+#&gt;   &lt;dbl&gt;      &lt;dbl&gt;
+#&gt; 1     1 0.16666667
+#&gt; 2     2 0.10000000
+#&gt; 3     3 0.13333333
+#&gt; 4     4 0.03333333
+#&gt; 5     5 0.16666667
+#&gt; 6     6 0.13333333
+#&gt; 7     7 0.13333333
+#&gt; 8     8 0.06666667
+#&gt; 9     9 0.06666667</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>5</span>
 <span class='no'>probs</span> <span class='kw'>&lt;-</span> <span class='fu'>c</span>(<span class='fl'>0.1</span>, <span class='fl'>0.2</span>, <span class='fl'>0.3</span>, <span class='fl'>0.15</span>, <span class='fl'>0.25</span>)
-<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>y</span><span class='kw'>=</span><span class='no'>probs</span>) <span class='co'># discrete inferred from y</span></div><div class='output co'>#&gt;    Val Prob
-#&gt; 1:   1 0.10
-#&gt; 2:   2 0.20
-#&gt; 3:   3 0.30
-#&gt; 4:   4 0.15
-#&gt; 5:   5 0.25</div><div class='input'><span class='fu'>attr</span>(<span class='no'>x</span>, <span class='st'>"probabilities"</span>) <span class='kw'>&lt;-</span> <span class='no'>probs</span>
-<span class='fu'>rvtable</span>(<span class='no'>x</span>) <span class='co'># discrete inferred from attributes</span></div><div class='output co'>#&gt;    Val Prob
-#&gt; 1:   1 0.10
-#&gt; 2:   2 0.20
-#&gt; 3:   3 0.30
-#&gt; 4:   4 0.15
-#&gt; 5:   5 0.25</div><div class='input'>
+<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>y</span><span class='kw'>=</span><span class='no'>probs</span>) <span class='co'># discrete inferred from y</span></div><div class='output co'>#&gt; # A tibble: 5 x 2
+#&gt;       x     y
+#&gt;   &lt;int&gt; &lt;dbl&gt;
+#&gt; 1     1  0.10
+#&gt; 2     2  0.20
+#&gt; 3     3  0.30
+#&gt; 4     4  0.15
+#&gt; 5     5  0.25</div><div class='input'><span class='fu'>attr</span>(<span class='no'>x</span>, <span class='st'>"probabilities"</span>) <span class='kw'>&lt;-</span> <span class='no'>probs</span>
+<span class='fu'>rvtable</span>(<span class='no'>x</span>) <span class='co'># discrete inferred from attributes</span></div><div class='output co'>#&gt; # A tibble: 5 x 2
+#&gt;       x     y
+#&gt;   &lt;int&gt; &lt;dbl&gt;
+#&gt; 1     1  0.10
+#&gt; 2     2  0.20
+#&gt; 3     3  0.30
+#&gt; 4     4  0.15
+#&gt; 5     5  0.25</div><div class='input'>
 <span class='co'># an existing data frame or data table</span>
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>data.frame</span>(<span class='kw'>Val</span><span class='kw'>=</span><span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>Prob</span><span class='kw'>=</span><span class='fl'>0.1</span>)
-<span class='fu'>rvtable</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt;     Val Prob
-#&gt;  1:   1  0.1
-#&gt;  2:   2  0.1
-#&gt;  3:   3  0.1
-#&gt;  4:   4  0.1
-#&gt;  5:   5  0.1
-#&gt;  6:   6  0.1
-#&gt;  7:   7  0.1
-#&gt;  8:   8  0.1
-#&gt;  9:   9  0.1
-#&gt; 10:  10  0.1</div><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)
+<span class='fu'>rvtable</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; # A tibble: 10 x 2
+#&gt;      Val  Prob
+#&gt;    &lt;int&gt; &lt;dbl&gt;
+#&gt;  1     1   0.1
+#&gt;  2     2   0.1
+#&gt;  3     3   0.1
+#&gt;  4     4   0.1
+#&gt;  5     5   0.1
+#&gt;  6     6   0.1
+#&gt;  7     7   0.1
+#&gt;  8     8   0.1
+#&gt;  9     9   0.1
+#&gt; 10    10   0.1</div><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(<span class='kw'>id</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>2</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>10</span>), <span class='kw'>v1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='fl'>2</span>), <span class='kw'>p1</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fu'>rep</span>(<span class='fl'>0.1</span>, <span class='fl'>10</span>), <span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>)))
-<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>Val</span><span class='kw'>=</span><span class='st'>"v1"</span>, <span class='kw'>Prob</span><span class='kw'>=</span><span class='st'>"p1"</span>)</div><div class='output co'>#&gt;     id Val     Prob
-#&gt;  1:  A   1 0.100000
-#&gt;  2:  A   2 0.100000
-#&gt;  3:  A   3 0.100000
-#&gt;  4:  A   4 0.100000
-#&gt;  5:  A   5 0.100000
-#&gt;  6:  A   6 0.100000
-#&gt;  7:  A   7 0.100000
-#&gt;  8:  A   8 0.100000
-#&gt;  9:  A   9 0.100000
-#&gt; 10:  A  10 0.100000
-#&gt; 11:  B   1 1.000000
-#&gt; 12:  B   2 1.414214
-#&gt; 13:  B   3 1.732051
-#&gt; 14:  B   4 2.000000
-#&gt; 15:  B   5 2.236068
-#&gt; 16:  B   6 2.449490
-#&gt; 17:  B   7 2.645751
-#&gt; 18:  B   8 2.828427
-#&gt; 19:  B   9 3.000000
-#&gt; 20:  B  10 3.162278</div></pre>
+<span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>Val</span><span class='kw'>=</span><span class='st'>"v1"</span>, <span class='kw'>Prob</span><span class='kw'>=</span><span class='st'>"p1"</span>)</div><div class='output co'>#&gt; # A tibble: 20 x 3
+#&gt;       id    v1       p1
+#&gt;    &lt;chr&gt; &lt;int&gt;    &lt;dbl&gt;
+#&gt;  1     A     1 0.100000
+#&gt;  2     A     2 0.100000
+#&gt;  3     A     3 0.100000
+#&gt;  4     A     4 0.100000
+#&gt;  5     A     5 0.100000
+#&gt;  6     A     6 0.100000
+#&gt;  7     A     7 0.100000
+#&gt;  8     A     8 0.100000
+#&gt;  9     A     9 0.100000
+#&gt; 10     A    10 0.100000
+#&gt; 11     B     1 1.000000
+#&gt; 12     B     2 1.414214
+#&gt; 13     B     3 1.732051
+#&gt; 14     B     4 2.000000
+#&gt; 15     B     5 2.236068
+#&gt; 16     B     6 2.449490
+#&gt; 17     B     7 2.645751
+#&gt; 18     B     8 2.828427
+#&gt; 19     B     9 3.000000
+#&gt; 20     B    10 3.162278</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

@@ -93,7 +93,7 @@
     <p>Merge conditional distributions of a random variable in an rvtable over levels of ungrouped categorical variables.</p>
     
 
-    <pre class="usage"><span class='fu'>merge_rvtable</span>(<span class='no'>x</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>sample.args</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>merge_rvtable</span>(<span class='no'>x</span>, <span class='no'>density.args</span>, <span class='no'>sample.args</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -104,11 +104,11 @@
     </tr>
     <tr>
       <th>density.args</th>
-      <td><p>optional arguments passed to <code>density</code>.</p></td>
+      <td><p>optional arguments passed to <code>density</code>. If supplied, overrides the <code>density.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     <tr>
       <th>sample.args</th>
-      <td><p>optional arguments used when sampling.</p></td>
+      <td><p>optional arguments used when sampling. If supplied, overrides the <code>sample.args</code> attribute of <code>x</code>.</p></td>
     </tr>
     </table>
     
