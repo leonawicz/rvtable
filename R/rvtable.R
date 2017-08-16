@@ -98,10 +98,10 @@ is.rvtable <- function(x){
 #' the rvtable as is; any other arguments passed to \code{rvtable} are ignored and
 #' neither the table nor its attributes are updated or altered in any way.
 #'
-#' @param x a numeric vector, data frame, or data table.
+#' @param x a numeric vector or data frame.
 #' @param y an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.
-#' @param Val the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.
-#' @param Prob the column name of \code{x} referring to random variable values when \code{x} is a data frame or data table.
+#' @param Val the column name of \code{x} referring to random variable values when \code{x} is a data frame.
+#' @param Prob the column name of \code{x} referring to random variable values when \code{x} is a data frame.
 #' @param discrete whether the random variable is discrete.
 #' @param density.args optional arguments passed to \code{density}.
 #' @param force.dist logical, force distribution-type rvtable output if \code{Prob} is missing, i.e., \code{Val} is assumed to be a sample.
@@ -127,8 +127,7 @@ is.rvtable <- function(x){
 #' # an existing data frame or data table
 #' x <- data.frame(Val=1:10, Prob=0.1)
 #' rvtable(x)
-#' library(data.table)
-#' x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
+#' x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
 rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
@@ -141,7 +140,6 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(!distr) Prob <- NULL
   if(is.numeric(x))
     return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
-  #if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
   if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
   .rvtable_df(x, Val, Prob, discrete, density.args, force.dist, vpmissing)
 }
@@ -150,7 +148,6 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   distr <- !vpmissing[2] | force.dist
   forced <- vpmissing[2] & force.dist
   grp <- dplyr::groups(x)
-  #if(length(class(x))==1 && class(x)!="data.table") x <- data.table::data.table(x)
   if("data.table" %in% class(x)) x <- data.frame(x)
   if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
   id <- names(x)
@@ -200,7 +197,6 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
 
   if(distr && length(x) != length(y))
     stop("Values and probabilities do not have equal length.")
-  #x <- if(distr) data.table(x=x, y=y) else data.table(x=x)
   x <- if(distr) data.frame(x=x, y=y) else data.frame(x=x)
   x <- dplyr::tbl_df(x)
   if(vpmissing[1]) Val <- "x"

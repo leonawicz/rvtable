@@ -15,13 +15,11 @@
 #' @export
 #'
 #' @examples
-#' library(data.table)
-#' library(dplyr)
-#' x <- data.table(
+#' x <- rvtable(data.frame(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
-#'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) %>% rvtable
+#'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)))
 #' get_levels(x)
 get_levels <- function(x, variable=NULL){
   x <- .lost_rv_class_check(x)
@@ -55,9 +53,8 @@ get_levels <- function(x, variable=NULL){
 #'
 #' @examples
 #' \dontrun{
-#' library(data.table)
 #' library(dplyr)
-#' x <- data.table(
+#' x <- data.frame(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
@@ -84,22 +81,6 @@ merge_rvtable <- function(x, density.args, sample.args){
   x <- .rvtable_makedist(x)
   x <- dplyr::group_by_(x, .dots=grp)
   x <- .add_rvtable_class(x, Val, Prob, discrete, TRUE, density.args, sample.args)
-  .lost_rv_class_check(x)
-}
-
-.rvtable_rename <- function(x, vp){
-  x <- .lost_rv_class_check(x)
-  .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  distr <- attr(x, "tabletype") == "distribution"
-  if(vp=="to"){
-    if(Val != "Val") x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
-    if(distr && Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
-  } else if(vp=="from"){
-    if(Val != "Val") x <- dplyr::rename_(x, .dots=stats::setNames("Val", Val))
-    if(distr && Prob != "Prob") x <- dplyr::rename_(x, .dots=stats::setNames("Prob", Prob))
-  }
   .lost_rv_class_check(x)
 }
 
@@ -144,6 +125,22 @@ merge_rvtable <- function(x, density.args, sample.args){
   .rvtable_rename(x, "from")
 }
 
+.rvtable_rename <- function(x, vp){
+  x <- .lost_rv_class_check(x)
+  .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  distr <- attr(x, "tabletype") == "distribution"
+  if(vp=="to"){
+    if(Val != "Val") x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
+    if(distr && Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
+  } else if(vp=="from"){
+    if(Val != "Val") x <- dplyr::rename_(x, .dots=stats::setNames("Val", Val))
+    if(distr && Prob != "Prob") x <- dplyr::rename_(x, .dots=stats::setNames("Prob", Prob))
+  }
+  .lost_rv_class_check(x)
+}
+
 #' Marginal Distribution rvtable
 #'
 #' Obtain a marginal distribution of a random variable in an rvtable.
@@ -167,9 +164,8 @@ merge_rvtable <- function(x, density.args, sample.args){
 #'
 #' @examples
 #' \dontrun{
-#' library(data.table)
 #' library(dplyr)
-#' x <- data.table(
+#' x <- data.frame(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
@@ -207,9 +203,8 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
   }
   x <- .add_rvtable_class(x, Val, Prob, discrete, distr, density.args, sample.args) %>%
     .rvtable_rename("from")
-  x <- merge_rvtable(x) %>% dplyr::group_by_(.dots=grp2) %>%
-    .add_rvtable_class(Val, Prob, discrete, distr, density.args, sample.args) %>%
-    .lost_rv_class_check()
+  merge_rvtable(x) %>% dplyr::group_by_(.dots=grp2) %>%
+    .add_rvtable_class(Val, Prob, discrete, distr, density.args, sample.args)
 }
 
 #' Repeated Resampling Utility
@@ -231,9 +226,8 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
 #'
 #' @examples
 #' \dontrun{
-#' library(data.table)
 #' library(dplyr)
-#' x <- data.table(
+#' x <- data.frame(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
