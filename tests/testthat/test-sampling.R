@@ -33,10 +33,13 @@ test_that("has correct attributes", {
 })
 
 test_that("has correct RV columns", {
-  onyl_val <- function(x) "Val" %in% names(x) & !("Prob" %in% names(x))
-  expect_true(onyl_val(y))
-  expect_true(onyl_val(z))
-  expect_true(onyl_val(d2))
+  only_val <- function(x, v, p) v %in% names(x) & !(p %in% names(x))
+  expect_true(only_val(y, "x", "y"))
+  expect_true(only_val(z, "x", "y"))
+  expect_true(only_val(d2, "x", "y"))
+
+  nam <- c("Val", "Prob")
+  expect_true(all(nam %in% names(d3) & nam[1]==attr(d3, "valcol") & nam[2]==attr(d3, "probcol")))
 })
 
 test_that("test error handling", {
