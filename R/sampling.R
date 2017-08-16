@@ -92,7 +92,6 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   }
   x <- dplyr::do(x, data.table::data.table(
     Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals))) %>%
-    dplyr::group_by_(.dots=grp)
-  x <- .rvtable_rename(x, "from")
-  .add_rvtable_class(x, Val, Prob, discrete, FALSE, density.args)
+    dplyr::group_by_(.dots=grp) %>% .add_rvtable_class(Val, NULL, discrete, FALSE, density.args)
+  .rvtable_rename(x, "from")
 }

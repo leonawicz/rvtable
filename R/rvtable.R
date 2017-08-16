@@ -4,7 +4,7 @@ globalVariables(c(".", "Val", "n", "numer", "denom"))
   !is.null(attr(x, "rvtype")) &
     !is.null(attr(x, "tabletype")) &
     !is.null(attr(x, "valcol")) &
-    !is.null(attr(x, "probcol")) &
+    #!is.null(attr(x, "probcol")) &
     !is.null(attr(x, "density.args")) &
     !is.null(attr(x, "sample.args"))
 }
@@ -14,12 +14,12 @@ globalVariables(c(".", "Val", "n", "numer", "denom"))
   x
 }
 
-.add_rvtable_class <- function(x, Val, Prob, discrete, dist, density.args=list(), sample.args=list()){
-  if(!dist & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
+.add_rvtable_class <- function(x, Val, Prob, discrete, distr, density.args=list(), sample.args=list()){
+  if(!distr & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
-  attr(x, "tabletype") <- ifelse(dist, "distribution", "sample")
-  attr(x, "valuecol") <- Val
+  attr(x, "tabletype") <- ifelse(distr, "distribution", "sample")
+  attr(x, "valcol") <- Val
   attr(x, "probcol") <- Prob
   attr(x, "density.args") <- density.args
   attr(x, "sample.args") <- sample.args
@@ -136,40 +136,45 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(vpmissing[1]) Val <- "Val"
   if(vpmissing[2]) Prob <- "Prob"
   if(Val==Prob) stop("`Val` and `Prob` cannot refer to the same column.")
-  dist <- !vpmissing[2] | force.dist
-  forced <- vpmissing[2] & force.dist
-  if(!dist) Prob <- NULL
+  distr <- !vpmissing[2] | force.dist
+  if(!distr) Prob <- NULL
   if(is.numeric(x))
     return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
-  if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
-  #if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
-  .rvtable_df(x, Val, Prob, discrete, density.args, dist, forced)
+  #if(!any(class(x) %in% c("data.table", "data.frame"))) stop("`x` is not a data frame or data table.")
+  if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
+  .rvtable_df(x, Val, Prob, discrete, density.args, force.dist, vpmissing)
 }
 
-.rvtable_df <- function(x, Val, Prob, discrete, density.args, dist, forced){
-  if(length(class(x))==1 && class(x)!="data.table") x <- data.table::data.table(x)
-  #if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
+.rvtable_df <- function(x, Val, Prob, discrete, density.args, force.dist, vpmissing){
+  distr <- !vpmissing[2] | force.dist
+  forced <- vpmissing[2] & force.dist
+  grp <- dplyr::groups(x)
+  #if(length(class(x))==1 && class(x)!="data.table") x <- data.table::data.table(x)
+  if("data.table" %in% class(x)) x <- data.frame(x)
+  if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
   id <- names(x)
   if(!(Val %in% id)) stop(paste("No column called", Val))
-  if(dist && !(Prob %in% id)) stop(paste("No column called", Prob))
+  if(distr && !(Prob %in% id)) stop(paste("No column called", Prob))
   stopifnot((is.numeric(x[[Val]]) || discrete) && !any(is.na(x[[Val]])))
-  if(dist){
+  if(distr){
     stopifnot(is.numeric(x[[Prob]]) && !any(is.na(x[[Prob]])))
     stopifnot(min(x[[Prob]]) >= 0)
   }
   dots <- lapply(id[!(id %in% c(Val, Prob))], as.symbol)
-  if(dist){
-    if(forced){
-      x <- .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list()) %>%
-        .rvtable_makedist(x)
+  if(distr){
+    if(forced && !Prob %in% id){
+      x <- dplyr::group_by_(x, .dots=dots) %>%
+        .add_rvtable_class(Val, Prob, discrete, distr, density.args, list()) %>%
+        .rvtable_makedist()
     }
     tmp <- (
       dplyr::group_by_(x, .dots=dots) %>%
         dplyr::summarise_(Duplicated=lazyeval::interp(~any(duplicated(var)), var=as.name(Val)))
-    )$Duplicated
-    if(any(tmp)) stop(paste0("Duplicated values in ", Val, "."))
+      )$Duplicated
+    if(any(tmp)) stop(paste0("Duplicated values in `", Val, "`."))
   }
-  .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list())
+  dplyr::group_by_(x, .dots=grp) %>%
+    .add_rvtable_class(Val, Prob, discrete, distr, density.args, list())
 }
 
 .rvtable_numeric <- function(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing){
@@ -177,7 +182,7 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(length(x)==1 && !discrete)
     stop("A single value for `x` with probability=1 is only allowed when discrete=TRUE")
   if(is.null(y)) y <- attr(x, "prob")
-  dist <- TRUE
+  distr <- TRUE
   if(force.dist & is.null(y)){
     if(discrete){
       x <- table(x)
@@ -189,20 +194,21 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
       x <- x$x
     }
   } else if(is.null(y)){
-    dist <- FALSE
+    distr <- FALSE
   }
 
-  if(dist && length(x) != length(y))
+  if(distr && length(x) != length(y))
     stop("Values and probabilities do not have equal length.")
-  x <- if(dist) data.table(x=x, y=y) else data.table(x=x)
-  #x <- if(dist) data.frame(x=x, y=y) else data.frame(x=x)
-  #x <- dplyr::table_df(x)
+  #x <- if(distr) data.table(x=x, y=y) else data.table(x=x)
+  x <- if(distr) data.frame(x=x, y=y) else data.frame(x=x)
+  x <- dplyr::tbl_df(x)
   if(vpmissing[1]) Val <- "x"
-  if(dist){
+  if(distr){
     if(vpmissing[2]) Prob <- "y"
     if(any(!vpmissing)) names(x) <- c(Val, Prob)
   } else {
     if(!vpmissing[1]) names(x) <- Val
   }
-  .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, list())
+  dplyr::ungroup(x) %>%
+    .add_rvtable_class(Val, Prob, discrete, distr, density.args, list())
 }

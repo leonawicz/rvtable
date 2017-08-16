@@ -28,14 +28,17 @@
 #' y2
 inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
   .rv_class_check(x)
-  stopifnot(length(val.range)==2 && val.range[1] < val.range[2])
+  if(is.null(attr(x, "probcol"))) stop("`x` must be a distribution-type rvtable.")
+  if(length(val.range) != 2 || val.range[1] >= val.range[2])
+    stop("`val.range` must be a length-2 vector giving a valid range.")
+  if(missing(var.new)) stop("`var.new` missing.")
+  if(!var.new %in% names(x)) stop(paste(var.new, "not found."))
   discrete <- attr(x, "rvtype")=="discrete"
   if(discrete) stop("inverse pmf not currently implemented for discrete rvtables.")
   if(attr(x, "tabletype")=="distribution"){
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
   }
   id <- names(x)
-  stopifnot(var.new %in% id)
   dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
   if(length(dots)==1){
     x <- dplyr::mutate_(x, .dots=list("dummy"=1))

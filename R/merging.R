@@ -69,6 +69,9 @@ get_levels <- function(x, variable=NULL){
 merge_rvtable <- function(x, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  discrete <- attr(x, "rvtype")=="discrete"
   grp <- dplyr::groups(x)
   if(missing(density.args)) density.args <- attr(x, "density.args")
   if(missing(sample.args)) sample.args <- attr(x, "sample.args")
@@ -80,6 +83,7 @@ merge_rvtable <- function(x, density.args, sample.args){
   }
   x <- .rvtable_makedist(x)
   x <- dplyr::group_by_(x, .dots=grp)
+  x <- .add_rvtable_class(x, Val, Prob, discrete, TRUE, density.args, sample.args)
   .lost_rv_class_check(x)
 }
 
@@ -88,12 +92,13 @@ merge_rvtable <- function(x, density.args, sample.args){
   .rv_class_check(x)
   Val <- attr(x, "valcol")
   Prob <- attr(x, "probcol")
+  distr <- attr(x, "tabletype") == "distribution"
   if(vp=="to"){
     if(Val != "Val") x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
-    if(Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
+    if(distr && Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
   } else if(vp=="from"){
     if(Val != "Val") x <- dplyr::rename_(x, .dots=stats::setNames("Val", Val))
-    if(Prob != "Prob") x <- dplyr::rename_(x, .dots=stats::setNames("Prob", Prob))
+    if(distr && Prob != "Prob") x <- dplyr::rename_(x, .dots=stats::setNames("Prob", Prob))
   }
   .lost_rv_class_check(x)
 }
@@ -102,10 +107,14 @@ merge_rvtable <- function(x, density.args, sample.args){
   .rv_class_check(x)
   Val <- attr(x, "valcol")
   Prob <- attr(x, "probcol")
+  if(is.null(Prob)) Prob <- "Prob"
   discrete <- attr(x, "rvtype")=="discrete"
   has.weights <- "weights" %in% names(x)
   density.args <- attr(x, "density.args")
   sample.args <- attr(x, "sample.args")
+  n <- sample.args$n
+  if(is.null(n)) n <- 10000
+  grp <- dplyr::groups(x)
   x <- .rvtable_rename(x, "to")
   if(discrete){
     if(has.weights){
@@ -131,7 +140,7 @@ merge_rvtable <- function(x, density.args, sample.args){
         Prob=do.call(density, c(list(x=.$Val), density.args))$y))
     }
   }
-  x <- .add_rvtable_class(x, Val, Prob, discrete, dist, density.args, sample.args)
+  x <- .add_rvtable_class(x, Val, Prob, discrete, TRUE, density.args, sample.args)
   .rvtable_rename(x, "from")
 }
 
@@ -174,8 +183,8 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
   .rv_class_check(x)
   Val <- attr(x, "valcol")
   Prob <- attr(x, "probcol")
-  discrete <- attr(x, "rvtype")=="discrete"
-  tbl <- attr(x, "tabletype")
+  discrete <- attr(x, "rvtype") == "discrete"
+  distr <- attr(x, "tabletype") == "distribution"
   if(missing(density.args)) density.args <- attr(x, "density.args")
   if(missing(sample.args)) sample.args <- attr(x, "sample.args")
   x <- .rvtable_rename(x, "to")
@@ -188,6 +197,7 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
   grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob", margin)), as.symbol)
   if(!length(grp2)) grp2 <- NULL
   x <- dplyr::group_by_(x, .dots=grp2)
+  if(!distr) Prob <- NULL
   if(!is.null(weights)){
     lev <- get_levels(x, margin)
     if(length(weights) != length(lev[[margin]]))
@@ -195,9 +205,11 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
     x <- x %>% split(.[[margin]]) %>% purrr::map2(weights, ~dplyr::mutate(.x, weights=.y)) %>%
       data.table::rbindlist() %>% dplyr::group_by_(.dots=grp2)
   }
-  .rvtable_rename(x, "from")
-  x <- .add_rvtable_class(x, Val, Prob, discrete, tbl=="distribution", density.args, sample.args)
-  x <- merge_rvtable(x) %>% dplyr::group_by_(.dots=grp2) %>% .lost_rv_class_check()
+  x <- .add_rvtable_class(x, Val, Prob, discrete, distr, density.args, sample.args) %>%
+    .rvtable_rename("from")
+  x <- merge_rvtable(x) %>% dplyr::group_by_(.dots=grp2) %>%
+    .add_rvtable_class(Val, Prob, discrete, distr, density.args, sample.args) %>%
+    .lost_rv_class_check()
 }
 
 #' Repeated Resampling Utility
@@ -232,6 +244,8 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
 cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all"){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
   rv <- attr(x, "rvtype")
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
@@ -243,9 +257,10 @@ cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all
   if(!("Cycle" %in% names(x))) x$Cycle <- 1
   if(is.null(start)) start <- max(x$Cycle)
   if(n<=1){
-    cols <- c(as.character(grp), "Cycle", "Val", "Prob")
+    cols <- c(as.character(grp), "Cycle", Val, Prob)
     x <- dplyr::select_(x, .dots=lapply(cols, as.symbol)) %>%
-      dplyr::group_by_(.dots=grp) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol)) %>% rvtable()
+      dplyr::group_by_(.dots=grp) %>% dplyr::distinct_(.dots=lapply(cols, as.symbol)) %>%
+      .add_rvtable_class(Val, Prob, discrete, TRUE, density.args, sample.args)
     return(x)
   }
   if(keep=="all"){
