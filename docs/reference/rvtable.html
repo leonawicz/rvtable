@@ -101,7 +101,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>a numeric vector, data frame, or data table.</p></td>
+      <td><p>a numeric vector or data frame.</p></td>
     </tr>
     <tr>
       <th>y</th>
@@ -109,11 +109,11 @@
     </tr>
     <tr>
       <th>Val</th>
-      <td><p>the column name of <code>x</code> referring to random variable values when <code>x</code> is a data frame or data table.</p></td>
+      <td><p>the column name of <code>x</code> referring to random variable values when <code>x</code> is a data frame.</p></td>
     </tr>
     <tr>
       <th>Prob</th>
-      <td><p>the column name of <code>x</code> referring to random variable values when <code>x</code> is a data frame or data table.</p></td>
+      <td><p>the column name of <code>x</code> referring to random variable values when <code>x</code> is a data frame.</p></td>
     </tr>
     <tr>
       <th>discrete</th>
@@ -251,31 +251,30 @@ neither the table nor its attributes are updated or altered in any way.</p>
 #&gt;  7     7   0.1
 #&gt;  8     8   0.1
 #&gt;  9     9   0.1
-#&gt; 10    10   0.1</div><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(<span class='kw'>id</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>2</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>10</span>), <span class='kw'>v1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='fl'>2</span>), <span class='kw'>p1</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fu'>rep</span>(<span class='fl'>0.1</span>, <span class='fl'>10</span>), <span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>)))
+#&gt; 10    10   0.1</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>data.frame</span>(<span class='kw'>id</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>2</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>10</span>), <span class='kw'>v1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='fl'>2</span>), <span class='kw'>p1</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fu'>rep</span>(<span class='fl'>0.1</span>, <span class='fl'>10</span>), <span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>)))
 <span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>Val</span><span class='kw'>=</span><span class='st'>"v1"</span>, <span class='kw'>Prob</span><span class='kw'>=</span><span class='st'>"p1"</span>)</div><div class='output co'>#&gt; # A tibble: 20 x 3
-#&gt;       id    v1       p1
-#&gt;    &lt;chr&gt; &lt;int&gt;    &lt;dbl&gt;
-#&gt;  1     A     1 0.100000
-#&gt;  2     A     2 0.100000
-#&gt;  3     A     3 0.100000
-#&gt;  4     A     4 0.100000
-#&gt;  5     A     5 0.100000
-#&gt;  6     A     6 0.100000
-#&gt;  7     A     7 0.100000
-#&gt;  8     A     8 0.100000
-#&gt;  9     A     9 0.100000
-#&gt; 10     A    10 0.100000
-#&gt; 11     B     1 1.000000
-#&gt; 12     B     2 1.414214
-#&gt; 13     B     3 1.732051
-#&gt; 14     B     4 2.000000
-#&gt; 15     B     5 2.236068
-#&gt; 16     B     6 2.449490
-#&gt; 17     B     7 2.645751
-#&gt; 18     B     8 2.828427
-#&gt; 19     B     9 3.000000
-#&gt; 20     B    10 3.162278</div></pre>
+#&gt;        id    v1       p1
+#&gt;    &lt;fctr&gt; &lt;int&gt;    &lt;dbl&gt;
+#&gt;  1      A     1 0.100000
+#&gt;  2      A     2 0.100000
+#&gt;  3      A     3 0.100000
+#&gt;  4      A     4 0.100000
+#&gt;  5      A     5 0.100000
+#&gt;  6      A     6 0.100000
+#&gt;  7      A     7 0.100000
+#&gt;  8      A     8 0.100000
+#&gt;  9      A     9 0.100000
+#&gt; 10      A    10 0.100000
+#&gt; 11      B     1 1.000000
+#&gt; 12      B     2 1.414214
+#&gt; 13      B     3 1.732051
+#&gt; 14      B     4 2.000000
+#&gt; 15      B     5 2.236068
+#&gt; 16      B     6 2.449490
+#&gt; 17      B     7 2.645751
+#&gt; 18      B     8 2.828427
+#&gt; 19      B     9 3.000000
+#&gt; 20      B    10 3.162278</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
