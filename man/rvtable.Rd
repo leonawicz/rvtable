@@ -4,8 +4,8 @@
 \alias{rvtable}
 \title{Random Variable Table}
 \usage{
-rvtable(x, y = NULL, Val = "Val", Prob = "Prob", discrete = FALSE,
-  density.args = list())
+rvtable(x, y = NULL, Val, Prob, discrete = FALSE, density.args = list(),
+  force.dist = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector, data frame, or data table.}
@@ -19,9 +19,12 @@ rvtable(x, y = NULL, Val = "Val", Prob = "Prob", discrete = FALSE,
 \item{discrete}{whether the random variable is discrete.}
 
 \item{density.args}{optional arguments passed to \code{density}.}
+
+\item{force.dist}{logical, force distribution-type rvtable output if \code{Prob} is missing, i.e., \code{Val} is assumed to be a sample.
+Defaults to \code{TRUE}.}
 }
 \value{
-an S3 object of class \code{rvtable}
+an object of class \code{rvtable}.
 }
 \description{
 Class constructor for \code{rvtable} objects.
@@ -33,10 +36,31 @@ When discrete, probabilities are true probabilities.
 When continuous, Val and Prob are based on \code{x} and \code{y} output from \code{density} and describe a distribution curve,
 and therefore values in Prob may be greater than one and may not sum to one.
 Val is typically numeric but may be character when discrete such as when an rvtable object is returned from \code{inverse_pmf}.
-All rvtable objects are either distribution-based or sample-based.
-This primary constructor only constructs distribution- or sample-based rvtable objects, with the attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
-Sampling on an rvtable can generate a sample-based rvtable, with the attribute \code{tabletype="sample"}.
+
+For data frame inputs, Val and Prob here refer generally to whatever columns in an rvtable are specified by \code{Val} and \code{Prob}.
+In \code{rvtable}, if the \code{Val} argument is not supplied, Val is assumed to be \code{Val="Val"} and \code{rvtable}
+will search the names of a data frame for this column, throwing an error if it is not found, like with any other value of \code{Val}.
+When \code{Prob} is missing, however, this is analogous to when \code{x} is numeric and
+\code{y} and \code{x} probability attributes are both NULL: the data in the \code{Val} column are assumed to be a direct sample
+from a distribution rather than a vector of values that describes a distribution in conjunction with a \code{Prob} column.
+When \code{x} is numeric, a supplied \code{Val} will substitute for rvtable names \code{x} and \code{y} in the output, respectively.
+
+All rvtable objects are in one of two forms: distribution-type or sample-type.
+This primary constructor constructs distribution- or sample-type rvtable objects,
+with the corresponding attribute \code{tabletype="distribution"} or \code{tabletype="sample"}.
+Sampling on an rvtable can generate a sample-type rvtable, with the attribute \code{tabletype="sample"}.
+Other operations like merging or marginalizing distributions typically yield rvtables in distribution form.
+This is the common form and rvtables are usually kept in this form until a final step in a processing chain
+where samples are needed.
+
 Every rvtable object also has a variable type attribute, \code{rvtype}, which is either "discrete" or "continuous".
+Other attributes assigned during rvtable construction include \code{valcol} and \code{probcol}, the names of the Val and Prob columns,
+and a \code{density.args} attribute that lists any most recent arguments passed to \code{density} in the process
+of making the rvtable.
+
+If an rvtable is already of class \code{rvtable}, the \code{rvtable} function simply returns
+the rvtable as is; any other arguments passed to \code{rvtable} are ignored and
+neither the table nor its attributes are updated or altered in any way.
 }
 \examples{
 # basic samples from continuous and discrete RVs

@@ -4,14 +4,14 @@
 \alias{merge_rvtable}
 \title{Merge RV Table Conditional Distributions}
 \usage{
-merge_rvtable(x, density.args = list(), sample.args = list())
+merge_rvtable(x, density.args, sample.args)
 }
 \arguments{
 \item{x}{an rvtable.}
 
-\item{density.args}{optional arguments passed to \code{density}.}
+\item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 
-\item{sample.args}{optional arguments used when sampling.}
+\item{sample.args}{optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.}
 }
 \value{
 an rvtable.

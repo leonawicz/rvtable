@@ -4,8 +4,7 @@
 \alias{cycle_rvtable}
 \title{Repeated Resampling Utility}
 \usage{
-cycle_rvtable(x, n, start = NULL, density.args = list(),
-  sample.args = list(), keep = "all")
+cycle_rvtable(x, n, start = NULL, density.args, sample.args, keep = "all")
 }
 \arguments{
 \item{x}{an rvtable in distribution form only.}
@@ -14,9 +13,9 @@ cycle_rvtable(x, n, start = NULL, density.args = list(),
 
 \item{start}{usually \code{NULL} when first called and on subsequent recursive calls an integer representing which cycle to begin from in the updated rvtable.}
 
-\item{density.args}{optional arguments passed to \code{density}.}
+\item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 
-\item{sample.args}{optional arguments used when sampling.}
+\item{sample.args}{optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.}
 
 \item{keep}{character, iterations to retain in output table. Options are \code{"all"} (default) or \code{"last"}.}
 }

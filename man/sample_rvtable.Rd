@@ -5,7 +5,7 @@
 \title{Sample A Random Variable In An RV Table}
 \usage{
 sample_rvtable(x, resample = FALSE, n = 10000, interp = TRUE,
-  n.interp = 1e+05, decimals = NULL, density.args = list())
+  n.interp = 1e+05, decimals = NULL, density.args)
 }
 \arguments{
 \item{x}{an \code{rvtable} object.}
@@ -20,7 +20,7 @@ sample_rvtable(x, resample = FALSE, n = 10000, interp = TRUE,
 
 \item{decimals}{number of decimal places for rounding samples. Ignored for discrete random variables.}
 
-\item{density.args}{optional arguments passed to \code{density}.}
+\item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 }
 \value{
 an \code{rvtable} object where the Val column represents samples and the Prob column is dropped.

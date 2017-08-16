@@ -4,8 +4,7 @@
 \alias{marginalize}
 \title{Marginal Distribution rvtable}
 \usage{
-marginalize(x, margin, weights = NULL, density.args = list(),
-  sample.args = list())
+marginalize(x, margin, weights = NULL, density.args, sample.args)
 }
 \arguments{
 \item{x}{an rvtable.}
@@ -14,9 +13,9 @@ marginalize(x, margin, weights = NULL, density.args = list(),
 
 \item{weights}{relative weights for unique values or levels of a single \code{margin} variable.}
 
-\item{density.args}{optional arguments passed to \code{density}.}
+\item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 
-\item{sample.args}{optional arguments used when sampling.}
+\item{sample.args}{optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.}
 }
 \value{
 an rvtable.
@@ -25,9 +24,11 @@ an rvtable.
 Obtain a marginal distribution of a random variable in an rvtable.
 }
 \details{
-Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables. \code{margin} must be explicit.
+Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables.
+\code{margin} must be explicit.
 \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
-Marginalizing over multiple variables in a single call to \code{marginalize} is only available assuming equal weights for all values of those variables.
+Marginalizing over multiple variables in a single call to \code{marginalize}
+is only available assuming equal weights for all values of those variables.
 When using weights, \code{marginalize} must be called on one variable at a time.
 Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
 }
