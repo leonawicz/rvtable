@@ -21,7 +21,8 @@ Imports:
     dplyr,
     purrr,
     magrittr,
-    tidyr
+    tidyr,
+    lazyeval
 Suggests:
     data.table,
     testthat,
