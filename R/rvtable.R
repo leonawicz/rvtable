@@ -1,5 +1,9 @@
 globalVariables(c(".", "Val", "n", "numer", "denom"))
 
+#' @importFrom magrittr %>%
+#' @importFrom stats approx density
+NULL
+
 .has_rv_attributes <- function(x){
   !is.null(attr(x, "rvtype")) &
     !is.null(attr(x, "tabletype")) &
@@ -126,9 +130,6 @@ is.rvtable <- function(x){
 #' library(data.table)
 #' x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
-#' @importFrom magrittr %>%
-#' @import data.table
-#' @importFrom stats approx density
 rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
   if(is.rvtable(x)) return(x)

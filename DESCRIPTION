@@ -18,12 +18,12 @@ Description: Store distributions of random variables in long format data tables
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
-    data.table,
     dplyr,
     purrr,
     magrittr,
     tidyr
 Suggests:
+    data.table,
     testthat,
     covr,
     lintr,
