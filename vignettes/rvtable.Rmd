@@ -128,14 +128,11 @@ rv2
 attributes(rv2)
 ```
 
-Lastly, we load the `data.table` package so we can make a data table instead of a data frame.
-It doesn't change anything in terms of rvtables since the package always applies the `data.table` class.
-The key change here is the addition of an ID column, `id`, representing a categorical variable.
+Lastly, we have the addition of an ID column, `id`, representing a categorical variable.
 The column names referring to values and their associated probabilities can also be changed.
 
 ```{r rvtable_objects4}
-library(data.table)
-x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
+x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
 rv <- rvtable(x, Val="v1", Prob="p1")
 rv
 attributes(rv)
@@ -199,7 +196,7 @@ sampling distribution via `density.args` prior to resampling.
 Returning to the data table from eariler, sampling is performed by group.
 
 ```{r sample_rvtable2}
-x <- data.table(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
+x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
 rv <- rvtable(x, Val="v1", Prob="p1")
 sample_rvtable(rv, n=5)
 ```
@@ -240,7 +237,7 @@ categrorical variables. The `margin` argument describes which variables to margi
 In the first example, `marginalize` collapses the rvtable over the levels of `id1` and `id2`.
 
 ```{r marginalize1}
-x <- data.table(
+x <- data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
