@@ -17,33 +17,63 @@ vignette: >
 knitr::opts_chunk$set(comment="#>", message=FALSE, warning=FALSE, error=FALSE, eval=FALSE, tidy=TRUE) # for html_vignette only
 ```
 
-The `rvtable` package provides a data frame-based object format and functionality for storing and manipulating
-random variables. The emphasis is on continuous random variables though discrete random variables are also handled.
-The `rvtable`-class object is a special type of data frame or data table that
-contains a column defining values representing or sampled from a probability distribution and a column of respective probabilities.
-Additional columns are ID columns and represent factors or categorical variables.
-While the package makes generous use of `dplyr`, `rvtable`-class objects also share the class, `data.table`,
-which is useful for efficiently working with large tables.
+The `rvtable` package provides a special type of data frame subclass with associated functionality for relatively convenient
+storage and manipulation of random variables. The emphasis is on distributions of continuous random variables derived from 
+relatively large samples, though discrete random variables are also handled.
+
+An rvtable contains a column defining values representing or sampled from a probability distribution and, 
+usually (see below for exception), a column of respective probabilities.
+Additional columns are treated as ID columns and represent factors or categorical variables.
+
+# Motivation
+
+While this package can be used for organizing small samples, there is not much point.
+The main motivation for `rvtable` is relatively seamless storage and manipulation of empirically estimated
+continuous probability distributions deriving from relatively large samples or data sets.
+
+By relatively large, I mean cases where it is both substantially more statistically and computationally efficient
+to store and susbsequently work with estimated probability distributions that are derived from and 
+sufficiently representative of the source data than to work directly on the source data itself.
+
+For an example scenario, see the use case example further below in the vignette.
+
+Note that it is of no benefit to known distributions with closed mathematical form expressions 
+because there is never a need to lug a ton of such data around in the first place.
+For example, a random normal distribution can be sampled with `rnorm` at any time.
+`rvtable` is helpful for empirical samples which are large and messy, of a complicated form or mixed distributions, 
+which cannot be reduced to a known or simple combination of known distributions,
+where an efficient snapshot of the distribution is helpful to avoid juggling excessive amounts of data from one analysis stage 
+to the next while retaining sufficient distributional information.
+
+# Linking code and concept
 
 It is helpful to make the connection between operations performed by code and the probability concepts they parallel.
 The entirety of an rvtable as described above represents a joint probability distribution of
-the continuous random variable whose values and probabilities are represented by the values and probabilities columns
-and any categrorical variables whose levels propogate the ID columns.
+the primary continuous or discrete random variable whose values and probabilities are represented by the values and probabilities columns
+and any categrorical variables whose levels propogate any ID columns.
 
 Filtering rows of an rvtable to specific combinations of ID variable levels yields a subset of the original table
-that represents a conditional distribution of the continuous random variable.
-Similarly, integrating out, marginalizing over, or collapsing the table over the unique levels of an ID variable
-is analogous to calculating a marginal distribution of the continuous random variable.
+that represents a conditional distribution of the primary random variable.
+Similarly, integrating out, marginalizing over, or collapsing the table over the unique levels of one or multiple ID variables
+is analogous to calculating a marginal distribution of the primary random variable.
 
-This package offers a collection of functions that assist with manipulating tables of continuous random variables
-in these and other ways. There is a function for generating rvtables from different kinds of input data.
+# Package functionality
+
+This package offers a collection of functions that assist with manipulating tables of random variables
+in these and other ways. There is a constructor function, `rvtable`, for generating rvtables from different kinds of input data.
 An rvtable can be in probability distribution or sample form.
-This means that an rvtable will contain `Val` and `Prob` columns (default names) when representing a distribution,
-but only the `Val` column once sampled from. Form is tracked by object attributes.
-Functions available in the package offer seamless transitions between forms, carrying out various operations
-such as sampling from densities and marginalizing over levels of categorical variables in an rvtable.
+This means that an rvtable will contain two columns, one of values and one of associated probabilities,
+when representing a distribution, but only the values column once sampled from. Form is tracked by object attributes.
+
+Other functions available in the package offer seamless transitions between forms, carrying out various operations
+such as sampling (`sample_rvtable`) from densities and marginalizing over levels of categorical variables in an rvtable 
+(`merge_rvtable` or `marginalize`).
 Users can maintain control over the resolution of the data via function arguments that correspond to any
 sampling or empirical density estimation steps that a function may perform.
+Probability mass functions can be computed and stored in a new rvtable (`inverse_pmf`) by inverting another rvtable,
+yielding the pmf of an ID variable conditional on a range of values of a continuous primary variable and any other ID variables.
+
+# Usage
 
 This introduction covers the following topics:
 
@@ -51,6 +81,8 @@ This introduction covers the following topics:
 - Sample from a distribution-type rvtable, yielding a new, sample-type rvtable.
 - Compute marginal distributions on an rvtable.
 - Compute an inverse empirical probability mass function from an rvtable.
+- Perform repeated cycles of distribution estimation and resampling.
+- Explore a toy example of a realistic use case.
 
 ## Creating rvtable objects
 
@@ -110,7 +142,7 @@ They are relative weights and will be rescaled internally by `sample` rather tha
 passed to `density` as is the case with continous random variables.
 
 Increasingly the complexity of the input to `rvtable`,
-we arrive at the more common ways to constuct an rvtable: from and existing data frame or data table.
+we arrive at the more common ways to constuct an rvtable: from and existing data frame.
 First is a data frame of values with equal probability.
 
 Note that by leaving out `discrete=TRUE` in the call to `rvtable` below,
@@ -138,25 +170,49 @@ rv
 attributes(rv)
 ```
 
+Factors or ID columns like `id` above, if present, need not be `factor` in  the literal `R` sense. 
+They need not even be `character`, but they are columns 
+in an rvtable that will be treated as some kind of discrete variable that can be meaningfully grouped by, for example.
+
+The general assumption is that an rvtable is intended to have a column of values and a column of probabilities, 
+which may describe a continuous or discrete random variable, 
+and optionally some ID variables in other columns that essentially help to define conditional distributions.
+
 In concluding, here are three important properites of `rvtable` worth being clear on:
 
-- An rvtable is not created from a data frame or data table that contains a values column
-but no corresponding probabilities column, as can be done when x is a basic numeric samples vector.
+- An rvtable can be created from a data frame that contains a values column
+but no corresponding probabilities column, analogous to when `x` is a basic numeric samples vector.
 
-Creating an rvtable from an existing data frame or data table requires a distribution-type
-input. The user is required to provide a table with both columns.
+- `rvtable` always creates an rvtable in distribution form regardless of input, unless provided a
+basic sample with no probabilities and `force.dist=FALSE`.
 
-- `rvtable` always creates an rvtable in distribution form, regardless of input.
+- `rvtable` ignores grouping on purpose. See below. 
 
-- `rvtable` ignores grouping. 
+### A note of caution and clarification
 
-If you pass a data frame or data table whose rows have been grouped by any categorical variables, 
-for example using `dplyr::group_by`, this grouping information is ignored.
-Instead, `rvtable` forcibly groups by all categorical variables present in the input, regardless.
-It is reasonable to assume that any present categorical variables are already distinguishing
+*Do not include other columns of continuous data or anything you do not want to use as an explicit ID variable* alongside the values
+and probabilities columns; rvtables and the functions that manipulate them work with *one* implicit random variable
+defined by *one* pair of values and probabilities columns. While ID columns add more variables to an rvtable, the focus remains on
+the main random variable. Any column in an rvtable not specified as a values or probabilities column will be
+treated as an ID variable. See bullet point below.
+
+This is the initial stopgap to using rvtables as not intended.
+If you pass a data frame whose rows have been grouped by any categorical variables using `dplyr::group_by`, 
+this grouping information is ignored, but will be passed through.
+`rvtable` forcibly groups by all categorical variables present in the input, regardless; this means
+all columns present that are not one of the two values or probabilites columns.
+
+Subsequent functions honor grouping information, but the assumption and intent here is that 
+any data provided to `rvtable` to initially construct and rvtable object is relevant, either the key variable or
+an important ID variable.
+Furthermore, it is reasonable to assume that any present ID variables are already distinguishing
 different sets of values and probabilities in a table and it is not intended for the
-`rvtable` constructor to also apply any maginalizing operations.
-`rvtable` always separates all apparent combinations of ID variables' levels.
+`rvtable` constructor to also apply any maginalizing operations if it is passed a data frame that has no or only
+partial grouping.
+
+`rvtable` always separates all apparent combinations of ID variables' levels and groups by all of them.
+When returning an rvtable object, it will reassign any grouping that might have been part of the input rather than
+strip grouping or retain full grouping.
 
 ## Sampling rvtables
 
@@ -193,7 +249,7 @@ forces the additonal step of re-estimation of the pmf or pdf prior to resampling
 This is especially useful in the continuous case when the user requires more control over the 
 sampling distribution via `density.args` prior to resampling.
 
-Returning to the data table from eariler, sampling is performed by group.
+Returning to the data frame from eariler, sampling is performed by group.
 
 ```{r sample_rvtable2}
 x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
@@ -217,7 +273,11 @@ larger samples if densities are subsequently re-estimated.
 - `density.args` takes a list of arguments to pass to `density` to override defaults, just as in `rvtable`.
 
 Like the constructor, `rvtable`, `sample_rvtable` also forcibly applies its sampling to each identifiable group
-and does not acknowledge any existing grouping information that has been added to a table.
+and does not acknowledge any existing grouping information that has been added to a data frame.
+The function will not presume that the user intends to implicitly marginalize over other ID variables;
+computing marginal distributions is intended always to be performed explicitly.
+For one thing, ID variables might stem from weighted samples of random variables and the user
+must be aware of instances where it would be incorrect to automatically merge two ID variables with accounting for this.
 For singling out or collapsing over ID variables, we turn to the next section.
 
 ## Computing marginal distributions on rvtables
@@ -293,3 +353,71 @@ rnadom variable represented by `Val` and `Prob` in the original rvtable;
 it is merely not including all levels of `id2` and `id3` in the second example.
 
 For more information about the `rvtable` package, see the [help documentation](http://leonawicz.github.io/rvtable/)
+
+## Density re-estimation and resampling
+
+It is important to be aware of the level of possible signal degredation that can occur with some combination of:
+
+* the density resolution being too low, leading to a more discretized density.
+* the bandwidth being too high, leading to a more highly smoothed, less flexible density.
+* the number of times that a density is sampled from and the size of the sample
+* the number of times a desnity is re-estimated from a sample, such as happens when computing marginal distributions,
+which requires sampling from multiple densities, combining weighted or unweighted samples, 
+and estimating a density from the pooled sample.
+
+In general, the fewer cycles of sampling and density estimation the better. However,
+if is not difficult to force retention of the original desnity estimation within acceptable tolerances for
+an analysis if the sampling size is large enough and the density estimation is fine-grained and flexible enough.
+The important thing is that what is "enough" is always something that should be directly assessed.
+What is enough will be different for different types of data and random variables as well as 
+varying suitability for different purposes.
+
+In the examples below, the same data sample is used with different combinations of parameters for density estimation and sampling.
+A number of resampling and re-estimation cycles are repeated in each case and signal degredation is plotted for select iterations.
+In typical use cases, re-estimation is restricted to just a few times; examples where there is a reason to perform
+this kind of cycling many more times are difficult to envision. Nonetheless, the number of iterations used here is
+relatively extreme.
+
+## Use case example
+
+As an example, say we have a large collection of high resolution maps that each contain many millions of pixels.
+The entire set may contain billions or even trillions of pixels, not to mention that the degree of spatial autocorrelation
+is so extreme that from the outset we know that for many purposes the data set, while containing much data, contains
+relatively little information.
+
+Various statistical analyses that may need to be performed with data may not require anywhere
+near this amount or resolution of data. There is much room for data reduction and the key is striking the right
+balance for the data and the type of analysis.
+However, merely accessing it all to get started can be a computational challenge,
+one that is ideally revisted as seldom as possible for subsequent analyses.
+It is much easier to revisit a smaller, derved data set that is still statistically sufficient for the analysis at hand.
+
+At one extreme, someone with a programming background but no knowledge of probability and statistics
+might take a brute force approach, attempting, often in vain and not without wasting vast amounts of time,
+to use every pixel even if their goal is to simply calculate the mean all pixels when using a tiny sample would do just as well.
+When asked later for the standard deviation, they will repeat the brute force attack on the massive data set
+and obtain the next value.
+
+At the other extreme, rather than applying judicious sampling and efficient data reduction methodologies,
+one might simply reduce everything in one go to statistics such as the mean and standard deviation.
+But like the previous instance, something new and unanticipated is often required later.
+Reducing all the data down to a set of statistics can preclude all kinds of analyses, 
+requiring the analyst to revisit the burden of accessing the massive source data yet again, 
+all the while wishing they could have forseen the need last time for whatever they are accessing it for this time around.
+
+`rvtable` bridges this gap for many use cases like this, where the happy medium, the goldilocks zone,
+is to model and store empircal estimates of probability distributions from high resolution source data
+or massive sample or populuation data. Downstream analyses can depend on such a
+derived data set, not needing to go to the source to be able to compute arbitrary statistics from full
+distributional information, nor being hamstrung by overly aggregated data.
+
+Specifically, imagine using the R function, `density`, to empirically estimate the continuous probability 
+distribution of a set of observations.
+It returns a list with `x` and `y` vectors that together describe the estimated density curve.
+If signal fidelity is of paramount importance and any further data aggregation should be postponed 
+until later in an analysis pipeline, one can model a higher resolution estimated density
+with greater flexibility by increasing the number of points and/or decreasing the bandwidth.
+Whereas doing so might necessitate a `x` and `y` vectors containing 1,000 values each and there might be 1,000
+of these for 1,000 different data sets, resulting in carrying 2 million total values through the bulk of a
+processing chain and steps of an analysis, these estimated density curves could capture all
+the information needed from source data sets that are far larger.
