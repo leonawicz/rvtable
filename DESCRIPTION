@@ -8,7 +8,7 @@ Maintainer: Matthew Leonawicz <mfleonawicz@alaska.edu>
 Authors@R: person("Matthew", "Leonawicz", role = c("aut", "cre"), email = "mfleonawicz@alaska.edu")
 URL: https://github.com/leonawicz/rvtable
 BugReports: https://github.com/leonawicz/rvtable/issues
-Description: Store distributions of random variables in long format data tables
+Description: Store distributions of random variables in long format data frames
     with the 'rvtable' class. The package provides a simplified and consistent
     interface for managing and manipulating random variables. Random variables can
     be conditioned on levels of categorical variables stored in a table's
