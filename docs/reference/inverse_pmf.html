@@ -127,14 +127,11 @@ At this time the rvtable type must be continuous.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)</div><div class='output co'>#&gt; <span class='message'>data.table 1.10.4</span></div><div class='output co'>#&gt; <span class='message'>  The fastest way to learn (by data.table authors): https://www.datacamp.com/courses/data-analysis-the-data-table-way</span></div><div class='output co'>#&gt; <span class='message'>  Documentation: ?data.table, example(data.table) and browseVignettes("data.table")</span></div><div class='output co'>#&gt; <span class='message'>  Release notes, videos and slides: http://r-datatable.com</span></div><div class='input'><span class='fu'>library</span>(<span class='no'>dplyr</span>)</div><div class='output co'>#&gt; <span class='message'></span>
-#&gt; <span class='message'>Attaching package: ‘dplyr’</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:data.table’:</span>
+    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)</div><div class='output co'>#&gt; <span class='message'>data.table 1.10.4</span></div><div class='output co'>#&gt; <span class='message'>  The fastest way to learn (by data.table authors): https://www.datacamp.com/courses/data-analysis-the-data-table-way</span></div><div class='output co'>#&gt; <span class='message'>  Documentation: ?data.table, example(data.table) and browseVignettes("data.table")</span></div><div class='output co'>#&gt; <span class='message'>  Release notes, videos and slides: http://r-datatable.com</span></div><div class='output co'>#&gt; <span class='message'></span>
+#&gt; <span class='message'>Attaching package: ‘data.table’</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:dplyr’:</span>
 #&gt; <span class='message'></span>
-#&gt; <span class='message'>    between, first, last</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:stats’:</span>
-#&gt; <span class='message'></span>
-#&gt; <span class='message'>    filter, lag</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:base’:</span>
-#&gt; <span class='message'></span>
-#&gt; <span class='message'>    intersect, setdiff, setequal, union</span></div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(
+#&gt; <span class='message'>    between, first, last</span></div><div class='input'><span class='fu'>library</span>(<span class='no'>dplyr</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(
   <span class='kw'>id1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>4</span>),
   <span class='kw'>id2</span><span class='kw'>=</span><span class='fu'>factor</span>(<span class='fu'>c</span>(<span class='st'>"low"</span>, <span class='st'>"high"</span>)),
   <span class='kw'>id3</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>2</span>),
