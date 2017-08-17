@@ -70,33 +70,30 @@ get_levels <- function(x, variable=NULL){
 merge_rvtable <- function(x, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  discrete <- attr(x, "rvtype")=="discrete"
+  atts <- c(valcol(x), probcol(x), rvtype(x)=="discrete")
   grp <- dplyr::groups(x)
-  if(missing(density.args)) density.args <- attr(x, "density.args")
-  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
-  if(attr(x, "tabletype")=="distribution"){
+  if(missing(density.args)) density.args <- get_density_args(x)
+  if(missing(sample.args)) sample.args <- get_sample_args(x)
+  if(tabletype(x)=="distribution"){
     if(is.null(sample.args$n)) sample.args$n <- 10000
     attr(x, "sample.args") <- sample.args
     sample.args$density.args <- density.args
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
   }
-  x <- .rvtable_makedist(x)
-  x <- dplyr::group_by_(x, .dots=grp)
-  x <- .add_rvtable_class(x, Val, Prob, discrete, TRUE, density.args, sample.args)
-  .lost_rv_class_check(x)
+  .rvtable_makedist(x) %>% dplyr::group_by_(.dots=grp) %>%
+    .add_rvtable_class(atts[1], atts[2], atts[3], TRUE, density.args, sample.args) %>%
+    .lost_rv_class_check()
 }
 
 .rvtable_makedist <- function(x){
   .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
+  Val <- valcol(x)
+  Prob <- probcol(x)
   if(is.null(Prob)) Prob <- "Prob"
-  discrete <- attr(x, "rvtype")=="discrete"
+  discrete <- rvtype(x)=="discrete"
   has.weights <- "weights" %in% names(x)
-  density.args <- attr(x, "density.args")
-  sample.args <- attr(x, "sample.args")
+  density.args <- get_density_args(x)
+  sample.args <- get_sample_args(x)
   n <- sample.args$n
   if(is.null(n)) n <- 10000
   grp <- dplyr::groups(x)
@@ -132,9 +129,9 @@ merge_rvtable <- function(x, density.args, sample.args){
 .rvtable_rename <- function(x, vp){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  distr <- attr(x, "tabletype") == "distribution"
+  Val <- valcol(x)
+  Prob <- probcol(x)
+  distr <- tabletype(x) == "distribution"
   if(vp=="to"){
     if(Val != "Val") x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
     if(distr && Prob != "Prob") x <- dplyr::rename_(x, Prob=lazyeval::interp(~p, p=Prob))
@@ -181,12 +178,12 @@ merge_rvtable <- function(x, density.args, sample.args){
 marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  discrete <- attr(x, "rvtype") == "discrete"
-  distr <- attr(x, "tabletype") == "distribution"
-  if(missing(density.args)) density.args <- attr(x, "density.args")
-  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
+  Val <- valcol(x)
+  Prob <- probcol(x)
+  discrete <- rvtype(x) == "discrete"
+  distr <- tabletype(x) == "distribution"
+  if(missing(density.args)) density.args <- get_density_args(x)
+  if(missing(sample.args)) sample.args <- get_sample_args(x)
   x <- .rvtable_rename(x, "to")
   id <- names(x)
   if(missing(margin)) stop("Must specify variable(s) to marginalize over.")
@@ -242,13 +239,13 @@ marginalize <- function(x, margin, weights=NULL, density.args, sample.args){
 cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all"){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  rv <- attr(x, "rvtype")
+  Val <- valcol(x)
+  Prob <- probcol(x)
+  rv <- rvtype(x)
   discrete <- rv=="discrete"
-  tbl <- attr(x, "tabletype")
-  if(missing(density.args)) density.args <- attr(x, "density.args")
-  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
+  tbl <- tabletype(x)
+  if(missing(density.args)) density.args <- get_density_args(x)
+  if(missing(sample.args)) sample.args <- get_sample_args(x)
   grp <- dplyr::groups(x)
   if(!keep %in% c("all", "last")) stop("keep must be 'all' or 'last'.")
   if(tbl=="sample") stop("rvtable must be in distribution form, not sample form.")

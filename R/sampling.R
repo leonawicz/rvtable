@@ -64,12 +64,12 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
                            n.interp=100000, decimals=NULL, density.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
-  rv <- attr(x, "rvtype")
+  rv <- rvtype(x)
   discrete <- rv=="discrete"
-  tbl <- attr(x, "tabletype")
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol") # nolint
-  if(missing(density.args)) density.args <- attr(x, "density.args")
+  tbl <- tabletype(x)
+  Val <- valcol(x)
+  Prob <- probcol(x) # nolint
+  if(missing(density.args)) density.args <- get_density_args(x)
   x <- .rvtable_rename(x, "to")
   id <- names(x)
   grp <- dplyr::groups(x)

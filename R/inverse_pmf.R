@@ -34,13 +34,13 @@ inverse_pmf <- function(x, values, id, sample.args){
   .rv_class_check(x)
   .inverse_pmf_stop(x, values, id)
   if(length(values) == 1) values <- rep(values, 2)
-  Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
-  density.args <- attr(x, "density.args")
-  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
-  if(attr(x, "tabletype")=="distribution"){
+  Val <- valcol(x)
+  Prob <- probcol(x)
+  density.args <- get_density_args(x)
+  if(missing(sample.args)) sample.args <- get_sample_args(x)
+  if(tabletype(x)=="distribution"){
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
-  } else if(attr(x, "rvtype")=="continuous"){
+  } else if(rvtype(x)=="continuous"){
     x <- do.call(sample_rvtable, c(list(x=x, resample=TRUE), sample.args))
   }
   x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
@@ -82,7 +82,7 @@ inverse_pmf <- function(x, values, id, sample.args){
 }
 
 .inverse_pmf_stop <- function(x, values, id){
-  discrete <- attr(x, "rvtype")=="discrete"
+  discrete <- rvtype(x)=="discrete"
   values_err_disc <- "discrete `values` must be a single value or valid range."
   values_err_cont <- "continuous `values` must be a valid range."
   if(discrete){
@@ -93,7 +93,7 @@ inverse_pmf <- function(x, values, id, sample.args){
   }
   if(missing(id)) stop("`id` missing.")
   if(length(id) != 1) stop("`id` must refer to a one ID variable.")
-  Val <- attr(x, "valcol")
+  Val <- valcol(x)
   if(id == Val)
     stop(paste(Val, "is the primary variable. `id` must refer to an ID variable."))
   if(!id %in% names(x)) stop(paste(id, "not found."))
