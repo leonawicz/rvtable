@@ -90,10 +90,10 @@
     </div>
 
     
-    <p>Compute the probability mass function for a specified categorical variable conditional on an interval of the continuous random variable's values.</p>
+    <p>Compute the probability mass function for a specified categorical variable conditional on values of the primary random variable.</p>
     
 
-    <pre class="usage"><span class='fu'>inverse_pmf</span>(<span class='no'>x</span>, <span class='no'>val.range</span>, <span class='no'>var.new</span>, <span class='kw'>sample.args</span> <span class='kw'>=</span> <span class='fu'>list</span>())</pre>
+    <pre class="usage"><span class='fu'>inverse_pmf</span>(<span class='no'>x</span>, <span class='no'>values</span>, <span class='no'>id</span>, <span class='no'>sample.args</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -103,12 +103,12 @@
       <td><p>an rvtable.</p></td>
     </tr>
     <tr>
-      <th>val.range</th>
+      <th>values</th>
       <td><p>range of values of the continuous random variable in the rvtable.</p></td>
     </tr>
     <tr>
-      <th>var.new</th>
-      <td><p>the categorical variable for which to compute the pmf given <code>val.range</code>.</p></td>
+      <th>id</th>
+      <td><p>the categorical variable for which to compute the pmf given <code>values</code>.</p></td>
     </tr>
     <tr>
       <th>sample.args</th>
@@ -122,53 +122,55 @@
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function computes the pmf of a categorical variable, providing probabilities corresponding to the levels of the variable, given a specific range of values of the continuous random variable in the rvtable.
-At this time the rvtable type must be continuous.</p>
+    <p>This function computes the pmf of a categorical variable,
+providing probabilities corresponding to the levels of the variable,
+conditional on values of the primary random variable in the rvtable.
+When the primary random variable is continuous, `values` must be a length-2 vector giving a valid range.
+When discrete, `values` can be a range or a single discrete value.
+If conditioning on a value or range of values restricts the conditional support for `id` to one where `id`
+has probability zero everywhere, a warning will be thrown and the returned rvtable will have zero rows.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>data.table</span>)</div><div class='output co'>#&gt; <span class='message'>data.table 1.10.4</span></div><div class='output co'>#&gt; <span class='message'>  The fastest way to learn (by data.table authors): https://www.datacamp.com/courses/data-analysis-the-data-table-way</span></div><div class='output co'>#&gt; <span class='message'>  Documentation: ?data.table, example(data.table) and browseVignettes("data.table")</span></div><div class='output co'>#&gt; <span class='message'>  Release notes, videos and slides: http://r-datatable.com</span></div><div class='output co'>#&gt; <span class='message'></span>
-#&gt; <span class='message'>Attaching package: ‘data.table’</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:dplyr’:</span>
-#&gt; <span class='message'></span>
-#&gt; <span class='message'>    between, first, last</span></div><div class='input'><span class='fu'>library</span>(<span class='no'>dplyr</span>)
-<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(
+    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>dplyr</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'>data.frame</span>(
   <span class='kw'>id1</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>4</span>),
   <span class='kw'>id2</span><span class='kw'>=</span><span class='fu'>factor</span>(<span class='fu'>c</span>(<span class='st'>"low"</span>, <span class='st'>"high"</span>)),
   <span class='kw'>id3</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>2</span>),
   <span class='kw'>Val</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>), <span class='kw'>Prob</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>), <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>)) <span class='kw'>%&gt;%</span> <span class='no'>rvtable</span>
 <span class='no'>y1</span> <span class='kw'>&lt;-</span> <span class='fu'>inverse_pmf</span>(<span class='no'>x</span>, <span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>8</span>), <span class='st'>"id1"</span>, <span class='kw'>sample.args</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>n</span><span class='kw'>=</span><span class='fl'>5</span>))
 <span class='no'>y1</span></div><div class='output co'>#&gt; # A tibble: 20 x 4
-#&gt;      id1    id2   id3       Prob
-#&gt;    &lt;chr&gt; &lt;fctr&gt; &lt;int&gt;      &lt;dbl&gt;
-#&gt;  1     A   high     1 0.06666667
-#&gt;  2     A   high     2 0.30769231
-#&gt;  3     A    low     1 0.00000000
-#&gt;  4     A    low     2 0.00000000
-#&gt;  5     B   high     1 0.20000000
-#&gt;  6     B   high     2 0.30769231
-#&gt;  7     B    low     1 0.20000000
-#&gt;  8     B    low     2 0.14285714
-#&gt;  9     C   high     1 0.26666667
-#&gt; 10     C   high     2 0.15384615
-#&gt; 11     C    low     1 0.30000000
-#&gt; 12     C    low     2 0.28571429
-#&gt; 13     D   high     1 0.26666667
-#&gt; 14     D   high     2 0.15384615
-#&gt; 15     D    low     1 0.20000000
-#&gt; 16     D    low     2 0.28571429
-#&gt; 17     E   high     1 0.20000000
-#&gt; 18     E   high     2 0.07692308
-#&gt; 19     E    low     1 0.30000000
-#&gt; 20     E    low     2 0.28571429</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>x</span>, <span class='no'>id2</span><span class='kw'>==</span><span class='st'>"low"</span> <span class='kw'>&amp;</span> <span class='no'>id3</span><span class='kw'>==</span><span class='fl'>1</span>) <span class='kw'>%&gt;%</span> <span class='fu'><a href='http://dplyr.tidyverse.org/reference/select.html'>select</a></span>(-<span class='no'>id2</span>, -<span class='no'>id3</span>) <span class='kw'>%&gt;%</span> <span class='no'>rvtable</span>
+#&gt;       id1    id2   id3       Prob
+#&gt;    &lt;fctr&gt; &lt;fctr&gt; &lt;int&gt;      &lt;dbl&gt;
+#&gt;  1      A   high     1 0.06666667
+#&gt;  2      A   high     2 0.30769231
+#&gt;  3      A    low     1 0.00000000
+#&gt;  4      A    low     2 0.00000000
+#&gt;  5      B   high     1 0.20000000
+#&gt;  6      B   high     2 0.30769231
+#&gt;  7      B    low     1 0.20000000
+#&gt;  8      B    low     2 0.14285714
+#&gt;  9      C   high     1 0.26666667
+#&gt; 10      C   high     2 0.15384615
+#&gt; 11      C    low     1 0.30000000
+#&gt; 12      C    low     2 0.28571429
+#&gt; 13      D   high     1 0.26666667
+#&gt; 14      D   high     2 0.15384615
+#&gt; 15      D    low     1 0.20000000
+#&gt; 16      D    low     2 0.28571429
+#&gt; 17      E   high     1 0.20000000
+#&gt; 18      E   high     2 0.07692308
+#&gt; 19      E    low     1 0.30000000
+#&gt; 20      E    low     2 0.28571429</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>x</span>, <span class='no'>id2</span><span class='kw'>==</span><span class='st'>"low"</span> <span class='kw'>&amp;</span> <span class='no'>id3</span><span class='kw'>==</span><span class='fl'>1</span>) <span class='kw'>%&gt;%</span> <span class='fu'><a href='http://dplyr.tidyverse.org/reference/select.html'>select</a></span>(-<span class='no'>id2</span>, -<span class='no'>id3</span>) <span class='kw'>%&gt;%</span> <span class='no'>rvtable</span>
 <span class='no'>y2</span> <span class='kw'>&lt;-</span> <span class='fu'>inverse_pmf</span>(<span class='no'>x</span>, <span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>8</span>), <span class='st'>"id1"</span>, <span class='kw'>sample.args</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>n</span><span class='kw'>=</span><span class='fl'>5</span>))
 <span class='no'>y2</span></div><div class='output co'>#&gt; # A tibble: 5 x 2
-#&gt;     id1       Prob
-#&gt;   &lt;chr&gt;      &lt;dbl&gt;
-#&gt; 1     A 0.00000000
-#&gt; 2     B 0.36363636
-#&gt; 3     C 0.18181818
-#&gt; 4     D 0.36363636
-#&gt; 5     E 0.09090909</div></pre>
+#&gt;      id1       Prob
+#&gt;   &lt;fctr&gt;      &lt;dbl&gt;
+#&gt; 1      A 0.00000000
+#&gt; 2      B 0.36363636
+#&gt; 3      C 0.18181818
+#&gt; 4      D 0.36363636
+#&gt; 5      E 0.09090909</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

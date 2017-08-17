@@ -66,7 +66,7 @@
       <h1>Introduction to rvtable</h1>
                         <h4 class="author">Matthew Leonawicz</h4>
             
-            <h4 class="date">2017-08-16</h4>
+            <h4 class="date">2017-08-17</h4>
           </div>
 
     
@@ -225,7 +225,7 @@ rv &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rvtable.
 <div id="computing-an-inverse-pmf" class="section level2">
 <h2 class="hasAnchor">
 <a href="#computing-an-inverse-pmf" class="anchor"></a>Computing an inverse pmf</h2>
-<p>An inverse pmf can be computed using <code>inverse_pmf</code>. Continuing with the previous rvtable, we obtain the pdf of <code>id1</code> conditioned on a range of values of the continuous random variable described by the original rvtable as well as the other present factors. The <code>val</code> column is now categorical and takes on the levels associated with <code>id1</code> in the input.</p>
+<p>An inverse pmf can be computed using <code>inverse_pmf</code>. Continuing with the previous rvtable, we obtain the pdf of <code>id1</code> conditioned on a range of values of the continuous random variable described by the original rvtable as well as the other present factors. The values column is now categorical and takes on the levels associated with <code>id1</code> in the input.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(rv, <span class="dt">val.range =</span> <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">8</span>), <span class="st">"id1"</span>)
 y1
 
@@ -233,7 +233,13 @@ y1
 x2 &lt;-<span class="st"> </span><span class="kw">filter</span>(rv, id2 <span class="op">==</span><span class="st"> "low"</span> <span class="op">&amp;</span><span class="st"> </span>id3 <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>id2, <span class="op">-</span>id3) <span class="op">%&gt;%</span><span class="st"> </span>rvtable
 y2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">8</span>), <span class="st">"id1"</span>)
 y2</code></pre></div>
-<p>The difference between the two calls to <code>inverse_pmf</code> above is that in the second call, the rvtable has first been subset to one combination of levels of <code>id2</code> and <code>id3</code>. In both cases, the pmf of <code>id1</code> is conditional on values of <code>id2</code>, <code>id3</code> and the continuous rnadom variable represented by <code>Val</code> and <code>Prob</code> in the original rvtable; it is merely not including all levels of <code>id2</code> and <code>id3</code> in the second example.</p>
+<p>The difference between the two calls to <code>inverse_pmf</code> above is that in the second call, the rvtable has first been subset to one combination of levels of <code>id2</code> and <code>id3</code>. In both cases, the pmf of <code>id1</code> is conditional on values of <code>id2</code>, <code>id3</code> and the continuous random variable represented by <code>Val</code> and <code>Prob</code> in the original rvtable; it is merely not including all levels of <code>id2</code> and <code>id3</code> in the second example.</p>
+<p>Here is another, highly simplified example where the primary variable is now discrete and, like the single additional ID variable, has only two unique values:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id1 =</span> <span class="kw">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>), <span class="dt">Val =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">Prob =</span> <span class="kw">c</span>(<span class="fl">0.25</span>, <span class="fl">0.5</span>, 
+    <span class="fl">0.75</span>, <span class="fl">0.5</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/rvtable.html">rvtable</a></span>(<span class="dt">discrete =</span> <span class="ot">TRUE</span>)
+<span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">1</span>, <span class="st">"id1"</span>)
+<span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">2</span>, <span class="st">"id1"</span>)
+<span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="st">"id1"</span>)</code></pre></div>
 <p>For more information about the <code>rvtable</code> package, see the <a href="http://leonawicz.github.io/rvtable/">help documentation</a></p>
 </div>
 <div id="density-re-estimation-and-resampling" class="section level2">
