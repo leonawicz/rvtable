@@ -334,7 +334,7 @@ An inverse pmf can be computed using `inverse_pmf`.
 Continuing with the previous rvtable, we obtain the pdf of `id1` conditioned on a range of values
 of the continuous random variable described by the original rvtable as well as the other present
 factors.
-The `val` column is now categorical and takes on the levels associated with `id1` in the input.
+The values column is now categorical and takes on the levels associated with `id1` in the input.
 
 ```{r inverse_pmf}
 y1 <- inverse_pmf(rv, val.range=c(5, 8), "id1")
@@ -349,8 +349,21 @@ y2
 The difference between the two calls to `inverse_pmf` above is that in the second call,
 the rvtable has first been subset to one combination of levels of `id2` and `id3`.
 In both cases, the pmf of `id1` is conditional on values of `id2`, `id3` and the continuous
-rnadom variable represented by `Val` and `Prob` in the original rvtable;
+random variable represented by values and probabilities in the original rvtable;
 it is merely not including all levels of `id2` and `id3` in the second example.
+
+Here is another, highly simplified example where the primary variable is now discrete and, 
+like the single additional ID variable, has only two unique values:
+
+```{r inverse_pmf2}
+x2 <- data.frame(
+  id1=c("A", "B"),
+  Val=c(1, 1, 2, 2),
+  Prob=c(0.25, 0.5, 0.75, 0.5)) %>% rvtable(discrete=TRUE)
+inverse_pmf(x2, 1, "id1")
+inverse_pmf(x2, 2, "id1")
+inverse_pmf(x2, 1:2, "id1")
+```
 
 For more information about the `rvtable` package, see the [help documentation](http://leonawicz.github.io/rvtable/)
 
