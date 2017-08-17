@@ -130,10 +130,10 @@ xlist_inverse3 <- purrr::map(xlist, ~inverse_pmf(.x, c(4, 8), "id3", sample.args
 test_that("grouping ignored/stripped with inverse_pmf", {
   # comparing different ID variables
   purrr::walk2(xlist_inverse1, xlist_inverse2, ~expect_identical(class(.x), class(.y)))
-  purrr::walk2(xlist_inverse1, xlist_inverse2, ~expect_identical(dim(.x), dim(.y)))
+  purrr::walk2(xlist_inverse1, xlist_inverse2, ~expect_identical(ncol(.x), ncol(.y)))
   purrr::walk2(xlist_inverse1, xlist_inverse2, ~expect_identical(groups(.x), groups(.y)))
   purrr::walk2(xlist_inverse1, xlist_inverse3, ~expect_identical(class(.x), class(.y)))
-  purrr::walk2(xlist_inverse1, xlist_inverse3, ~expect_identical(dim(.x), dim(.y)))
+  purrr::walk2(xlist_inverse1, xlist_inverse3, ~expect_identical(ncol(.x), ncol(.y)))
   purrr::walk2(xlist_inverse1, xlist_inverse3, ~expect_identical(groups(.x), groups(.y)))
 
   # invrse vs original
@@ -143,8 +143,9 @@ test_that("grouping ignored/stripped with inverse_pmf", {
 
   purrr::walk(xlist_inverse1, ~expect_identical(dim(.x), as.integer(c(5*2*2, 2 + 3 - 1))))
   purrr::walk2(xlist_inverse1, xlist, ~expect_identical(ncol(.x), ncol(.y) - 1L))
-  purrr::walk(xlist_inverse2, ~expect_identical(dim(.x), as.integer(c(5*2*2, 2 + 3 - 1))))
+
+  purrr::walk(xlist_inverse2, ~expect_true(nrow(.x) <= 5*2*2))
   purrr::walk2(xlist_inverse2, xlist, ~expect_identical(ncol(.x), ncol(.y) - 1L))
-  purrr::walk(xlist_inverse3, ~expect_identical(dim(.x), as.integer(c(5*2*2, 2 + 3 - 1))))
+  purrr::walk(xlist_inverse3, ~expect_true(nrow(.x) <= 5*2*2))
   purrr::walk2(xlist_inverse3, xlist, ~expect_identical(ncol(.x), ncol(.y) - 1L))
 })
