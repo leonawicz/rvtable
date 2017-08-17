@@ -40,13 +40,12 @@ What does an rvtable hold?
 
 -   An rvtable may contain one discrete or continuous random variable.
 -   The distribution of the random variable is described in a table using a values column and a probabilities column.
--   Any other columns in an RV table are ID columns and therefore should only store categorical variables.
+-   Any other columns in an rvtable are ID columns and therefore should only store categorical variables.
 -   An rvtable is essentially a way of storing the distribution of one random variable in a data frame or, if ID columns are present in addition to the the values and probabilities columns, sections of rows of the table can be seen as a sequence of conditional distributions based on combinations of the ID variables' levels.
 
 Functions included in the package provide the following abilities:
 
--   Subset specific conditional distributions from a table
--   Marginalize over/integrate out ID variables to obtain a specified marginal distribution of the random variable
+-   Subset specific conditional distributions from a table or marginalize over/integrate out ID variables to obtain a specified marginal distribution of the random variable
 -   Draw random samples from distributions.
 -   Invert conditional distributions, i.e., obtain the pmf of a ID variable conditional on a values of the random variable the rvtable is based on.
 
