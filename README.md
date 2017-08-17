@@ -14,13 +14,13 @@ Motivation
 
 While this package can be used for organizing small samples, there is not much point. The main motivation for `rvtable` is relatively seamless storage and manipulation of empirically estimated continuous probability distributions deriving from relatively large samples or data sets.
 
-By relatively large, I mean cases where it is both substantially more statistically and computationally efficient to store and susbsequently work with estimated probability distributions that are derived from and sufficiently representative of the source data than to work directly on the source data itself.
+By relatively large, I mean cases where it is both substantially more statistically and computationally efficient to store and subsequently work with estimated probability distributions that are derived from and sufficiently representative of the source data than to work directly on the source data itself.
 
-A large data set can be sampled to make it more maneagable. This package provides an alternative by estimating the empirical probability density function of a continuous random variable so that the model of the distribution can be carried through analyses pipelines in place of raw observations. This allows sampling from a distribution of a random variable when and however necessary. This is particularly helpful well-estimated distributions remain much more compact and efficient than holding onto much larger amounts of data throughout a processing chain where it is ultimately not needed.
+A large data set can be sampled to make it more manageable. This package provides an alternative by estimating the empirical probability density function of a continuous random variable so that the model of the distribution can be carried through analyses pipelines in place of raw observations. This allows sampling from a distribution of a random variable when and however necessary. This is particularly helpful well-estimated distributions remain much more compact and efficient than holding onto much larger amounts of data throughout a processing chain where it is ultimately not needed.
 
 ### Use case and limitations
 
-For example, it is sometimes useful to calculate statistics as the final step in a sequence of intensive data processing operations. It could be that a product to come out of the analysis is a web application where the analyst leaves it to the user to decide interactively which variable(s) to select and what statistics to compute, what to graph and how, whether to exlcude or merge data, etc. A R Shiny app is the perfect example of this.
+For example, it is sometimes useful to calculate statistics as the final step in a sequence of intensive data processing operations. It could be that a product to come out of the analysis is a web application where the analyst leaves it to the user to decide interactively which variable(s) to select and what statistics to compute, what to graph and how, whether to exclude or merge data, etc. A R Shiny app is the perfect example of this.
 
 This can lead to the problem of having far too much data to put in the application yet not being able to summarize or aggregate the data in advance sufficiently without taking too much control away from the user. When there is a lot of data involved, using a relatively efficient representation of a distribution of the data rather than raw observations or a static, relatively small sample, can help transport the relevant information from one stage of an analysis to another, particularly in a context of limited computing resources or a simple need for speed, such as in an interactive environment involving other users. At the same time, using estimated probability distributions leaves in place the ability to draw an arbitrarily large sample later when the time is right and context demands it.
 
@@ -43,7 +43,7 @@ What does an rvtable hold?
 -   Any other columns in an RV table are ID columns and therefore should only store categorical variables.
 -   An rvtable is essentially a way of storing the distribution of one random variable in a data frame or, if ID columns are present in addition to the the values and probabilities columns, sections of rows of the table can be seen as a sequence of conditional distributions based on combinations of the ID variables' levels.
 
-Functions included in the package provide the following abiities:
+Functions included in the package provide the following abilities:
 
 -   Subset specific conditional distributions from a table
 -   Marginalize over/integrate out ID variables to obtain a specified marginal distribution of the random variable

@@ -29,10 +29,10 @@ The main motivation for `rvtable` is relatively seamless storage and manipulatio
 continuous probability distributions deriving from relatively large samples or data sets.
 
 By relatively large, I mean cases where it is both substantially more statistically and computationally efficient
-to store and susbsequently work with estimated probability distributions that are derived from and 
+to store and subsequently work with estimated probability distributions that are derived from and 
 sufficiently representative of the source data than to work directly on the source data itself.
 
-A large data set can be sampled to make it more maneagable.
+A large data set can be sampled to make it more manageable.
 This package provides an alternative by estimating the empirical probability density function of a continuous random variable 
 so that the model of the distribution can be carried through analyses pipelines in place of raw observations.
 This allows sampling from a distribution of a random variable when and however necessary.
@@ -43,7 +43,7 @@ much larger amounts of data throughout a processing chain where it is ultimately
 
 For example, it is sometimes useful to calculate statistics as the final step in a sequence of intensive data processing operations.
 It could be that a product to come out of the analysis is a web application where the analyst leaves it to the user to decide interactively which variable(s) to select and what statistics to compute, what to graph and how,
-whether to exlcude or merge data, etc. A R Shiny app is the perfect example of this.
+whether to exclude or merge data, etc. A R Shiny app is the perfect example of this.
 
 This can lead to the problem of having far too much data to put in the application yet not being able to summarize or aggregate the data in advance sufficiently without taking too much control away from the user.
 When there is a lot of data involved, using a relatively efficient representation of a distribution of the data rather than raw observations 
@@ -83,7 +83,7 @@ What does an rvtable hold?
 if ID columns are present in addition to the the values and probabilities columns,
 sections of rows of the table can be seen as a sequence of conditional distributions based on combinations of the ID variables' levels.
 
-Functions included in the package provide the following abiities:
+Functions included in the package provide the following abilities:
 
 *    Subset specific conditional distributions from a table
 *    Marginalize over/integrate out ID variables to obtain a specified marginal distribution of the random variable
