@@ -4,63 +4,6 @@ globalVariables(c(".", "Val", "n", "numer", "denom"))
 #' @importFrom stats approx density
 NULL
 
-.has_rv_attributes <- function(x){
-  !is.null(attr(x, "rvtype")) &
-    !is.null(attr(x, "tabletype")) &
-    !is.null(attr(x, "valcol")) &
-    !is.null(attr(x, "density.args")) &
-    !is.null(attr(x, "sample.args"))
-}
-
-.lost_rv_class_check <- function(x){
-  if(.has_rv_attributes(x) & !("rvtable" %in% class(x))) class(x) <- unique(c("rvtable", class(x)))
-  x
-}
-
-.add_rvtable_class <- function(x, Val, Prob, discrete, distr, density.args=list(), sample.args=list()){
-  if(!distr & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
-  class(x) <- unique(c("rvtable", class(x)))
-  attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
-  attr(x, "tabletype") <- ifelse(distr, "distribution", "sample")
-  attr(x, "valcol") <- Val
-  attr(x, "probcol") <- Prob
-  attr(x, "density.args") <- density.args
-  attr(x, "sample.args") <- sample.args
-  x
-}
-
-#' Check For rvtable Class
-#'
-#' Check if an object has class rvtable.
-#'
-#' @param x an R object.
-#'
-#' @return \code{TRUE} if \code{x} is an rvtable class object, otherwise \code{FALSE}.
-#' @export
-#'
-#' @examples
-#' is.rvtable("a")
-#' is.rvtable(rvtable(1:10))
-is.rvtable <- function(x){
-  has_class <- "rvtable" %in% class(x)
-  if(has_class & .has_rv_attributes(x)) TRUE else FALSE
-}
-
-#' Stop Error Helper Function
-#'
-#' Return an error if \code{x} is not an rvtable.
-#'
-#' This helper function is used inside other functions to interrupt when \code{x} is not an rvtable.
-#'
-#' @param x an R object.
-#'
-#' @return
-#'
-#' @examples
-#' f <- function(x) .rv_class_check(x)
-#' f(1)
-.rv_class_check <- function(x) if(!is.rvtable(x)) stop("`x` must be an rvtable.") else TRUE
-
 #' Random Variable Table
 #'
 #' Class constructor for \code{rvtable} objects.
@@ -121,7 +64,7 @@ is.rvtable <- function(x){
 #' probs <- c(0.1, 0.2, 0.3, 0.15, 0.25)
 #' rvtable(x, y=probs) # discrete inferred from y
 #' attr(x, "probabilities") <- probs
-#' rvtable(x) # discrete inferred from attributes
+#' rvtable(x) # inferred from attributes (partial match 'prob')
 #'
 #' # an existing data frame or data table
 #' x <- data.frame(Val=1:10, Prob=0.1)
@@ -130,7 +73,7 @@ is.rvtable <- function(x){
 #' rvtable(x, Val="v1", Prob="p1")
 rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
-  if(is.rvtable(x)) return(x)
+  if(is_rvtable(x)) return(x)
   vpmissing <- c(missing(Val), missing(Prob))
   if(vpmissing[1]) Val <- "Val"
   if(vpmissing[2]) Prob <- "Prob"
