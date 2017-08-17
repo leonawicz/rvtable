@@ -90,8 +90,10 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
         dplyr::group_by_(.dots=grp2)
     }
   }
-  x <- dplyr::do(x, data.table::data.table(
-    Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals))) %>%
-    dplyr::group_by_(.dots=grp) %>% .add_rvtable_class(Val, NULL, discrete, FALSE, density.args)
+  x <- dplyr::do(x, data.frame(
+    Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals),
+    stringsAsFactors=FALSE)) %>%
+    dplyr::group_by_(.dots=grp) %>%
+    .add_rvtable_class(Val, NULL, discrete, FALSE, density.args)
   .rvtable_rename(x, "from")
 }
