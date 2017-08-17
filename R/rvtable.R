@@ -8,7 +8,6 @@ NULL
   !is.null(attr(x, "rvtype")) &
     !is.null(attr(x, "tabletype")) &
     !is.null(attr(x, "valcol")) &
-    #!is.null(attr(x, "probcol")) &
     !is.null(attr(x, "density.args")) &
     !is.null(attr(x, "sample.args"))
 }
