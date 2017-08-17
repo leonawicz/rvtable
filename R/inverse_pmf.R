@@ -1,22 +1,26 @@
 #' Inverse Probability Mass Function
 #'
-#' Compute the probability mass function for a specified categorical variable conditional on an interval of the continuous random variable's values.
+#' Compute the probability mass function for a specified categorical variable conditional on values of the primary random variable.
 #'
-#' This function computes the pmf of a categorical variable, providing probabilities corresponding to the levels of the variable, given a specific range of values of the continuous random variable in the rvtable.
-#' At this time the rvtable type must be continuous.
+#' This function computes the pmf of a categorical variable,
+#' providing probabilities corresponding to the levels of the variable,
+#' conditional on values of the primary random variable in the rvtable.
+#' When the primary random variable is continuous, `values` must be a length-2 vector giving a valid range.
+#' When discrete, `values` can be a range or a single discrete value.
+#' If conditioning on a value or range of values restricts the conditional support for `id` to one where `id`
+#' has probability zero everywhere, a warning will be thrown and the returned rvtable will have zero rows.
 #'
 #' @param x an rvtable.
-#' @param val.range range of values of the continuous random variable in the rvtable.
-#' @param var.new the categorical variable for which to compute the pmf given \code{val.range}.
+#' @param values range of values of the continuous random variable in the rvtable.
+#' @param id the categorical variable for which to compute the pmf given \code{values}.
 #' @param sample.args optional arguments used when sampling.
 #'
 #' @return an rvtable.
 #' @export
 #'
 #' @examples
-#' library(data.table)
 #' library(dplyr)
-#' x <- data.table(
+#' x <- data.frame(
 #'   id1=rep(LETTERS[1:5], each=4),
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
@@ -26,45 +30,72 @@
 #' x <- filter(x, id2=="low" & id3==1) %>% select(-id2, -id3) %>% rvtable
 #' y2 <- inverse_pmf(x, c(5,8), "id1", sample.args=list(n=5))
 #' y2
-inverse_pmf <- function(x, val.range, var.new, sample.args=list()){
+inverse_pmf <- function(x, values, id, sample.args){
   .rv_class_check(x)
-  if(is.null(attr(x, "probcol"))) stop("`x` must be a distribution-type rvtable.")
-  if(length(val.range) != 2 || val.range[1] >= val.range[2])
-    stop("`val.range` must be a length-2 vector giving a valid range.")
-  if(missing(var.new)) stop("`var.new` missing.")
-  if(!var.new %in% names(x)) stop(paste(var.new, "not found."))
-  discrete <- attr(x, "rvtype")=="discrete"
-  if(discrete) stop("inverse pmf not currently implemented for discrete rvtables.")
+  #if(is.null(attr(x, "probcol"))) stop("`x` must be a distribution-type rvtable.")
+  .inverse_pmf_stop(x, values, id)
+  if(length(values) == 1) values <- rep(values, 2)
+  Val <- attr(x, "valcol")
+  Prob <- attr(x, "probcol")
+  density.args <- attr(x, "density.args")
+  if(missing(sample.args)) sample.args <- attr(x, "sample.args")
   if(attr(x, "tabletype")=="distribution"){
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
+  } else if(attr(x, "rvtype")=="continuous"){
+    x <- do.call(sample_rvtable, c(list(x=x, resample=TRUE), sample.args))
   }
-  id <- names(x)
-  dots <- lapply(id[!(id %in% c("Val", "Prob"))], as.symbol)
+  x <- dplyr::rename_(x, Val=lazyeval::interp(~v, v=Val))
+  xid <- names(x)
+  dots <- lapply(xid[!(xid %in% c("Val", Prob))], as.symbol)
   if(length(dots)==1){
     x <- dplyr::mutate_(x, .dots=list("dummy"=1))
     dots2 <- lapply("dummy", as.symbol)
   } else {
-    dots2 <- dots[!(as.character(dots) %in% var.new)]
+    dots2 <- dots[!(as.character(dots) %in% id)]
   }
-  n.levels <- length(unique(x[[var.new]]))
+  n.levels <- length(unique(x[[id]]))
   x <- x %>% dplyr::group_by_(.dots=dots2)
-  uni <- unique(x[[var.new]])
+  uni <- unique(x[[id]])
 
   x <- x %>% dplyr::do(NEW=uni,
     numer=dplyr::group_by_(., .dots=dots) %>%
-      dplyr::do(data.table::data.table(
-        numer=length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / (n.levels*nrow(.)))
+      dplyr::do(data.frame(
+        numer=length(which(.$Val >= values[1] & .$Val <= values[2])) / (n.levels*nrow(.)))
         ) %>% dplyr::ungroup() %>% dplyr::select(numer),
     denom=dplyr::group_by_(., .dots=dots2) %>%
-      dplyr::do(data.table::data.table(
-        denom=rep(length(which(.$Val >= val.range[1] & .$Val <= val.range[2])) / nrow(.), n.levels))
+      dplyr::do(data.frame(
+        denom=rep(length(which(.$Val >= values[1] & .$Val <= values[2])) / nrow(.), n.levels))
         ) %>% dplyr::ungroup() %>% dplyr::select(denom)) %>%
     dplyr::ungroup()
 
   if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
-  id <- names(x)
-  id[which(id=="NEW")] <- var.new
-  data.table::setnames(x, id)
-  tidyr::unnest(x) %>% dplyr::group_by_(.dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
-    dplyr::ungroup() %>% data.table::data.table() %>% rvtable(Val=var.new, discrete=TRUE)
+  names(x)[names(x)=="NEW"] <- id
+  if(is.null(Prob)) Prob <- "Prob"
+  x <- tidyr::unnest(x) %>% dplyr::filter(denom != 0) %>%
+    dplyr::group_by_(.dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
+    dplyr::rename_(.dots=stats::setNames("Prob", Prob)) %>% dplyr::ungroup()
+  if(nrow(x) == 0){
+    warning(paste0("'", id,
+       "' has probability zero over the given value range of the primary random variable."))
+    x[[Prob]] <- numeric()
+  }
+  .add_rvtable_class(x, id, Prob, TRUE, TRUE, density.args, sample.args)
+}
+
+.inverse_pmf_stop <- function(x, values, id){
+  discrete <- attr(x, "rvtype")=="discrete"
+  values_err_disc <- "discrete `values` must be a single value or valid range."
+  values_err_cont <- "continuous `values` must be a valid range."
+  if(discrete){
+    if(length(values) == 0 || length(values) > 2 ||
+       (length(values) == 2 && values[1] > values[2])) stop(values_err_disc)
+  } else {
+    if(length(values) != 2 || values[1] >= values[2]) stop(values_err_cont)
+  }
+  if(missing(id)) stop("`id` missing.")
+  if(length(id) != 1) stop("`id` must refer to a one ID variable.")
+  Val <- attr(x, "valcol")
+  if(id == Val)
+    stop(paste(Val, "is the primary variable. `id` must refer to an ID variable."))
+  if(!id %in% names(x)) stop(paste(id, "not found."))
 }

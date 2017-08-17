@@ -4,14 +4,14 @@
 \alias{inverse_pmf}
 \title{Inverse Probability Mass Function}
 \usage{
-inverse_pmf(x, val.range, var.new, sample.args = list())
+inverse_pmf(x, values, id, sample.args)
 }
 \arguments{
 \item{x}{an rvtable.}
 
-\item{val.range}{range of values of the continuous random variable in the rvtable.}
+\item{values}{range of values of the continuous random variable in the rvtable.}
 
-\item{var.new}{the categorical variable for which to compute the pmf given \code{val.range}.}
+\item{id}{the categorical variable for which to compute the pmf given \code{values}.}
 
 \item{sample.args}{optional arguments used when sampling.}
 }
@@ -19,16 +19,20 @@ inverse_pmf(x, val.range, var.new, sample.args = list())
 an rvtable.
 }
 \description{
-Compute the probability mass function for a specified categorical variable conditional on an interval of the continuous random variable's values.
+Compute the probability mass function for a specified categorical variable conditional on values of the primary random variable.
 }
 \details{
-This function computes the pmf of a categorical variable, providing probabilities corresponding to the levels of the variable, given a specific range of values of the continuous random variable in the rvtable.
-At this time the rvtable type must be continuous.
+This function computes the pmf of a categorical variable,
+providing probabilities corresponding to the levels of the variable,
+conditional on values of the primary random variable in the rvtable.
+When the primary random variable is continuous, `values` must be a length-2 vector giving a valid range.
+When discrete, `values` can be a range or a single discrete value.
+If conditioning on a value or range of values restricts the conditional support for `id` to one where `id`
+has probability zero everywhere, a warning will be thrown and the returned rvtable will have zero rows.
 }
 \examples{
-library(data.table)
 library(dplyr)
-x <- data.table(
+x <- data.frame(
   id1=rep(LETTERS[1:5], each=4),
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
