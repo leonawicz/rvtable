@@ -74,7 +74,7 @@ x <- 1:5
 probs <- c(0.1, 0.2, 0.3, 0.15, 0.25)
 rvtable(x, y=probs) # discrete inferred from y
 attr(x, "probabilities") <- probs
-rvtable(x) # discrete inferred from attributes
+rvtable(x) # inferred from attributes (partial match 'prob')
 
 # an existing data frame or data table
 x <- data.frame(Val=1:10, Prob=0.1)
