@@ -26,7 +26,7 @@ n <- c(nlevels(x$id1), nlevels(x$id2), length(unique(x$id3)))
 
 test_that("inverse_pmf on continuous RV returns correctly", {
   purrr::walk(ylist, ~expect_is(.x, cl))
-  purrr::walk2(ylist, c(20, 8 ,8), ~expect_equal(nrow(.x), .y))
+  purrr::walk2(ylist, c(20, 8, 8), ~expect_equal(nrow(.x), .y))
   purrr::walk2(ylist, c("id1", "id2", "id3"), ~expect_identical(attr(.x, "valcol"), .y))
   purrr::walk(ylist, ~expect_identical(attr(.x, "probcol"), "Prob1"))
 
@@ -71,7 +71,7 @@ ylist <- c(ylist, list(y1, y2, y3))
 
 test_that("inverse_pmf on discrete RV returns correctly", {
   purrr::walk(ylist, ~expect_is(.x, cl))
-  purrr::walk2(ylist, c(20, 8 ,12, rep(2, 3)), ~expect_equal(nrow(.x), .y))
+  purrr::walk2(ylist, c(20, 8, 12, rep(2, 3)), ~expect_equal(nrow(.x), .y))
   purrr::walk2(ylist, c("id1", "id2", "id3", rep("id1", 3)), ~expect_identical(attr(.x, "valcol"), .y))
   purrr::walk2(ylist, rep(c("Prob1", "Prob"), each=3), ~expect_identical(attr(.x, "probcol"), .y))
 

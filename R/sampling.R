@@ -68,7 +68,7 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   discrete <- rv=="discrete"
   tbl <- attr(x, "tabletype")
   Val <- attr(x, "valcol")
-  Prob <- attr(x, "probcol")
+  Prob <- attr(x, "probcol") # nolint
   if(missing(density.args)) density.args <- attr(x, "density.args")
   x <- .rvtable_rename(x, "to")
   id <- names(x)

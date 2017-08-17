@@ -32,7 +32,6 @@
 #' y2
 inverse_pmf <- function(x, values, id, sample.args){
   .rv_class_check(x)
-  #if(is.null(attr(x, "probcol"))) stop("`x` must be a distribution-type rvtable.")
   .inverse_pmf_stop(x, values, id)
   if(length(values) == 1) values <- rep(values, 2)
   Val <- attr(x, "valcol")
