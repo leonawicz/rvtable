@@ -1,3 +1,17 @@
+# rvtable 0.6.0 (Release date: 2017-08-21)
+
+* Substantial refactor of code to:
+*   enahnce `rvtable` functionality.
+*   remove dependencies on data.table package.
+* `inverse_pmf` now handles discrete primary random variables and rvtables in sample form.
+* Added a collection of helper functions for interacting with the `rvtable` class and its attributes.
+* Updated documentation.
+* Refactored all package documentation examples, unit tests and vignette examples.
+* Added unit tests for grouped data frame handling.
+* Added more unit tests for inverse_pmf.
+* Added and expanded sections in README and introduction vignette.
+* minor bug fixes.
+
 # rvtable 0.4.0 (Release date: 2017-08-14)
 
 * Added initial introduction vignette.
