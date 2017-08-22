@@ -76,28 +76,33 @@ merge_rvtable <- function(x, density.args, sample.args){
   x <- .lost_rv_class_check(x)
   .rv_class_check(x)
   atts <- list(valcol(x), probcol(x), rvtype(x)=="discrete")
+  if(is.null(atts[[2]])) atts[[2]] <- "Prob"
+  distr <- tabletype(x) == "distribution"
   grp <- as.character(dplyr::groups(x))
-  not_grp <- names(x)[!names(x) %in% c(grp, atts[[1]], atts[[2]])]
+  not_grp <- names(x)[!names(x) %in% c(grp, atts[[1]], atts[[2]], "weights_")]
   if(!length(not_grp)){
-    warning("No ungrouped ID variables to merge. No merging performed.")
-    return(x)
+    .no_merge_warn(x)
+    if("weights_" %in% names(x)) x$weights_ <- NULL
+    if(distr) return(x)
   } else {
     w <- get_weights(x, not_grp)
     any_wts <- any(as.numeric(unlist(purrr::map(w, ~.x$weights))) != 1)
     if(any_wts)
       warning("Ungrouped ID variable levels have unequal weights. Consider `marginalize` instead of `merge_rvtable`.")
   }
-  weights <- get_weights(x, grp)
+  weights <- get_weights(x)
   if(missing(density.args)) density.args <- get_density_args(x)
   if(missing(sample.args)) sample.args <- get_sample_args(x)
-  if(tabletype(x)=="distribution"){
+  if(distr){
     if(is.null(sample.args$n)) sample.args$n <- 10000
     attr(x, "sample.args") <- sample.args
     sample.args$density.args <- density.args
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
+    sample.args$density.args <- NULL
   }
-  .rvtable_makedist(x) %>% dplyr::group_by_(.dots=grp) %>%
-    .add_rvtable_class(atts[[1]], atts[[2]], atts[[3]], TRUE, weights, density.args, sample.args) %>%
+  x <- .rvtable_makedist(x) %>% dplyr::group_by_(.dots=grp) #%>%
+  weights <- weights[names(weights) %in% names(x)]
+  x <- .add_rvtable_class(x, atts[[1]], atts[[2]], atts[[3]], TRUE, weights, density.args, sample.args) %>%
     .lost_rv_class_check()
 }
 
@@ -114,25 +119,28 @@ merge_rvtable <- function(x, density.args, sample.args){
   grp <- as.character(dplyr::groups(x))
   weights <- get_weights(x, grp)
   x <- .rvtable_rename(x, "to")
-  has.weights <- "weights" %in% names(x)
+  has.weights <- "weights_" %in% names(x) && any(x$weights_ != 1)
   if(discrete){
     if(has.weights){
       x <- dplyr::do(x, data.frame(
-        Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights), stringsAsFactors=FALSE))
+        Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_), stringsAsFactors=FALSE))
     } else {
       x <- dplyr::do(x, data.frame(
         Val=sample(x=.$Val, size=n, replace=TRUE), stringsAsFactors=FALSE))
     }
     x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::do(
-      data.table::data.table(Val=as.numeric(names(table(.$Val))),
-                             Prob=as.numeric(table(.$Val)) / sum(table(.$Val))))
+      dplyr::tbl_df(data.frame(
+        Val=as.numeric(names(table(.$Val))),
+        Prob=as.numeric(table(.$Val)) / sum(table(.$Val)),
+        stringsAsFactors=FALSE))
+    )
   } else {
     if(has.weights){
       x <- dplyr::do(x, data.frame(
         Val=do.call(density,
-                    c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$x,
+                    c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_)), density.args))$x,
         Prob=do.call(density,
-                     c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights)), density.args))$y,
+                     c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_)), density.args))$y,
         stringsAsFactors=FALSE))
     } else {
       x <- dplyr::do(x, data.frame(
@@ -161,21 +169,30 @@ merge_rvtable <- function(x, density.args, sample.args){
   .lost_rv_class_check(x)
 }
 
+.no_merge_warn <- function(x){
+  has.weights <- "weights_" %in% names(x)
+  merge_type1 <- if(has.weights) "marginalize" else "merge"
+  merge_type2 <- if(has.weights) "marginalizing" else "merging"
+  merge_type_vars <- if(has.weights) " " else " ungrouped "
+  no_merge1 <- paste0("No", merge_type_vars, "ID variables to ", merge_type1, ".")
+  no_merge2 <- if(tabletype(x) == "distribution") paste0("No ", merge_type2, " performed.") else
+    paste0("Density re-estimation performed, but no variables ", merge_type1, "d.")
+  no_merge <- paste(no_merge1, no_merge2)
+  warning(no_merge)
+}
+
 #' Marginal Distribution rvtable
 #'
 #' Obtain a marginal distribution of a random variable in an rvtable.
 #'
 #' Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables.
-#' \code{margin} must be explicit.
-#' \code{weights} only applies in the clear case of marginalizing over a single categorical variable.
-#' Marginalizing over multiple variables in a single call to \code{marginalize}
-#' is only available assuming equal weights for all values of those variables.
-#' When using weights, \code{marginalize} must be called on one variable at a time.
-#' Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
+#' Unlike \code{merge_rvtable}, \code{marginalize} will not merge ungrouped ID variables.
+#' It will only marginalize over the ID variables specified in \code{margin}.
+#' It will also account for unequal weighting of an ID variable's levels, taken from the \code{weights} attribute of an rvtable,
+#' whereas \code{merge_rvtable} is a simpler function that ignores weights.
 #'
 #' @param x an rvtable.
 #' @param margin variable(s) in rvtable to marginalize over.
-#' @param weights relative weights for unique values or levels of a single \code{margin} variable.
 #' @param density.args optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.
 #' @param sample.args optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.
 #'
@@ -205,6 +222,7 @@ marginalize <- function(x, margin, density.args, sample.args){
   .rv_class_check(x)
   Val <- valcol(x)
   Prob <- probcol(x)
+  Prob2 <- if(is.null(Prob)) "Prob" else Prob
   discrete <- rvtype(x) == "discrete"
   distr <- tabletype(x) == "distribution"
   if(missing(density.args)) density.args <- get_density_args(x)
@@ -224,23 +242,22 @@ marginalize <- function(x, margin, density.args, sample.args){
       grp2 <- dplyr::setdiff(id, c(Val, Prob))
       if(!length(grp2)) grp2 <- NULL
       x <- dplyr::group_by_(x, .dots=grp2)
-      if(!distr) Prob <- NULL
       x <- x %>% split(.[[m]])
       x <- x[match(names(x), w[[m]]$levels)]
       wi <- w[[m]]$weights
-      x <- purrr::map2(x, wi, ~dplyr::mutate(.x, weights=.y)) %>%
-        bind_rows() %>% dplyr::group_by_(.dots=grp2)
+      x <- purrr::map2(x, wi, ~dplyr::mutate(.x, weights_=.y)) %>%
+        dplyr::bind_rows() %>% dplyr::group_by_(.dots=grp2)
       x <- .add_rvtable_class(x, Val, Prob, discrete, distr, list(), density.args, sample.args) %>%
         merge_rvtable() %>% dplyr::group_by_(.dots=grp2) %>%
-        .add_rvtable_class(Val, Prob, discrete, distr, w_all, density.args, sample.args)
+        .add_rvtable_class(Val, Prob2, discrete, TRUE, w_all, density.args, sample.args)
     }
   } else {
     w_sub <- w_all[!names(w_all) %in% margin]
     grp2 <- dplyr::setdiff(names(x), c(Val, Prob, margin))
-    x <- dplyr::group_by_(x, .dots=grp2) %>%
+    x <- dplyr::mutate(x, weights_=1) %>% dplyr::group_by_(.dots=grp2) %>%
       .add_rvtable_class(Val, Prob, discrete, distr, w_all, density.args, sample.args) %>%
       merge_rvtable() %>% dplyr::group_by_(.dots=grp2)
-    x <- .add_rvtable_class(x, Val, Prob, discrete, distr, w_sub, density.args, sample.args)
+    x <- .add_rvtable_class(x, Val, Prob2, discrete, TRUE, w_sub, density.args, sample.args)
   }
   x
 }
@@ -316,7 +333,7 @@ cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all
       merge_rvtable(density.args=density.args, sample.args=sample.args) %>%
       dplyr::mutate(Cycle=start + 1)
     dots <- names(x2)
-    x <- dplyr::bind_rows(dplyr::select_(ungroup(x), .dots=dots), x2)
+    x <- dplyr::bind_rows(dplyr::select_(dplyr::ungroup(x), .dots=dots), x2)
     cycles <- c(cycles, start + 1)
   } else {
     x <- force_weights(x, "Cycle", cycles)
