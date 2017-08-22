@@ -12,10 +12,12 @@ x_d <- rvtable(x, discrete=TRUE)
 x_c_merge <- dplyr::group_by(x_c, id2, id3) %>% merge_rvtable()
 x_d_merge <- dplyr::group_by(x_d, id3) %>% merge_rvtable()
 
+wts <- data.frame(levels=LETTERS[1:5], weights=c(1, 1.5, 2, 4, 1))
+
 x_c_margin <- marginalize(x_c, c("id1", "id3"))
-x_c_margin_w <- marginalize(x_c, c("id1"), weights=c(1, 1.5, 2, 4, 1))
+x_c_margin_w <- marginalize(set_weights(x_c, "id1", wts), c("id1"))
 x_d_margin <- marginalize(x_d, c("id2"))
-x_d_margin_w <- marginalize(x_d, c("id1"), weights=c(1, 1.5, 2, 4, 1))
+x_d_margin_w <- marginalize(set_weights(x_d, "id1", wts), c("id1"))
 
 test_that("get_levels returns correctly", {
   cl <- "list"
@@ -23,7 +25,7 @@ test_that("get_levels returns correctly", {
   expect_is(get_levels(x_d), cl)
   expect_is(get_levels(x_c, "id2"), cl)
   expect_is(get_levels(x_d, "id3"), cl)
-  expect_error(get_levels(x_c, "a"), "`variable` not found")
+  expect_error(get_levels(x_c, "a"), "`id` not found")
 })
 
 test_that("merge_rvtable returns correct class object", {
@@ -49,7 +51,7 @@ test_that("marginalize returns correct class object", {
   expect_is(x_c_margin_w, cl)
   expect_is(x_d_margin, cl)
   expect_is(x_d_margin_w, cl)
-  expect_is(marginalize(x_d, c("id1"), weights=c(1, 1.5, 0, 0, 0)), cl)
+  expect_is(marginalize(set_weights(x_d, "id1", wts), c("id1")), cl)
 })
 
 test_that("groups are ignored by marginalize", {
@@ -63,20 +65,15 @@ test_that("groups are ignored by marginalize", {
 
 test_that("marginalize throws correct errors", {
   e <- c("Must specify variable(s) to marginalize over.",
-         "May only marginalize over one variable at a time if using level weights.",
          "Marginalizing variable not found",
          "Invalid marginalizaing variable.",
          "Number of weights does not match the number of levels in `margin`.")
   expect_error(marginalize(x_c), e[1], fixed=TRUE)
   expect_error(marginalize(x_d), e[1], fixed=TRUE)
-  expect_error(marginalize(x_c, c("id1", "id2"), weights=2), e[2])
-  expect_error(marginalize(x_d, c("id1", "id2"), weights=2), e[2])
-  expect_error(marginalize(x_c, c("ABC", "DEF"), weights=2), e[2])
-  expect_error(marginalize(x_d, "ABC"), e[3])
-  expect_error(marginalize(x_c, "Val"), e[4])
-  expect_error(marginalize(x_d, "Prob"), e[4])
-  expect_error(marginalize(x_c, "id1", weights=c(1, 1.5, 2, 4)), e[5])
-  expect_error(marginalize(x_d, "id1", weights=c(1, 1.5, 2, 4, 1, 5)), e[5])
+  expect_error(marginalize(x_c, c("ABC", "DEF")), e[2])
+  expect_error(marginalize(x_d, "ABC"), e[2])
+  expect_error(marginalize(x_c, "Val"), e[3])
+  expect_error(marginalize(x_d, "Prob"), e[3])
 })
 
 suppressMessages(library(dplyr))
@@ -100,12 +97,18 @@ test_that("marginalize unrun examples work", {
   lev <- get_levels(x, "id1")
   expect_is(lev, "list")
   expect_identical(lev, list(id1=LETTERS[1:5]))
-  expect_is(marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1)), cl)
+  expect_is(marginalize(set_weights(x, "id1", wts), "id1"), cl)
 })
 
 test_that("cycle_rvtable unrun examples work", {
   expect_is(cycle_rvtable(x, 2), cl)
+  expect_is(x %>% group_by(id1, id2) %>% cycle_rvtable(2, keep="last"), cl)
+  expect_is(cycle_rvtable(x, 3), cl)
   expect_is(x %>% group_by(id1, id2) %>% cycle_rvtable(3, keep="last"), cl)
+  expect_is(cycle_rvtable(x, 2, keep="last"), cl)
+  expect_is(x %>% group_by(id1, id2) %>% cycle_rvtable(2), cl)
+  expect_is(cycle_rvtable(x, 3, keep="last"), cl)
+  expect_is(x %>% group_by(id1, id2) %>% cycle_rvtable(3), cl)
 })
 
 test_that("cycle_rvtable keep arg has consistency", {
