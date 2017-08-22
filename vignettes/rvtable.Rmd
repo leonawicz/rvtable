@@ -154,10 +154,10 @@ uniform pdf rather than a fully represented uniform pmf.
 x <- data.frame(Val=1:10, Prob=0.1)
 rv1 <- rvtable(x)
 rv1
-attributes(rv1)
+rvattr(rv1)
 rv2 <- rvtable(x, discrete=TRUE)
 rv2
-attributes(rv2)
+rvattr(rv2)
 ```
 
 Lastly, we have the addition of an ID column, `id`, representing a categorical variable.
@@ -167,7 +167,7 @@ The column names referring to values and their associated probabilities can also
 x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(c(10:1)^2, sqrt(1:10)))
 rv <- rvtable(x, Val="v1", Prob="p1")
 rv
-attributes(rv)
+rvattr(rv)
 ```
 
 Factors or ID columns like `id` above, if present, need not be `factor` in  the literal `R` sense. 
@@ -230,10 +230,10 @@ continuous and discrete random variables, respectively.
 # continuous RV
 x <- rvtable(rnorm(1000))
 x
-attributes(x)$tabletype
+rvattr(x)$tabletype
 y <- sample_rvtable(x, n=10)
 y
-attributes(y)$tabletype
+rvattr(y)$tabletype
 
 # discrete RV
 x <- rvtable(sample(1:100, 50), discrete=TRUE)
