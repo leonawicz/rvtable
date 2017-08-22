@@ -130,6 +130,7 @@ get_density_args <- function(x){
   attr(x, "density.args")
 }
 
+#' @export
 #' @rdname helpers
 get_sample_args <- function(x){
   .rv_class_check(x)

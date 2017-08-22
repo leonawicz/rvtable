@@ -3,6 +3,7 @@
 export(cycle_rvtable)
 export(get_density_args)
 export(get_levels)
+export(get_sample_args)
 export(get_weights)
 export(idcols)
 export(inverse_pmf)
