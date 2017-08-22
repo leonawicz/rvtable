@@ -52,9 +52,9 @@ test_that("get/set weights and marginalize/merge correct", {
 
 test_that("get/set weights errors", {
   xvp <- rvtable(data.frame(Val=1:10, Prob=1:10))
-  expect_error(
+  expect_warning(
     set_weights(xvp, id="id1", weights=data.frame(levels=1:2, weights=1:2)),
-    "`id` must contain only valid ID variables in `x`."
+    "`x` has no ID variables. Weights not set."
   )
 
   expect_error(
