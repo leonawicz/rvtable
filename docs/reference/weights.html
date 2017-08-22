@@ -93,7 +93,7 @@
     <p>Get or set ID variable level weights.</p>
     
 
-    <pre class="usage"><span class='fu'><a href='get_levels.html'>get_levels</a></span>(<span class='no'>x</span>, <span class='kw'>id</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+    <pre class="usage"><span class='fu'>get_levels</span>(<span class='no'>x</span>, <span class='no'>id</span>)
 
 <span class='fu'>get_weights</span>(<span class='no'>x</span>, <span class='no'>id</span>)
 
@@ -118,7 +118,7 @@
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a list for <code>get_weights</code>.</p>
+    <p>a list for <code>get_weights</code> and <code>get_levels</code>.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -144,7 +144,7 @@ When an rvtable contains no ID variables, there are no levels or weights.</p>
   <span class='kw'>id2</span><span class='kw'>=</span><span class='fu'>factor</span>(<span class='fu'>c</span>(<span class='st'>"low"</span>, <span class='st'>"high"</span>)),
   <span class='kw'>id3</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>2</span>),
   <span class='kw'>Val</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>), <span class='kw'>Prob</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>), <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>)))
-<span class='fu'><a href='get_levels.html'>get_levels</a></span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; $id1
+<span class='fu'>get_levels</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; $id1
 #&gt; [1] "A" "B" "C" "D" "E"
 #&gt; 
 #&gt; $id2

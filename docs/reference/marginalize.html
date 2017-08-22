@@ -139,7 +139,7 @@ whereas <code>merge_rvtable</code> is a simpler function that ignores weights.</
   <span class='kw'>Val</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>), <span class='kw'>Prob</span><span class='kw'>=</span><span class='fu'>rep</span>(<span class='fu'>sqrt</span>(<span class='fl'>1</span>:<span class='fl'>10</span>), <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>20</span>)) <span class='kw'>%&gt;%</span> <span class='no'>rvtable</span>
 <span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='fu'>c</span>(<span class='st'>"id1"</span>, <span class='st'>"id2"</span>))
 
-<span class='fu'><a href='get_levels.html'>get_levels</a></span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)
+<span class='fu'><a href='weights.html'>get_levels</a></span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)
 <span class='fu'><a href='weights.html'>get_weights</a></span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)
 <span class='fu'>marginalize</span>(<span class='no'>x</span>, <span class='st'>"id1"</span>)
 <span class='no'>wts</span> <span class='kw'>&lt;-</span> <span class='fu'>data.frame</span>(<span class='kw'>levels</span><span class='kw'>=</span><span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>5</span>], <span class='kw'>weights</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>1.5</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>1</span>))
