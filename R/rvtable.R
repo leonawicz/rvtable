@@ -87,15 +87,14 @@ NULL
 #' rvtable(x)
 #' x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
-rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), weights=list(), force.dist=TRUE){
+rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE,
+                    density.args=list(), weights=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
   if(is_rvtable(x)) return(x)
   vpmissing <- c(missing(Val), missing(Prob))
   if(vpmissing[1]) Val <- "Val"
   if(vpmissing[2]) Prob <- "Prob"
   if(Val==Prob) stop("`Val` and `Prob` cannot refer to the same column.")
-  distr <- !vpmissing[2] | force.dist
-  if(!distr) Prob <- NULL
   if(is.numeric(x))
     return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
   if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
@@ -122,7 +121,7 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), w
   if(distr){
     if(forced && !Prob %in% id){
       x <- dplyr::group_by_(x, .dots=dots) %>%
-        .add_rvtable_class(Val, Prob, discrete, distr, NULL, density.args, list()) %>%
+        .add_rvtable_class(Val, Prob, discrete, distr, list(), density.args, list()) %>%
         .rvtable_makedist()
     }
     tmp <- (
@@ -131,8 +130,9 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), w
       )$Duplicated
     if(any(tmp)) stop(paste0("Duplicated values in `", Val, "`."))
   }
+  if(!Prob %in% names(x)) Prob <- NULL
   x <- dplyr::group_by_(x, .dots=grp) %>%
-    .add_rvtable_class(Val, Prob, discrete, distr, NULL, density.args, list())
+    .add_rvtable_class(Val, Prob, discrete, distr, list(), density.args, list())
   if(!.no_weights(weights)) x <- set_weights(x, names(weights), weights)
   x
 }
