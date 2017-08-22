@@ -22,11 +22,16 @@ Merge conditional distributions of a random variable in an rvtable over levels o
 \details{
 Distributions are merged using a cycle of bootstrap resampling followed by density re-estimation.
 Merging relies simply on what \code{x} is grouped by.
-It assumes equal weights for all levels of all grouping variables over which a random variable is being merged.
-This is why it is called merging rather than marginalizing.
-This function is also used by \code{marginalize} and can properly obtain a marginal distribution when passed an rvtable including a \code{weights} column, which \code{marginalize} provides.
-If calling this function directly, it is important to know that it is generally intended for simple merging.
-Use \code{marginalize} to ensure proper marginal distributions are obtained since it can be used with or without non-constant weights.
+All levels of all ungrouped variables are merged. Weights are also ignored by \code{merge_rvtable}.
+This is why the behavior is referred to as merging rather than marginalizing.
+If an ungrouped variable has levels with unequal weights, weights are ignored, the merging is still forced,
+but a warning is thrown.
+
+This function is also called internally by \code{marginalize}, in which case it does not ignore weights
+and will calculate a proper marginal distribution even when there are unequal weights.
+If calling this function directly, it is important to know that it is intended for simple merging.
+Recommended practice is to use \code{marginalize} to ensure proper marginal distributions
+are always obtained by default regardless of equal or unequal weights.
 }
 \examples{
 \dontrun{

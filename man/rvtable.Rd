@@ -5,7 +5,7 @@
 \title{Random Variable Table}
 \usage{
 rvtable(x, y = NULL, Val, Prob, discrete = FALSE, density.args = list(),
-  force.dist = TRUE)
+  weights = list(), force.dist = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector or data frame.}
@@ -19,6 +19,8 @@ rvtable(x, y = NULL, Val, Prob, discrete = FALSE, density.args = list(),
 \item{discrete}{whether the random variable is discrete.}
 
 \item{density.args}{optional arguments passed to \code{density}.}
+
+\item{weights}{\code{NULL} or a list of weights associated with levels of ID variables in `x`. See details.}
 
 \item{force.dist}{logical, force distribution-type rvtable output if \code{Prob} is missing, i.e., \code{Val} is assumed to be a sample.
 Defaults to \code{TRUE}.}
@@ -61,6 +63,20 @@ of making the rvtable.
 If an rvtable is already of class \code{rvtable}, the \code{rvtable} function simply returns
 the rvtable as is; any other arguments passed to \code{rvtable} are ignored and
 neither the table nor its attributes are updated or altered in any way.
+
+Weights for levels of an ID variable are can be set by \code{set_weights}.
+In \code{rvtable}, \code{weights} is passed to \code{set_weights} so that weights can be set on rvtable construction if desired.
+It can be relatively cumbersome to set weights for all ID variables at once in a call to \code{rvtable}, and
+particularly wasteful if there are several ID columns and most or all have levels with equal weights.
+The weights attribute assigned to the rvtable will be an empty list
+if there are no ID columns in \code{x} and a named list of data frames otherwise.
+The names are the names of the ID variables in \code{x} and each data frame has two columns: \code{levels} and \code{weights},
+giving the weighting of an ID variable's levels.
+When \code{weights=NULL} or \code{weights=list()}, the values in the \code{weights} column for each level in each data frame
+are set to \code{1} for equal weighting.
+Similarly, individual named list elements can be set to \code{NULL} for convenience instead of passing a data frame.
+\code{NULL} or \code{list()} elements in the \code{weights} list are converted to data frames with weights equal to one.
+Note that \code{weights} is ignored if \code{x} is not a data frame.
 }
 \examples{
 # basic samples from continuous and discrete RVs

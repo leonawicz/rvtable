@@ -4,18 +4,18 @@
 \alias{marginalize}
 \title{Marginal Distribution rvtable}
 \usage{
-marginalize(x, margin, weights = NULL, density.args, sample.args)
+marginalize(x, margin, density.args, sample.args)
 }
 \arguments{
 \item{x}{an rvtable.}
 
 \item{margin}{variable(s) in rvtable to marginalize over.}
 
-\item{weights}{relative weights for unique values or levels of a single \code{margin} variable.}
-
 \item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 
 \item{sample.args}{optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.}
+
+\item{weights}{relative weights for unique values or levels of a single \code{margin} variable.}
 }
 \value{
 an rvtable.
@@ -41,7 +41,13 @@ x <- data.frame(
   id3=rep(1:2, each=2),
   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)) \%>\% rvtable
 marginalize(x, c("id1", "id2"))
+
 get_levels(x, "id1")
-marginalize(x, "id1", weights=c(1, 1.5, 2, 4, 1))
+get_weights(x, "id1")
+marginalize(x, "id1")
+wts <- data.frame(levels=LETTERS[1:5], weights=c(1, 1.5, 2, 4, 1))
+x <- set_weights(x, "id1", wts)
+get_weights(x, "id1")
+marginalize(x, "id1")
 }
 }

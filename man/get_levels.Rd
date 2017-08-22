@@ -2,27 +2,27 @@
 % Please edit documentation in R/merging.R
 \name{get_levels}
 \alias{get_levels}
-\title{Get levels of categorical variables}
+\title{Get levels of ID variables}
 \usage{
-get_levels(x, variable = NULL)
+get_levels(x, id = NULL)
 }
 \arguments{
 \item{x}{an rvtable.}
 
-\item{variable}{specific column name or vector of column names in \code{x}.}
+\item{id}{specific column name or vector of column names in \code{x}.}
 }
 \value{
 \code{NULL} if there are no columns other than Val and Prob, otherwise a list.
 }
 \description{
-Obtain the levels associated with categorical variables in an rvtable.
+Obtain the levels associated with categorical (ID) variables in an rvtable.
 }
 \details{
-All columns in an rvtable other than the Val and Prob columns are assumed to represent categorical variables.
+All columns in an rvtable other than the values and probabilities columns are assumed to represent categorical variables.
 If a column is a factor, all possible levels of the factor are returned even if they do not appear in the table.
 For other types all unique values observed in the table are returned.
-If \code{variable} is \code{NULL}, a list is returned for all categorical variables.
-A shorter list is returned if \code{variable} is used to specify a subset of columns.
+If \code{id} is \code{NULL}, a list is returned for all categorical variables.
+A shorter list is returned if \code{id} is used to specify a subset of columns.
 }
 \examples{
 x <- rvtable(data.frame(

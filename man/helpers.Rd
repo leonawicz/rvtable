@@ -13,6 +13,7 @@
 \alias{is_density}
 \alias{valcol}
 \alias{probcol}
+\alias{idcols}
 \alias{get_density_args}
 \alias{get_sample_args}
 \alias{set_density_args}
@@ -40,6 +41,8 @@ is_density(x)
 valcol(x)
 
 probcol(x)
+
+idcols(x)
 
 get_density_args(x)
 
