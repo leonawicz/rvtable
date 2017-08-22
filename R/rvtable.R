@@ -40,12 +40,28 @@ NULL
 #' the rvtable as is; any other arguments passed to \code{rvtable} are ignored and
 #' neither the table nor its attributes are updated or altered in any way.
 #'
+#' Weights for levels of an ID variable are can be set by \code{set_weights}.
+#' In \code{rvtable}, \code{weights} is passed to \code{set_weights} so that weights can be set on rvtable construction if desired.
+#' It can be relatively cumbersome to set weights for all ID variables at once in a call to \code{rvtable}, and
+#' particularly wasteful if there are several ID columns and most or all have levels with equal weights.
+#' The weights attribute assigned to the rvtable will be an empty list
+#' if there are no ID columns in \code{x} and a named list of data frames otherwise.
+#' The names are the names of the ID variables in \code{x} and each data frame has two columns: \code{levels} and \code{weights},
+#' giving the weighting of an ID variable's levels.
+#' When \code{weights=NULL} or \code{weights=list()}, the values in the \code{weights} column for each level in each data frame
+#' are set to \code{1} for equal weighting.
+#' Similarly, individual named list elements can be set to \code{NULL} for convenience instead of passing a data frame.
+#' \code{NULL} or \code{list()} elements in the \code{weights} list are converted to data frames with weights equal to one.
+#' Note that \code{weights} is ignored if \code{x} is not a data frame.
+#'
+#'
 #' @param x a numeric vector or data frame.
 #' @param y an optional vector of probabilities associated with \code{x} when \code{x} is a numeric vector with no similar probabilities vector attribute.
 #' @param Val the column name of \code{x} referring to random variable values when \code{x} is a data frame.
 #' @param Prob the column name of \code{x} referring to random variable values when \code{x} is a data frame.
 #' @param discrete whether the random variable is discrete.
 #' @param density.args optional arguments passed to \code{density}.
+#' @param weights \code{NULL} or a list of weights associated with levels of ID variables in `x`. See details.
 #' @param force.dist logical, force distribution-type rvtable output if \code{Prob} is missing, i.e., \code{Val} is assumed to be a sample.
 #' Defaults to \code{TRUE}.
 #'
@@ -71,7 +87,7 @@ NULL
 #' rvtable(x)
 #' x <- data.frame(id=rep(LETTERS[1:2], each=10), v1=rep(1:10, 2), p1=c(rep(0.1, 10), sqrt(1:10)))
 #' rvtable(x, Val="v1", Prob="p1")
-rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), force.dist=TRUE){
+rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), weights=list(), force.dist=TRUE){
   if(missing(x)) stop("`x` is missing.")
   if(is_rvtable(x)) return(x)
   vpmissing <- c(missing(Val), missing(Prob))
@@ -83,10 +99,12 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(is.numeric(x))
     return(.rvtable_numeric(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing))
   if(!any(class(x) %in% "data.frame")) stop("`x` is not a data frame.")
-  .rvtable_df(x, Val, Prob, discrete, density.args, force.dist, vpmissing)
+  .rvtable_df(x, Val, Prob, discrete, density.args, weights, force.dist, vpmissing)
 }
 
-.rvtable_df <- function(x, Val, Prob, discrete, density.args, force.dist, vpmissing){
+.rvtable_df <- function(x, Val, Prob, discrete, density.args, weights, force.dist, vpmissing){
+  if(!.no_weights(weights) && is.null(names(weights)))
+    stop("`weights` list must be a named list in `rvtable`.")
   distr <- !vpmissing[2] | force.dist
   forced <- vpmissing[2] & force.dist
   grp <- dplyr::groups(x)
@@ -104,7 +122,7 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
   if(distr){
     if(forced && !Prob %in% id){
       x <- dplyr::group_by_(x, .dots=dots) %>%
-        .add_rvtable_class(Val, Prob, discrete, distr, density.args, list()) %>%
+        .add_rvtable_class(Val, Prob, discrete, distr, NULL, density.args, list()) %>%
         .rvtable_makedist()
     }
     tmp <- (
@@ -113,8 +131,10 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
       )$Duplicated
     if(any(tmp)) stop(paste0("Duplicated values in `", Val, "`."))
   }
-  dplyr::group_by_(x, .dots=grp) %>%
-    .add_rvtable_class(Val, Prob, discrete, distr, density.args, list())
+  x <- dplyr::group_by_(x, .dots=grp) %>%
+    .add_rvtable_class(Val, Prob, discrete, distr, NULL, density.args, list())
+  if(!.no_weights(weights)) x <- set_weights(x, names(weights), weights)
+  x
 }
 
 .rvtable_numeric <- function(x, y, Val, Prob, discrete, density.args, force.dist, vpmissing){
@@ -150,5 +170,5 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE, density.args=list(), f
     if(!vpmissing[1]) names(x) <- Val
   }
   dplyr::ungroup(x) %>%
-    .add_rvtable_class(Val, Prob, discrete, distr, density.args, list())
+    .add_rvtable_class(Val, Prob, discrete, distr, list(), density.args, list())
 }

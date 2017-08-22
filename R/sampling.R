@@ -69,11 +69,12 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   tbl <- tabletype(x)
   Val <- valcol(x)
   Prob <- probcol(x) # nolint
+  weights <- get_weights(x)
   if(missing(density.args)) density.args <- get_density_args(x)
   x <- .rvtable_rename(x, "to")
   id <- names(x)
   grp <- dplyr::groups(x)
-  grp2 <- lapply(dplyr::setdiff(id, c("Val", "Prob")), as.symbol)
+  grp2 <- dplyr::setdiff(id, c("Val", "Prob"))
   if(tbl=="sample" & !resample){
     message("rvtable already contains samples and resample=FALSE. Returning original rvtable.")
     return(x)
@@ -84,16 +85,17 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
-      x <- dplyr::do(x, data.table::data.table(
+      x <- dplyr::do(x, data.frame(
         Val=do.call(density, c(list(x=.$Val), density.args))$x,
-        Prob=do.call(density, c(list(x=.$Val), density.args))$y)) %>%
+        Prob=do.call(density, c(list(x=.$Val), density.args))$y,
+        stringsAsFactors=FALSE)) %>%
         dplyr::group_by_(.dots=grp2)
     }
   }
   x <- dplyr::do(x, data.frame(
     Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals),
-    stringsAsFactors=FALSE)) %>%
-    dplyr::group_by_(.dots=grp) %>%
-    .add_rvtable_class(Val, NULL, discrete, FALSE, density.args)
-  .rvtable_rename(x, "from")
+    stringsAsFactors=FALSE))
+  dplyr::group_by_(x, .dots=grp) %>%
+    .add_rvtable_class(Val, NULL, discrete, FALSE, weights, density.args) %>%
+    .rvtable_rename("from")
 }
