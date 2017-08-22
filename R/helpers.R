@@ -8,15 +8,19 @@
 #' \code{rvtype}, \code{tabletype}, \code{valcol} and \code{probcol} return individual attributes of \code{x} (character).
 #'
 #' \code{get*} functions for density and sample argument lists return the lists from the attributes of \code{x}
-#' and the corresponding \code{set*} functions return \code{x} with the new \code{denisty.args} and \code{sample.args}.
+#' and the corresponding \code{set*} functions return \code{x} with the new \code{denisty.args} and \code{sample.args} attributes.
 #' Setting density or sample argument lists is usually done when passing arguments to a function, e.g., \code{rvtable}
 #' or \code{sample_rvtable}. However, it can sometimes be useful to set these directly or update them at a desired step
-#' in a rvtable processing pipeline.
+#' in a rvtable processing pipeline. Note that when defaults are not explicitly provided (i.e., leaving as \code{list()} or \code{NULL}),
+#' the atrributes of an rvtable will still display all sampling default arguments and the most important \code{density}
+#' default arguments for clarity.
 #'
 #' @param x rvtable.
 #' @param id character, rvtable attribute(s). If not provided, all available rvtable attributes.
 #' @param all logical, ignore `id` and return all attributes,
 #' including those not specific to the `rvtable` class. Defaults to \code{FALSE}.
+#' @param density.args set rvtable \code{density} arguments. See details.
+#' @param sample.args set rvtable sampling arguments. See details.
 #' @name helpers
 #'
 #' @return information about various rvtable attributes. See details.
@@ -80,7 +84,9 @@ tabletype <- function(x){
 
 #' @export
 #' @rdname helpers
-is_rvtable <- function(x) "rvtable" %in% class(x) & .has_rv_attributes(x)
+is_rvtable <- function(x){
+  "rvtable" %in% class(x) & .has_rv_attributes(x, drop=c("probcol", "idcols"))
+}
 
 #' @export
 #' @rdname helpers
@@ -120,7 +126,7 @@ probcol <- function(x){
 #' @rdname helpers
 idcols <- function(x){
   .rv_class_check(x)
-  names(get_weights(x))
+  attr(x, "idcols")
 }
 
 #' @export
@@ -153,30 +159,52 @@ set_sample_args <- function(x, sample.args){
   x
 }
 
-.rvtable_attribute_names <- function(prob=TRUE){
-  x <- c("rvtype", "tabletype", "valcol", "probcol", "weights", "density.args", "sample.args")
-  if(prob) x else x[-4]
+.rvtable_attribute_names <- function(drop=NULL){
+  x <- c("rvtype", "tabletype", "valcol", "probcol",
+         "idcols", "weights", "density.args", "sample.args")
+  if(is.null(drop)) x else x[!x %in% drop]
 }
 
-.has_rv_attributes <- function(x)
-  all(.rvtable_attribute_names(prob=FALSE) %in% names(attributes(x)))
+.has_rv_attributes <- function(x, ...)
+  all(.rvtable_attribute_names(...) %in% names(attributes(x)))
 
-.lost_rv_class_check <- function(x){
-  if(.has_rv_attributes(x) & !(is_rvtable(x)))
+.lost_rv_class_check <- function(x, drop=c("probcol", "idcols")){
+  if(.has_rv_attributes(x, drop=drop) & !(is_rvtable(x)))
     class(x) <- unique(c("rvtable", class(x)))
   x
 }
 
-.add_rvtable_class <- function(x, Val, Prob, discrete, distr, weights=list(), density.args=list(), sample.args=list()){
-  if(!distr & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
+.update_default_args <- function(user_args, type, drop_nulls=TRUE){
+  if(!type %in% c("density", "sample")) stop("`type` must be 'density' or 'sample'.")
+  if(type == "density"){
+    x <- list(n=512, adjust=1, from=NULL, to=NULL, bw="nrd0", kernel="gaussian")
+    if(drop_nulls) x <- x[!names(x) %in% c("from", "to")]
+  }
+  if(type == "sample")
+    x <- formals(sample_rvtable)[c("n", "interp", "n.interp", "decimals")]
+  for(i in names(x)) if(!i %in% names(user_args)) user_args[[i]] <- x[[i]]
+  user_args
+}
+
+.add_rvtable_class <- function(x, Val, Prob, discrete, distr, weights=list(),
+                               density.args=list(), sample.args=list(),
+                               not_ids=c("Val", "Prob", "weights_")){
+  density.args <- .update_default_args(density.args, "density")
+  sample.args <- .update_default_args(sample.args, "sample")
+  if(!distr & !is.null(Prob))
+    stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
   attr(x, "tabletype") <- ifelse(distr, "distribution", "sample")
   attr(x, "valcol") <- Val
   attr(x, "probcol") <- Prob
-  attr(x, "weights") <- .set_all_weights(x, weights, Prob, Val)
   attr(x, "density.args") <- density.args
   attr(x, "sample.args") <- sample.args
+  id <- names(x)[!names(x) %in% c(Val, Prob, not_ids)]
+  if(!length(id)) id <- NULL
+  attr(x, "idcols") <- id
+  weights <- if(is.null(id)) list(x=1)[0] else .set_all_weights(x, weights, Val, Prob)
+  attr(x, "weights") <- weights
   x
 }
 
