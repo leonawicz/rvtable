@@ -26,7 +26,7 @@
 #'
 #' @name weights
 #'
-#' @return a list for \code{get_weights}.
+#' @return a list for \code{get_weights} and \code{get_levels}.
 #'
 #' @examples
 #' x <- rvtable(data.frame(
@@ -49,7 +49,10 @@ NULL
 
 #' @export
 #' @rdname weights
-get_levels <- function(x, id=NULL) purrr::map(get_weights(x), ~.x$levels)
+get_levels <- function(x, id){
+  x <- get_weights(x, id)
+  purrr::map(x, ~.x$levels)
+}
 
 #' @export
 #' @rdname weights
@@ -57,6 +60,7 @@ get_weights <- function(x, id){
   .rv_class_check(x)
   w <- attr(x, "weights")
   if(missing(id)) return(w)
+  if(any(!id %in% idcols(x))) stop("Invalid `id`, not found in ID columns of `x`.")
   w[id]
 }
 
@@ -152,7 +156,7 @@ set_weights <- function(x, id, weights){
 }
 
 .set_all_weights <- function(x, weights, Val, Prob){
-  id <- attr(x, "idcols")
+  id <- attr(x, "coltypes")$ids
   weights <- .check_weights(weights, id)
   weights <- purrr::map2(id, weights, ~.weights_tbl(x, id=.x, weights=.y))
   names(weights) <- id
