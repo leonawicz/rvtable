@@ -129,7 +129,8 @@ set_weights <- function(x, id, weights){
 
 .no_weights <- function(weights){
   is.null(weights) || identical(weights, list()) ||
-    identical(weights, list(NULL)) || identical(weights, list(x=1)[0])
+    identical(weights, list(NULL)) || identical(weights, list(x=1)[0]) ||
+    (is.list(weights) && length(weights) == 1 && is.null(weights[[1]]))
 }
 
 .weights_tbl <- function(x, id, weights=NULL){
@@ -143,10 +144,10 @@ set_weights <- function(x, id, weights){
 }
 
 .set_all_weights <- function(x, weights, Val, Prob){
-  idvars <- names(x)[which(!names(x) %in% c(Val, Prob))]
-  weights <- .check_weights(weights, idvars)
-  weights <- purrr::map2(idvars, weights, ~.weights_tbl(x, id=.x, weights=.y))
-  names(weights) <- idvars
+  id <- attr(x, "idcols")
+  weights <- .check_weights(weights, id)
+  weights <- purrr::map2(id, weights, ~.weights_tbl(x, id=.x, weights=.y))
+  names(weights) <- id
   weights
 }
 
