@@ -36,6 +36,8 @@ inverse_pmf <- function(x, values, id, sample.args){
   if(length(values) == 1) values <- rep(values, 2)
   Val <- valcol(x)
   Prob <- probcol(x)
+  weights <- get_weights(x)
+  weights <- weights[names(weights) != id]
   density.args <- get_density_args(x)
   if(missing(sample.args)) sample.args <- get_sample_args(x)
   if(tabletype(x)=="distribution"){
@@ -78,7 +80,7 @@ inverse_pmf <- function(x, values, id, sample.args){
        "' has probability zero over the given value range of the primary random variable."))
     x[[Prob]] <- numeric()
   }
-  .add_rvtable_class(x, id, Prob, TRUE, TRUE, density.args, sample.args)
+  .add_rvtable_class(x, id, Prob, TRUE, TRUE, weights, density.args, sample.args)
 }
 
 .inverse_pmf_stop <- function(x, values, id){
