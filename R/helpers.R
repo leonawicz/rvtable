@@ -118,6 +118,13 @@ probcol <- function(x){
 
 #' @export
 #' @rdname helpers
+idcols <- function(x){
+  .rv_class_check(x)
+  names(get_weights(x))
+}
+
+#' @export
+#' @rdname helpers
 get_density_args <- function(x){
   .rv_class_check(x)
   attr(x, "density.args")
@@ -146,7 +153,7 @@ set_sample_args <- function(x, sample.args){
 }
 
 .rvtable_attribute_names <- function(prob=TRUE){
-  x <- c("rvtype", "tabletype", "valcol", "probcol", "density.args", "sample.args")
+  x <- c("rvtype", "tabletype", "valcol", "probcol", "weights", "density.args", "sample.args")
   if(prob) x else x[-4]
 }
 
@@ -159,13 +166,14 @@ set_sample_args <- function(x, sample.args){
   x
 }
 
-.add_rvtable_class <- function(x, Val, Prob, discrete, distr, density.args=list(), sample.args=list()){
+.add_rvtable_class <- function(x, Val, Prob, discrete, distr, weights=list(), density.args=list(), sample.args=list()){
   if(!distr & !is.null(Prob)) stop("Expected `Prob` to be NULL if tabletype is 'sample'.")
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
   attr(x, "tabletype") <- ifelse(distr, "distribution", "sample")
   attr(x, "valcol") <- Val
   attr(x, "probcol") <- Prob
+  attr(x, "weights") <- .set_all_weights(x, weights, Prob, Val)
   attr(x, "density.args") <- density.args
   attr(x, "sample.args") <- sample.args
   x
