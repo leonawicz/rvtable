@@ -11,6 +11,7 @@
 \alias{is_discrete}
 \alias{is_continuous}
 \alias{is_density}
+\alias{coltypes}
 \alias{valcol}
 \alias{probcol}
 \alias{idcols}
@@ -37,6 +38,8 @@ is_discrete(x)
 is_continuous(x)
 
 is_density(x)
+
+coltypes(x)
 
 valcol(x)
 

@@ -78,6 +78,7 @@ yielding the pmf of an ID variable conditional on a range of values of a continu
 This introduction covers the following topics:
 
 - Create various rvtable objects.
+- Examine rvtable class attributes.
 - Sample from a distribution-type rvtable, yielding a new, sample-type rvtable.
 - Compute marginal distributions on an rvtable.
 - Compute an inverse empirical probability mass function from an rvtable.
@@ -123,7 +124,7 @@ The discrete nature of `x` is inferred either from its attributes or from `y`.
 When `x` is a numeric vector, `discrete = TRUE` is only required when probabilities are not passed by `y`
 or by `x` attributes and `x` is a basic unweighted sample (but possibly with repeating values).
 There are a number of convenient functions for accessing attributes of an rvtable. See `?helpers`
-for details.
+as well as the next section for details.
 
 ```{r rvtable_objects2}
 x <- sample(1:10, size=10000, replace=TRUE, prob=sqrt(10:1))
@@ -194,7 +195,7 @@ basic sample with no probabilities and `force.dist=FALSE`.
 and probabilities columns; rvtables and the functions that manipulate them work with *one* implicit random variable
 defined by *one* pair of values and probabilities columns. While ID columns add more variables to an rvtable, the focus remains on
 the main random variable. Any column in an rvtable not specified as a values or probabilities column will be
-treated as an ID variable. See bullet point below.
+treated as an ID variable.
 
 This is the initial stopgap to using rvtables as not intended.
 If you pass a data frame whose rows have been grouped by any categorical variables using `dplyr::group_by`, 
@@ -214,11 +215,19 @@ partial grouping.
 When returning an rvtable object, it will reassign any grouping that might have been part of the input rather than
 strip grouping or retain full grouping.
 
+## Examine rvtable attributes
+
+The rvtable class is a class added to a data frame. rvtables are also tibbles (class `tbl_df`) from `dplyr`, specifically.
+The key addition is a more restricted, contextualized format and attachment of a number of class attributes
+that assist in describing and manipulating rvtables.
+
+[More needed...]
+
 ## Sampling rvtables
 
 Sampling on an rvtable requires a density-type rvtable.
 This is the more common form. Sampling results in a new rvtable object that is of sampling-type, meaning its
-`Val` column represents raw sample values and there is no corresponding `Prob` column of probabilities tied to values.
+values column represents raw sample values and there is no corresponding column of probabilities tied to those values.
 This is the less common rvtable type and tends to be explicitly created and used at the end of a chain of
 data manipulation steps when it finally comes time to do something with the data such as plot it or pass samples to
 an analysis.
@@ -244,7 +253,7 @@ sample_rvtable(y, n=8, resample=TRUE)
 In the above example, the `tabletype` entry in the attributes of `y` is different from that in `x`.
 After sampling from the density-type rvtable, the resultant rvtable is in sample form.
 In the discrete example, `sample_rvtable` is called on an rvtable that is already in sample form.
-In this case samples are taken directly from the rvtable `Val` column unless `resample=TRUE`, which
+In this case samples are taken directly from the rvtable values column unless `resample=TRUE`, which
 forces the additional step of re-estimation of the pmf or pdf prior to resampling.
 This is especially useful in the continuous case when the user requires more control over the 
 sampling distribution via `density.args` prior to resampling.
@@ -283,11 +292,12 @@ For singling out or collapsing over ID variables, we turn to the next section.
 ## Computing marginal distributions on rvtables
 
 There is not much to say about conditional distributions because this is relatively trivial.
-A conditional distribution of the random variable described by `Val` and `Prob` given, say, an ID variable being
-equal to one or some subset of some of its levels, is obtained by simply subsetting the rvtable to those rows.
+A conditional distribution of the random variable described by the values and probabilities columns given, say, 
+an ID variable being equal to one or some subset of some of its levels, 
+is obtained by simply subsetting the rvtable to those rows.
 
 On the other hand, marginalizing over levels of an ID variable
-to yield a marginal distribution of the random variable described by `Val` and `Prob`, is more complex.
+to yield a marginal distribution of the primary random variable is more complex.
 This is done with `marginalize`, which is a wrapper around `merge_rvtable`.
 While the latter is exported by the `rvtable` package and can make sense to use directly,
 it is typical to use `marginalize`, specifically.

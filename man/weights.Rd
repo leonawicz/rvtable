@@ -7,7 +7,7 @@
 \alias{set_weights}
 \title{ID variable level weights}
 \usage{
-get_levels(x, id = NULL)
+get_levels(x, id)
 
 get_weights(x, id)
 
@@ -21,7 +21,7 @@ set_weights(x, id, weights)
 \item{weights}{list, data frame, or \code{NULL}. See details.}
 }
 \value{
-a list for \code{get_weights}.
+a list for \code{get_weights} and \code{get_levels}.
 }
 \description{
 Get or set ID variable level weights.
