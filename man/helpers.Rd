@@ -59,6 +59,10 @@ set_sample_args(x, sample.args)
 
 \item{all}{logical, ignore `id` and return all attributes,
 including those not specific to the `rvtable` class. Defaults to \code{FALSE}.}
+
+\item{density.args}{set rvtable \code{density} arguments. See details.}
+
+\item{sample.args}{set rvtable sampling arguments. See details.}
 }
 \value{
 information about various rvtable attributes. See details.
@@ -73,10 +77,12 @@ They get and in some cases set rvtable attributes as well as perform various log
 \code{rvtype}, \code{tabletype}, \code{valcol} and \code{probcol} return individual attributes of \code{x} (character).
 
 \code{get*} functions for density and sample argument lists return the lists from the attributes of \code{x}
-and the corresponding \code{set*} functions return \code{x} with the new \code{denisty.args} and \code{sample.args}.
+and the corresponding \code{set*} functions return \code{x} with the new \code{denisty.args} and \code{sample.args} attributes.
 Setting density or sample argument lists is usually done when passing arguments to a function, e.g., \code{rvtable}
 or \code{sample_rvtable}. However, it can sometimes be useful to set these directly or update them at a desired step
-in a rvtable processing pipeline.
+in a rvtable processing pipeline. Note that when defaults are not explicitly provided (i.e., leaving as \code{list()} or \code{NULL}),
+the atrributes of an rvtable will still display all sampling default arguments and the most important \code{density}
+default arguments for clarity.
 }
 \examples{
 x <- rvtable(1:10)

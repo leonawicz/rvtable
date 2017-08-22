@@ -14,8 +14,6 @@ marginalize(x, margin, density.args, sample.args)
 \item{density.args}{optional arguments passed to \code{density}. If supplied, overrides the \code{density.args} attribute of \code{x}.}
 
 \item{sample.args}{optional arguments used when sampling. If supplied, overrides the \code{sample.args} attribute of \code{x}.}
-
-\item{weights}{relative weights for unique values or levels of a single \code{margin} variable.}
 }
 \value{
 an rvtable.
@@ -25,12 +23,10 @@ Obtain a marginal distribution of a random variable in an rvtable.
 }
 \details{
 Grouping variables are ignored when marginalizing the distribution of a random variable over explicit categorical variables.
-\code{margin} must be explicit.
-\code{weights} only applies in the clear case of marginalizing over a single categorical variable.
-Marginalizing over multiple variables in a single call to \code{marginalize}
-is only available assuming equal weights for all values of those variables.
-When using weights, \code{marginalize} must be called on one variable at a time.
-Call \code{get_levels} on an rvtable first to ensure weights are passed in the correct order.
+Unlike \code{merge_rvtable}, \code{marginalize} will not merge ungrouped ID variables.
+It will only marginalize over the ID variables specified in \code{margin}.
+It will also account for unequal weighting of an ID variable's levels, taken from the \code{weights} attribute of an rvtable,
+whereas \code{merge_rvtable} is a simpler function that ignores weights.
 }
 \examples{
 \dontrun{
