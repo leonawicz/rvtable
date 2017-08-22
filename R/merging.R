@@ -57,7 +57,7 @@ merge_rvtable <- function(x, density.args, sample.args){
   if(missing(sample.args)) sample.args <- get_sample_args(x)
   if(distr){
     if(is.null(sample.args$n)) sample.args$n <- 10000
-    attr(x, "sample.args") <- sample.args
+    x <- set_sample_args(x, sample.args)
     sample.args$density.args <- density.args
     x <- do.call(sample_rvtable, c(list(x=x), sample.args))
     sample.args$density.args <- NULL
