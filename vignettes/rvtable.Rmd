@@ -118,12 +118,12 @@ unless `discrete=TRUE`.
 
 For discrete random variables, probabilities associated with values of `x` can be passed to `y`.
 Alternatively, `x` can be passed without `y` for the same purpose if `x` has the attribute `probabilities`.
-Note that in either case, it is no longer necessary to explicitly pass `discrete=TRUE`.
+Note that in either case, it is no longer necessary to explicitly pass `discrete = TRUE`.
 The discrete nature of `x` is inferred either from its attributes or from `y`.
-When `x` is a numeric vector, `discrete=TRUE` is only required when probabilities are not passed by `y`
+When `x` is a numeric vector, `discrete = TRUE` is only required when probabilities are not passed by `y`
 or by `x` attributes and `x` is a basic unweighted sample (but possibly with repeating values).
-At any time use `attributes` to inspect the attributes of an rvtable.
-
+There are a number of convenient functions for accessing attributes of an rvtable. See `?helpers`
+for details.
 
 ```{r rvtable_objects2}
 x <- sample(1:10, size=10000, replace=TRUE, prob=sqrt(10:1))
@@ -134,11 +134,11 @@ rvtable(x, y=probs) # discreteness inferred from y
 attr(x, "probabilities") <- probs
 rv <- rvtable(x) # discreteness inferred from attributes
 rv
-attributes(rv)
+rvattr(rv)
 ```
 
 Also note above that probabilities need not sum to one in the discrete case.
-They are relative weights and will be rescaled internally by `sample` rather than
+In this case relative weights suffice and will be rescaled internally by `sample` rather than
 passed to `density` as is the case with continuous random variables.
 
 Increasingly the complexity of the input to `rvtable`,
@@ -307,26 +307,28 @@ marginalize(rv, margin=c("id1", "id2"))
 ```
 
 `get_levels` can be used to quickly check the unique levels of an ID variable.
+More informative is to call `get_weights`, which returns levels and their respective weights.
 Note that ID columns do not have to be of class `factor` to be treated as ID/categorical/factor variables, etc.
-Character vectors suffice.
 
-A reason this is helpful is because when marginalizing over an ID variable,
+A reason weights are helpful is because when marginalizing over an ID variable,
 it is possible to pass a vector of weights or probabilities when integration should account for weighted samples.
 For example, an rvtable may have equal numbers of rows describing the probability distribution of a continuous
 random variable conditional on each of two ID variable levels. However, it may be known by the user that
 each of these levels do not contribute equally to the marginal distribution.
-Weights must be passed in the same orders as the levels returned by `get_levels`.
+
+Weights are stored as an rvtable attribute and can get retrieved and set with `get_weights` and `set_weights`.
+Weights should not be confused with the probabilities column in an rvtable that describes the actual random variable
+probabilities. Weights can also be set for ID variables as part of the call to the `rvtable` constructor,
+which calls `set_weights` internally. By default, weights of each ID variable's levels are equal (set to one, though
+what matters is only that they are equal). Unequal weights must be assigned explicitly.
 
 ```{r marginalize2}
 get_levels(rv, "id1")
-marginalize(rv, "id1", weights=c(1, 1.5, 2, 4, 1))
+get_weights(rv, "id1")
+wts <- data.frame(levels = LETTERS[1:5], weights = c(1, 1.5, 2, 4, 1))
+x <- set_weigths(x, id = "id1", weights = wts)
+marginalize(rv, "id1")
 ```
-
-When weights need to be specified, `marginalize` can only collapse over one ID variable at a time.
-If multiple variables must be integrated out, this can usually be done with a single call as shown,
-but when weights are supplied, then `marginalize` must be called successively.
-The current implementation of `marginalize` does not allow `weights` to take a list of weights vectors 
-for each of multiple ID variables.
 
 ## Computing an inverse pmf
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{helpers}
 \alias{helpers}
-\alias{rvatts}
+\alias{rvattr}
 \alias{rvtype}
 \alias{tabletype}
 \alias{is_rvtable}
@@ -20,7 +20,7 @@
 \alias{set_sample_args}
 \title{rvtable helpers and attributes}
 \usage{
-rvatts(x, id, all = FALSE)
+rvattr(x, id, all = FALSE)
 
 rvtype(x)
 
@@ -73,7 +73,7 @@ Helper functions for the rvtable class.
 \details{
 These helper functions provide information about `rvtable` class objects and their attributes.
 They get and in some cases set rvtable attributes as well as perform various logical checks.
-\code{rvatts} returns a named list of attributes of \code{x}. \code{is*} functions return \code{TRUE} or \code{FALSE}.
+\code{rvattr} returns a named list of attributes of \code{x}. \code{is*} functions return \code{TRUE} or \code{FALSE}.
 \code{rvtype}, \code{tabletype}, \code{valcol} and \code{probcol} return individual attributes of \code{x} (character).
 
 \code{get*} functions for density and sample argument lists return the lists from the attributes of \code{x}
@@ -94,9 +94,9 @@ is_discrete(x)
 is_continuous(x)
 is_density(x)
 
-rvatts(x)
-rvatts(x, id=c("rvtype", "tabletype"))
-rvatts(x, all = TRUE)
+rvattr(x)
+rvattr(x, id=c("rvtype", "tabletype"))
+rvattr(x, all = TRUE)
 
 rvtype(x)
 tabletype(x)

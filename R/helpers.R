@@ -4,7 +4,7 @@
 #'
 #' These helper functions provide information about `rvtable` class objects and their attributes.
 #' They get and in some cases set rvtable attributes as well as perform various logical checks.
-#' \code{rvatts} returns a named list of attributes of \code{x}. \code{is*} functions return \code{TRUE} or \code{FALSE}.
+#' \code{rvattr} returns a named list of attributes of \code{x}. \code{is*} functions return \code{TRUE} or \code{FALSE}.
 #' \code{rvtype}, \code{tabletype}, \code{valcol} and \code{probcol} return individual attributes of \code{x} (character).
 #'
 #' \code{get*} functions for density and sample argument lists return the lists from the attributes of \code{x}
@@ -35,9 +35,9 @@
 #' is_continuous(x)
 #' is_density(x)
 #'
-#' rvatts(x)
-#' rvatts(x, id=c("rvtype", "tabletype"))
-#' rvatts(x, all = TRUE)
+#' rvattr(x)
+#' rvattr(x, id=c("rvtype", "tabletype"))
+#' rvattr(x, all = TRUE)
 #'
 #' rvtype(x)
 #' tabletype(x)
@@ -54,7 +54,7 @@ NULL
 
 #' @export
 #' @rdname helpers
-rvatts <- function(x, id, all=FALSE){
+rvattr <- function(x, id, all=FALSE){
   .rv_class_check(x)
   atts <- .rvtable_attribute_names()
   smpl <- tabletype(x) == "sample"
