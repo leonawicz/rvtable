@@ -25,7 +25,7 @@ test_that("get_levels returns correctly", {
   expect_is(get_levels(x_d), cl)
   expect_is(get_levels(x_c, "id2"), cl)
   expect_is(get_levels(x_d, "id3"), cl)
-  expect_error(get_levels(x_c, "a"), "`id` not found")
+  expect_error(get_levels(x_c, "a"), "Invalid `id`, not found in ID columns of `x`.")
 })
 
 test_that("merge_rvtable returns correct class object", {

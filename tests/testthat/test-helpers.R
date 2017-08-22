@@ -11,9 +11,9 @@ test_that("unrun helpers examples return correctly", {
   expect_true(is_density(x))
 
   expect_is(rvattr(x), "list")
-  expect_equal(length(rvattr(x)), 7)
+  expect_equal(length(rvattr(x)), 6)
   expect_equal(length(rvattr(x, id=c("rvtype", "tabletype"))), 2)
-  expect_equal(length(rvattr(x, all=TRUE)), 10)
+  expect_equal(length(rvattr(x, all=TRUE)), 9)
 
   expect_equal(rvtype(x), "continuous")
   expect_equal(tabletype(x), "distribution")

@@ -144,7 +144,7 @@ test_that("grouping ignored/stripped with inverse_pmf", {
 
   # invrse vs original
   purrr::walk(xlist_inverse1, ~expect_identical(class(.x), cl[[1]]))
-  purrr::walk(xlist_inverse1, ~expect_identical(get_levels(.x), lev[1:3]))
+  purrr::walk(xlist_inverse1, ~expect_identical(get_levels(.x), lev[2:3]))
   purrr::walk(xlist_inverse1, ~expect_identical(groups(.x), NULL))
 
   purrr::walk(xlist_inverse1, ~expect_identical(dim(.x), as.integer(c(5*2*2, 2 + 3 - 1))))
