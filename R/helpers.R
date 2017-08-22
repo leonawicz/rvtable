@@ -59,11 +59,7 @@ NULL
 rvattr <- function(x, id, all=FALSE){
   .rv_class_check(x)
   atts <- .rvtable_attribute_names()
-  smpl <- tabletype(x) == "sample"
-  if(smpl) atts <- atts[atts != "probcol"]
   if(missing(id)) id <- atts
-  if(smpl & any(id == "probcol"))
-    stop("'probcol' is not an attribute of sample-type rvtables.")
   if(any(!id %in% atts)) stop("Invalid attribute name(s) in `id`.")
   x <- attributes(x)
   if(all) return(x)
@@ -86,9 +82,7 @@ tabletype <- function(x){
 
 #' @export
 #' @rdname helpers
-is_rvtable <- function(x){
-  "rvtable" %in% class(x) & .has_rv_attributes(x, drop=c("probcol", "idcols"))
-}
+is_rvtable <- function(x) "rvtable" %in% class(x) & .has_rv_attributes(x)
 
 #' @export
 #' @rdname helpers
@@ -112,23 +106,30 @@ is_density <- function(x) rvtype(x) == "continuous" & tabletype(x) == "distribut
 
 #' @export
 #' @rdname helpers
+coltypes <- function(x){
+  .rv_class_check(x)
+  attr(x, "coltypes")
+}
+
+#' @export
+#' @rdname helpers
 valcol <- function(x){
   .rv_class_check(x)
-  attr(x, "valcol")
+  attr(x, "coltypes")$values
 }
 
 #' @export
 #' @rdname helpers
 probcol <- function(x){
   .rv_class_check(x)
-  attr(x, "probcol")
+  attr(x, "coltypes")$probs
 }
 
 #' @export
 #' @rdname helpers
 idcols <- function(x){
   .rv_class_check(x)
-  attr(x, "idcols")
+  attr(x, "coltypes")$ids
 }
 
 #' @export
@@ -162,16 +163,15 @@ set_sample_args <- function(x, sample.args){
 }
 
 .rvtable_attribute_names <- function(drop=NULL){
-  x <- c("rvtype", "tabletype", "valcol", "probcol",
-         "idcols", "weights", "density.args", "sample.args")
+  x <- c("rvtype", "tabletype", "coltypes", "weights", "density.args", "sample.args")
   if(is.null(drop)) x else x[!x %in% drop]
 }
 
 .has_rv_attributes <- function(x, ...)
   all(.rvtable_attribute_names(...) %in% names(attributes(x)))
 
-.lost_rv_class_check <- function(x, drop=c("probcol", "idcols")){
-  if(.has_rv_attributes(x, drop=drop) & !(is_rvtable(x)))
+.lost_rv_class_check <- function(x){
+  if(.has_rv_attributes(x) & !(is_rvtable(x)))
     class(x) <- unique(c("rvtable", class(x)))
   x
 }
@@ -198,13 +198,11 @@ set_sample_args <- function(x, sample.args){
   class(x) <- unique(c("rvtable", class(x)))
   attr(x, "rvtype") <- ifelse(discrete, "discrete", "continuous")
   attr(x, "tabletype") <- ifelse(distr, "distribution", "sample")
-  attr(x, "valcol") <- Val
-  attr(x, "probcol") <- Prob
   attr(x, "density.args") <- density.args
   attr(x, "sample.args") <- sample.args
   id <- names(x)[!names(x) %in% c(Val, Prob, not_ids)]
   if(!length(id)) id <- NULL
-  attr(x, "idcols") <- id
+  attr(x, "coltypes") <- list(values=Val, probs=Prob, ids=id)
   weights <- if(is.null(id)) list(x=1)[0] else .set_all_weights(x, weights, Val, Prob)
   attr(x, "weights") <- weights
   x
