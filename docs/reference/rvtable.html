@@ -94,7 +94,7 @@
     
 
     <pre class="usage"><span class='fu'>rvtable</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>Val</span>, <span class='no'>Prob</span>, <span class='kw'>discrete</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>density.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(),
-  <span class='kw'>force.dist</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='kw'>force.dist</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -122,6 +122,10 @@
     <tr>
       <th>density.args</th>
       <td><p>optional arguments passed to <code>density</code>.</p></td>
+    </tr>
+    <tr>
+      <th>weights</th>
+      <td><p><code>NULL</code> or a list of weights associated with levels of ID variables in `x`. See details.</p></td>
     </tr>
     <tr>
       <th>force.dist</th>
@@ -163,6 +167,19 @@ of making the rvtable.</p>
 <p>If an rvtable is already of class <code>rvtable</code>, the <code>rvtable</code> function simply returns
 the rvtable as is; any other arguments passed to <code>rvtable</code> are ignored and
 neither the table nor its attributes are updated or altered in any way.</p>
+<p>Weights for levels of an ID variable are can be set by <code>set_weights</code>.
+In <code>rvtable</code>, <code>weights</code> is passed to <code>set_weights</code> so that weights can be set on rvtable construction if desired.
+It can be relatively cumbersome to set weights for all ID variables at once in a call to <code>rvtable</code>, and
+particularly wasteful if there are several ID columns and most or all have levels with equal weights.
+The weights attribute assigned to the rvtable will be an empty list
+if there are no ID columns in <code>x</code> and a named list of data frames otherwise.
+The names are the names of the ID variables in <code>x</code> and each data frame has two columns: <code>levels</code> and <code>weights</code>,
+giving the weighting of an ID variable's levels.
+When <code>weights=NULL</code> or <code>weights=list()</code>, the values in the <code>weights</code> column for each level in each data frame
+are set to <code>1</code> for equal weighting.
+Similarly, individual named list elements can be set to <code>NULL</code> for convenience instead of passing a data frame.
+<code>NULL</code> or <code>list()</code> elements in the <code>weights</code> list are converted to data frames with weights equal to one.
+Note that <code>weights</code> is ignored if <code>x</code> is not a data frame.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>

@@ -120,11 +120,15 @@
 
     <p>Distributions are merged using a cycle of bootstrap resampling followed by density re-estimation.
 Merging relies simply on what <code>x</code> is grouped by.
-It assumes equal weights for all levels of all grouping variables over which a random variable is being merged.
-This is why it is called merging rather than marginalizing.
-This function is also used by <code>marginalize</code> and can properly obtain a marginal distribution when passed an rvtable including a <code>weights</code> column, which <code>marginalize</code> provides.
-If calling this function directly, it is important to know that it is generally intended for simple merging.
-Use <code>marginalize</code> to ensure proper marginal distributions are obtained since it can be used with or without non-constant weights.</p>
+All levels of all ungrouped variables are merged. Weights are also ignored by <code>merge_rvtable</code>.
+This is why the behavior is referred to as merging rather than marginalizing.
+If an ungrouped variable has levels with unequal weights, weights are ignored, the merging is still forced,
+but a warning is thrown.</p>
+<p>This function is also called internally by <code>marginalize</code>, in which case it does not ignore weights
+and will calculate a proper marginal distribution even when there are unequal weights.
+If calling this function directly, it is important to know that it is intended for simple merging.
+Recommended practice is to use <code>marginalize</code> to ensure proper marginal distributions
+are always obtained by default regardless of equal or unequal weights.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>

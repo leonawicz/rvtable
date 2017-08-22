@@ -145,31 +145,10 @@ All rvtable objects are either distribution-based or sample-based.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rvtable.html'>rvtable</a></span>(<span class='fu'>rnorm</span>(<span class='fl'>1000</span>))
-<span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>10</span>)</div><div class='output co'>#&gt; # A tibble: 10 x 1
-#&gt;              x
-#&gt;          &lt;dbl&gt;
-#&gt;  1  0.06765750
-#&gt;  2  0.88746804
-#&gt;  3 -0.06671491
-#&gt;  4  0.27230159
-#&gt;  5 -1.13398049
-#&gt;  6  0.38260730
-#&gt;  7  1.05300374
-#&gt;  8  1.26937263
-#&gt;  9  0.60722983
-#&gt; 10 -1.26295332</div><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rvtable.html'>rvtable</a></span>(<span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>100</span>, <span class='fl'>50</span>), <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
+<span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>10</span>)
+<span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='rvtable.html'>rvtable</a></span>(<span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>100</span>, <span class='fl'>50</span>), <span class='kw'>discrete</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
 <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>sample_rvtable</span>(<span class='no'>x</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>10</span>)
-<span class='fu'>sample_rvtable</span>(<span class='no'>y</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>8</span>, <span class='kw'>resample</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; # A tibble: 8 x 1
-#&gt;       x
-#&gt;   &lt;dbl&gt;
-#&gt; 1    70
-#&gt; 2     6
-#&gt; 3    70
-#&gt; 4    70
-#&gt; 5    48
-#&gt; 6    81
-#&gt; 7    81
-#&gt; 8    70</div></pre>
+<span class='fu'>sample_rvtable</span>(<span class='no'>y</span>, <span class='kw'>n</span><span class='kw'>=</span><span class='fl'>8</span>, <span class='kw'>resample</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
