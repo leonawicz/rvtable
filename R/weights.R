@@ -17,6 +17,9 @@
 #' Equal weights are set for an individual ID variable's levels
 #' when a list element in \code{weights} correpsonding to an \code{id} value is \code{NULL}.
 #'
+#' \code{get_levels} returns a list of levels for ID variables in \code{x}, a subset of the information returned by \code{get_weights}
+#' When an rvtable contains no ID variables, there are no levels or weights.
+#'
 #' @param x rvtable.
 #' @param id character, ID column name in \code{x}.
 #' @param weights list, data frame, or \code{NULL}. See details.
@@ -31,6 +34,7 @@
 #'   id2=factor(c("low", "high")),
 #'   id3=rep(1:2, each=2),
 #'   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)))
+#' get_levels(x)
 #' get_weights(x)
 #' get_weights(x, "id1")
 #' x <- set_weights(x, "id1", data.frame(levels=LETTERS[1:5], weights=1:5))
@@ -42,6 +46,10 @@
 #' x <- set_weights(x, c("id1", "id2"), list(NULL, wts))
 #' get_weights(x)
 NULL
+
+#' @export
+#' @rdname weights
+get_levels <- function(x, id=NULL) purrr::map(get_weights(x), ~.x$levels)
 
 #' @export
 #' @rdname weights

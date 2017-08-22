@@ -2,10 +2,13 @@
 % Please edit documentation in R/weights.R
 \name{weights}
 \alias{weights}
+\alias{get_levels}
 \alias{get_weights}
 \alias{set_weights}
 \title{ID variable level weights}
 \usage{
+get_levels(x, id = NULL)
+
 get_weights(x, id)
 
 set_weights(x, id, weights)
@@ -38,6 +41,9 @@ In general, \code{weights} is a list of data frames corresponding to the variabl
 If \code{weights} is a named list, the named map to \code{id}. If unnamed, they must be provided in the same order as \code{id}.
 Equal weights are set for an individual ID variable's levels
 when a list element in \code{weights} correpsonding to an \code{id} value is \code{NULL}.
+
+\code{get_levels} returns a list of levels for ID variables in \code{x}, a subset of the information returned by \code{get_weights}
+When an rvtable contains no ID variables, there are no levels or weights.
 }
 \examples{
 x <- rvtable(data.frame(
@@ -45,6 +51,7 @@ x <- rvtable(data.frame(
   id2=factor(c("low", "high")),
   id3=rep(1:2, each=2),
   Val=rep(1:10, each=20), Prob=rep(sqrt(1:10), each=20)))
+get_levels(x)
 get_weights(x)
 get_weights(x, "id1")
 x <- set_weights(x, "id1", data.frame(levels=LETTERS[1:5], weights=1:5))

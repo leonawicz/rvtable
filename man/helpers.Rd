@@ -85,6 +85,7 @@ the atrributes of an rvtable will still display all sampling default arguments a
 default arguments for clarity.
 }
 \examples{
+\dontrun{
 x <- rvtable(1:10)
 
 is_rvtable(x)
@@ -109,4 +110,5 @@ x <- set_density_args(x, list(n = 1000, adjust = 0.1))
 x <- set_sample_args(x, list(n = 100))
 get_density_args(x)
 get_sample_args(x)
+}
 }

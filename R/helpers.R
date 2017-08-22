@@ -26,6 +26,7 @@
 #' @return information about various rvtable attributes. See details.
 #'
 #' @examples
+#' \dontrun{
 #' x <- rvtable(1:10)
 #'
 #' is_rvtable(x)
@@ -50,6 +51,7 @@
 #' x <- set_sample_args(x, list(n = 100))
 #' get_density_args(x)
 #' get_sample_args(x)
+#' }
 NULL
 
 #' @export
@@ -147,7 +149,7 @@ get_sample_args <- function(x){
 #' @rdname helpers
 set_density_args <- function(x, density.args){
   .rv_class_check(x)
-  attr(x, "density.args") <- density.args
+  attr(x, "density.args") <- .update_default_args(density.args, "density")
   x
 }
 
@@ -155,7 +157,7 @@ set_density_args <- function(x, density.args){
 #' @rdname helpers
 set_sample_args <- function(x, sample.args){
   .rv_class_check(x)
-  attr(x, "sample.args") <- sample.args
+  attr(x, "sample.args") <- .update_default_args(sample.args, "sample")
   x
 }
 
