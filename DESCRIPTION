@@ -24,7 +24,6 @@ Imports:
     tidyr,
     lazyeval
 Suggests:
-    data.table,
     testthat,
     covr,
     lintr,
