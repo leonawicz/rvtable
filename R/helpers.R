@@ -2,7 +2,7 @@
 #'
 #' Helper functions for the rvtable class.
 #'
-#' These helper functions provide information about `rvtable` class objects and their attributes.
+#' These helper functions provide information about \code{rvtable} class objects and their attributes.
 #' They get and in some cases set rvtable attributes as well as perform various logical checks.
 #' \code{rvattr} returns a named list of attributes of \code{x}. \code{is*} functions return \code{TRUE} or \code{FALSE}.
 #' \code{rvtype}, \code{tabletype}, \code{valcol} and \code{probcol} return individual attributes of \code{x} (character).
@@ -171,7 +171,7 @@ set_sample_args <- function(x, sample.args){
   all(.rvtable_attribute_names(...) %in% names(attributes(x)))
 
 .lost_rv_class_check <- function(x){
-  if(.has_rv_attributes(x) & !(is_rvtable(x)))
+  if(.has_rv_attributes(x) && (!(is_rvtable(x)) || class(x)[1] != "rvtable"))
     class(x) <- unique(c("rvtable", class(x)))
   x
 }
