@@ -2,28 +2,37 @@
 % Please edit documentation in R/rvdplyr.R
 \name{rvdplyr}
 \alias{rvdplyr}
-\alias{arrange.rvtable}
-\alias{filter.rvtable}
-\alias{slice.rvtable}
-\alias{mutate.rvtable}
-\alias{summarise.rvtable}
-\alias{summarize.rvtable}
-\alias{distinct.rvtable}
+\alias{arrange}
+\alias{filter}
+\alias{slice}
+\alias{select}
+\alias{mutate}
+\alias{summarise}
+\alias{summarize}
+\alias{distinct}
+\alias{group_by}
+\alias{ungroup}
 \title{Preserving rvtable class and attributes with dplyr}
 \usage{
-\method{arrange}{rvtable}(.data, ...)
+arrange(.data, ...)
 
-\method{filter}{rvtable}(.data, ...)
+filter(.data, ...)
 
-\method{slice}{rvtable}(.data, ...)
+slice(.data, ...)
 
-\method{mutate}{rvtable}(.data, ...)
+select(.data, ...)
 
-\method{summarise}{rvtable}(.data, ...)
+mutate(.data, ...)
 
-\method{summarize}{rvtable}(.data, ...)
+summarise(.data, ...)
 
-\method{distinct}{rvtable}(.data, ...)
+summarize(.data, ...)
+
+distinct(.data, ..., .keep_all = FALSE)
+
+group_by(.data, ..., add = FALSE)
+
+ungroup(x, ..., .keep_all = FALSE)
 }
 \arguments{
 \item{.data}{rvtable.}
@@ -34,9 +43,33 @@
 an rvtable.
 }
 \description{
-Methods for the rvtable class are provided for a number of common generic \code{dplyr} methods.
+Methods for the \code{rvtable} class are provided for a number of common generic \code{dplyr} methods.
 }
 \details{
 Functions in the \code{dplyr} package tend to strip custom classes and attributes from data frames.
 These rvtable methods preserve the \code{rvtable} class as the primary class and preserve all rvtable-specific attributes.
+
+Note that some operations inherently destroy an rvtable. For example, the resulting data frame cannot be an rvtable
+after using \code{select} to drop the values column.
+Constructing an rvtable generally suggests that most other operations that manipulate the data frame have been completed;
+there should be little reason to do anything other than possibly use \code{group_by}, \code{ungroup} or \code{arrange}
+and still have use for the result as an rvtable specifically.
+\code{filter}, \code{slice}, \code{select}, \code{mutate}, \code{summarise} and \code{distinct} should be used with caution.
+Methods will make attempts to explicitly coerce output to a tibble instead of preserving the rvtable class and associated attributes
+when a change in the data frame that ruins the meaningfulness of an rvtable is detected.
+
+For example, if a dplyr operation removes the values column, the result will be a simple tibble, not an rvtable.
+Similarly, if the original rvtable was in distribution form, but a dplyr function strips the probabilities column,
+the result is left as a tibble and the \code{rvtable} class and associated attributes are not preserved.
+If all observations for an ID variable are removed with \code{filter} or \code{slice},
+the attribute entries for that ID variable in  \code{coltypes$idcols} and \code{weights} are removed.
+Nevertheless, despite modest efforts to protect against misuse, it remains incredibly easy to create bogus rvtables
+by applying various \code{dplyr} operations indiscriminantly.
+These \code{rvtable} methods are provided for convenience only.
+It is recommended to only construct rvtables from data frames that clearly conform to rvtable requirements and expectations.
+If hacking at an rvtable with dplyr functions, consideration should be given to whether the result is still meaningful as an rvtable.
+
+The \code{rvtable} package exports its own generic methods for the above functions.
+Therefore, if strict \code{dplyr} methods for tibbles is preferred over \code{rvtable} class methods when working with \code{rvtable} objects,
+just load \code{library(dplyr)} after \code{library(rvtable)} to override the \code{rvtable} versions.
 }
