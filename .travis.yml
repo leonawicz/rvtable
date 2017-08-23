@@ -5,6 +5,12 @@ sudo: false
 cache: packages
 
 r_packages:
-  - covr
+- covr
+
+include:
+- r: release
+- r: oldrel
+- r: devel
+
 after_success:
-  - Rscript -e 'covr::codecov()'
+- Rscript -e 'covr::codecov()'

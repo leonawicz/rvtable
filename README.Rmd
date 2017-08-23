@@ -11,6 +11,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.path = "README-")
 # rvtable
 
 [![Travis-CI Build Status](https://travis-ci.org/leonawicz/rvtable.svg?branch=master)](https://travis-ci.org/leonawicz/rvtable)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/leonawicz/rvtable?branch=master&svg=true)](https://ci.appveyor.com/project/leonawicz/rvtable)
 [![Coverage Status](https://img.shields.io/codecov/c/github/leonawicz/rvtable/master.svg)](https://codecov.io/github/leonawicz/rvtable?branch=master)
 
 rvtable is an R package for storing distributions of random variables in long format data frames with the `rvtable` class.
