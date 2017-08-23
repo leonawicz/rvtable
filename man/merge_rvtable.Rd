@@ -2,7 +2,7 @@
 % Please edit documentation in R/merging.R
 \name{merge_rvtable}
 \alias{merge_rvtable}
-\title{Merge RV Table Conditional Distributions}
+\title{Merge Conditional Distributions}
 \usage{
 merge_rvtable(x, density.args, sample.args)
 }

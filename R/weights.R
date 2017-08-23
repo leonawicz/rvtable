@@ -1,4 +1,4 @@
-#' ID variable level weights
+#' ID Variable Level Weights
 #'
 #' Get or set ID variable level weights.
 #'

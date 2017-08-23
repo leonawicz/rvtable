@@ -5,7 +5,7 @@
 \alias{get_levels}
 \alias{get_weights}
 \alias{set_weights}
-\title{ID variable level weights}
+\title{ID Variable Level Weights}
 \usage{
 get_levels(x, id)
 

@@ -19,7 +19,7 @@
 \alias{get_sample_args}
 \alias{set_density_args}
 \alias{set_sample_args}
-\title{rvtable helpers and attributes}
+\title{Helpers Functions And Attributes}
 \usage{
 rvattr(x, id, all = FALSE)
 

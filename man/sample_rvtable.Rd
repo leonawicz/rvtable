@@ -2,7 +2,7 @@
 % Please edit documentation in R/sampling.R
 \name{sample_rvtable}
 \alias{sample_rvtable}
-\title{Sample A Random Variable In An RV Table}
+\title{Sample A Random Variable Table}
 \usage{
 sample_rvtable(x, resample = FALSE, n = 10000, interp = TRUE,
   n.interp = 1e+05, decimals = NULL, density.args)

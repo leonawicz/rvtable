@@ -1,4 +1,4 @@
-#' rvtable helpers and attributes
+#' Helpers Functions And Attributes
 #'
 #' Helper functions for the rvtable class.
 #'

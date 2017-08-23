@@ -1,4 +1,4 @@
-#' Sample A Random Variable
+#' Sample A Random Variable Table
 #'
 #' This is an unexported helpful function for bootstrap resampling with replacement from a distribution of a random variable.
 #'
@@ -32,7 +32,7 @@
   if(is.null(decimals) | discrete) p else round(p, decimals)
 }
 
-#' Sample A Random Variable In An RV Table
+#' Sample A Random Variable Table
 #'
 #' Bootstrap resampling with replacement from a distribution of a random variable stored in an rvtable.
 #'

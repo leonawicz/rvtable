@@ -3,7 +3,7 @@
 rvtable
 =======
 
-[![Travis-CI Build Status](https://travis-ci.org/leonawicz/rvtable.svg?branch=master)](https://travis-ci.org/leonawicz/rvtable) [![Coverage Status](https://img.shields.io/codecov/c/github/leonawicz/rvtable/master.svg)](https://codecov.io/github/leonawicz/rvtable?branch=master)
+[![Travis-CI Build Status](https://travis-ci.org/leonawicz/rvtable.svg?branch=master)](https://travis-ci.org/leonawicz/rvtable) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/leonawicz/rvtable?branch=master&svg=true)](https://ci.appveyor.com/project/leonawicz/rvtable) [![Coverage Status](https://img.shields.io/codecov/c/github/leonawicz/rvtable/master.svg)](https://codecov.io/github/leonawicz/rvtable?branch=master)
 
 rvtable is an R package for storing distributions of random variables in long format data frames with the `rvtable` class. The package provides a simplified and consistent interface for managing and manipulating random variables. The key purpose of rvtable is to carry distributions through an analysis from beginning to end where the distributions are empirically derived from a large data set that is impractical or impossible to keep in original form.
 
@@ -52,7 +52,7 @@ Functions included in the package provide the following abilities:
 Installation and bug reporting
 ------------------------------
 
-Install the latest development version (0.3.1) from github:
+Install the latest development version (0.6.1) from github:
 
 ``` r
 install.packages("devtools")

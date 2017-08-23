@@ -2,7 +2,7 @@
 % Please edit documentation in R/merging.R
 \name{marginalize}
 \alias{marginalize}
-\title{Marginal Distribution rvtable}
+\title{Marginal Distributions}
 \usage{
 marginalize(x, margin, density.args, sample.args)
 }

@@ -1,4 +1,4 @@
-#' Merge RV Table Conditional Distributions
+#' Merge Conditional Distributions
 #'
 #' Merge conditional distributions of a random variable in an rvtable over levels of ungrouped categorical variables.
 #'
@@ -142,7 +142,7 @@ merge_rvtable <- function(x, density.args, sample.args){
   warning(no_merge)
 }
 
-#' Marginal Distribution rvtable
+#' Marginal Distributions
 #'
 #' Obtain a marginal distribution of a random variable in an rvtable.
 #'

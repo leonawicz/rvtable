@@ -2,7 +2,7 @@
 % Please edit documentation in R/rvtable.R
 \name{rvtable}
 \alias{rvtable}
-\title{Random Variable Table}
+\title{Construct A Random Variable Table}
 \usage{
 rvtable(x, y = NULL, Val, Prob, discrete = FALSE, density.args = list(),
   weights = list(), force.dist = TRUE)

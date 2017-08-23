@@ -1,7 +1,6 @@
 # rvtable 0.6.1 (Release date: 2017-08-23)
 
-* Added rvtable methods for several common dplyr functions to 
-offer some degree of convenient class and attributes rentention for rvtables. See `?rvdplyr` help documentation.
+* Minor changes and code and documentation clean up for release.
 
 # rvtable 0.6.0 (Release date: 2017-08-22)
 
