@@ -107,8 +107,8 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE,
   distr <- !vpmissing[2] | force.dist
   forced <- vpmissing[2] & force.dist
   grp <- dplyr::groups(x)
-  if("data.table" %in% class(x)) x <- data.frame(x, stringsAsFactors=FALSE)
-  if(!"tbl_df" %in% class(x)) x <- dplyr::tbl_df(x)
+  if("data.table" %in% class(x)) x <- tibble::data_frame(x)
+  if(!"tbl_df" %in% class(x)) x <- tibble::as_data_frame(x)
   id <- names(x)
   if(!(Val %in% id)) stop(paste("No column called", Val))
   if(distr && !(Prob %in% id)) stop(paste("No column called", Prob))
@@ -159,9 +159,7 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE,
 
   if(distr && length(x) != length(y))
     stop("Values and probabilities do not have equal length.")
-  x <- if(distr) data.frame(x=x, y=y, stringsAsFactors=FALSE) else
-    data.frame(x=x, stringsAsFactors=FALSE)
-  x <- dplyr::tbl_df(x)
+  x <- if(distr) tibble::data_frame(x=x, y=y) else tibble::data_frame(x=x)
   if(vpmissing[1]) Val <- "x"
   if(distr){
     if(vpmissing[2]) Prob <- "y"

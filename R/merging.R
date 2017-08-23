@@ -84,31 +84,30 @@ merge_rvtable <- function(x, density.args, sample.args){
   has.weights <- "weights_" %in% names(x) && any(x$weights_ != 1)
   if(discrete){
     if(has.weights){
-      x <- dplyr::do(x, data.frame(
-        Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_), stringsAsFactors=FALSE))
+      x <- dplyr::do(x, tibble::data_frame(
+        Val=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_)))
     } else {
-      x <- dplyr::do(x, data.frame(
-        Val=sample(x=.$Val, size=n, replace=TRUE), stringsAsFactors=FALSE))
+      x <- dplyr::do(x, tibble::data_frame(
+        Val=sample(x=.$Val, size=n, replace=TRUE)))
     }
     x <- dplyr::group_by_(x, .dots=grp) %>% dplyr::do(
-      dplyr::tbl_df(data.frame(
+      tibble::data_frame(
         Val=as.numeric(names(table(.$Val))),
-        Prob=as.numeric(table(.$Val)) / sum(table(.$Val)),
-        stringsAsFactors=FALSE))
+        Prob=as.numeric(table(.$Val)) / sum(table(.$Val)))
     )
   } else {
     if(has.weights){
-      x <- dplyr::do(x, data.frame(
+      x <- dplyr::do(x, tibble::data_frame(
         Val=do.call(density,
                     c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_)), density.args))$x,
         Prob=do.call(density,
                      c(list(x=sample(x=.$Val, size=n, replace=TRUE, prob=.$weights_)), density.args))$y,
-        stringsAsFactors=FALSE))
+        ))
     } else {
-      x <- dplyr::do(x, data.frame(
+      x <- dplyr::do(x, tibble::data_frame(
         Val=do.call(density, c(list(x=.$Val), density.args))$x,
         Prob=do.call(density, c(list(x=.$Val), density.args))$y,
-        stringsAsFactors=FALSE))
+        ))
     }
   }
   x <- .add_rvtable_class(x, Val, Prob, discrete, TRUE, weights, density.args, sample.args)
@@ -277,7 +276,7 @@ cycle_rvtable <- function(x, n, start=NULL, density.args, sample.args, keep="all
   }
 
   force_weights <- function(x, id, values){
-    attr(x, "weights")[[id]] <- data.frame(levels=values, weights=1)
+    attr(x, "weights")[[id]] <- tibble::data_frame(levels=values, weights=1)
     x
   }
 

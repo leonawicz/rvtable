@@ -85,17 +85,15 @@ sample_rvtable <- function(x, resample=FALSE, n=10000, interp=TRUE,
   if(tbl=="sample"){
     if(discrete) x <- dplyr::mutate(x, Prob=1)
     if(!discrete){
-      x <- dplyr::tbl_df(dplyr::do(x, data.frame(
+      x <- dplyr::do(x, tibble::data_frame(
         Val=do.call(density, c(list(x=.$Val), density.args))$x,
-        Prob=do.call(density, c(list(x=.$Val), density.args))$y,
-        stringsAsFactors=FALSE))) %>%
+        Prob=do.call(density, c(list(x=.$Val), density.args))$y)) %>%
         dplyr::group_by_(.dots=grp2)
     }
   }
-  x <- dplyr::do(x, dplyr::tbl_df(data.frame(
-    Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals),
-    stringsAsFactors=FALSE)))
-  x <- dplyr::group_by_(x, .dots=grp) %>%
+  x <- dplyr::do(x, tibble::data_frame(
+    Val=.sample_rvdist(.$Val, .$Prob, n, discrete, interp, n.interp, decimals)))
+  dplyr::group_by_(x, .dots=grp) %>%
     .add_rvtable_class(Val, NULL, discrete, FALSE, weights, density.args) %>%
     .rvtable_rename("from") %>%
     .add_rvtable_class(Val, NULL, discrete, FALSE, weights, density.args)

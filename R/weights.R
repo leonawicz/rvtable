@@ -151,8 +151,11 @@ set_weights <- function(x, id, weights){
   no_wts <- .no_weights(weights)
   if(!no_wts && (nrow(weights) != length(lev)))
     stop("`weights` must have number of rows equal to number of levels in `x[[id]]`.")
-  if(no_wts) return(dplyr::tbl_df(data.frame(levels=lev, weights=1, stringsAsFactors=FALSE)))
-  if(!"tbl_df" %in% weights) dplyr::tbl_df(weights)
+  if(no_wts) return(tibble::data_frame(levels=lev, weights=1))
+  cl <- class(weights)
+  if(!"data.frame" %in% cl) stop("`weights` should be NULL or a data frame.")
+  if(!"tbl_df" %in% cl) weights <- tibble::as_data_frame(weights)
+  weights
 }
 
 .set_all_weights <- function(x, weights, Val, Prob){

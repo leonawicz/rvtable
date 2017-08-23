@@ -60,11 +60,11 @@ inverse_pmf <- function(x, values, id, sample.args){
 
   x <- x %>% dplyr::do(NEW=uni,
     numer=dplyr::group_by_(., .dots=dots) %>%
-      dplyr::do(data.frame(
+      dplyr::do(tibble::data_frame(
         numer=length(which(.$Val >= values[1] & .$Val <= values[2])) / (n.levels*nrow(.)))
         ) %>% dplyr::ungroup() %>% dplyr::select(numer),
     denom=dplyr::group_by_(., .dots=dots2) %>%
-      dplyr::do(data.frame(
+      dplyr::do(tibble::data_frame(
         denom=rep(length(which(.$Val >= values[1] & .$Val <= values[2])) / nrow(.), n.levels))
         ) %>% dplyr::ungroup() %>% dplyr::select(denom)) %>%
     dplyr::ungroup()

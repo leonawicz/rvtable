@@ -20,6 +20,7 @@ LazyData: TRUE
 Imports:
     dplyr,
     purrr,
+    tibble,
     magrittr,
     tidyr,
     lazyeval
