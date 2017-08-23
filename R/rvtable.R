@@ -2,6 +2,7 @@ globalVariables(c(".", "Val", "n", "numer", "denom"))
 
 #' @importFrom magrittr %>%
 #' @importFrom stats approx density
+#' @importFrom dplyr arrange distinct filter group_by mutate select slice summarise summarize ungroup
 NULL
 
 #' Random Variable Table

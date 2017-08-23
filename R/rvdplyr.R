@@ -25,10 +25,6 @@
 #' It is recommended to only construct rvtables from data frames that clearly conform to rvtable requirements and expectations.
 #' If hacking at an rvtable with dplyr functions, consideration should be given to whether the result is still meaningful as an rvtable.
 #'
-#' The \code{rvtable} package exports its own generic methods for the above functions.
-#' Therefore, if strict \code{dplyr} methods for tibbles is preferred over \code{rvtable} class methods when working with \code{rvtable} objects,
-#' just load \code{library(dplyr)} after \code{library(rvtable)} to override the \code{rvtable} versions.
-#'
 #' @param .data rvtable.
 #' @param ... additional arguments.
 #' @name rvdplyr
@@ -70,71 +66,13 @@ NULL
 
 #' @rdname rvdplyr
 #' @export
-arrange <- function (.data, ...) {
-  UseMethod("arrange", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-filter <- function (.data, ...) {
-  UseMethod("filter", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-slice <- function (.data, ...) {
-  UseMethod("slice", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-select <- function (.data, ...) {
-  UseMethod("select", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-mutate <- function (.data, ...) {
-  UseMethod("mutate", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-summarise <- function (.data, ...) {
-  UseMethod("summarise", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-summarize <- function (.data, ...) {
-  UseMethod("summarise", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-distinct <- function (.data, ..., .keep_all = FALSE) {
-  UseMethod("distinct", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-group_by <- function (.data, ..., add = FALSE) {
-  UseMethod("group_by", .data)
-}
-
-#' @rdname rvdplyr
-#' @export
-ungroup <- function (x, ..., .keep_all = FALSE) {
-  UseMethod("ungroup", x)
-}
-
-#' @export
 arrange.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
   class(.data) <- class(.data)[-1]
   .replace_rvatts(dplyr::arrange(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 filter.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -142,6 +80,7 @@ filter.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::filter(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 slice.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -149,6 +88,7 @@ slice.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::slice(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 select.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -156,6 +96,7 @@ select.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::select(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 mutate.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -163,6 +104,7 @@ mutate.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::mutate(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 summarise.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -170,6 +112,7 @@ summarise.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::summarise(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 summarize.rvtable <- function(.data, ...) {
   a <- rvattr(.data)
@@ -177,6 +120,7 @@ summarize.rvtable <- function(.data, ...) {
   .replace_rvatts(dplyr::summarise(.data, ...), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 distinct.rvtable <- function(.data, ..., .keep_all = FALSE) {
   a <- rvattr(.data)
@@ -184,6 +128,7 @@ distinct.rvtable <- function(.data, ..., .keep_all = FALSE) {
   .replace_rvatts(dplyr::distinct(.data, ..., .keep_all = .keep_all), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 group_by.rvtable <- function(.data, ..., add = FALSE) {
   a <- rvattr(.data)
@@ -191,6 +136,7 @@ group_by.rvtable <- function(.data, ..., add = FALSE) {
   .replace_rvatts(dplyr::group_by(.data, ..., add = add), a)
 }
 
+#' @rdname rvdplyr
 #' @export
 ungroup.rvtable <- function(x, ...) {
   a <- rvattr(x)

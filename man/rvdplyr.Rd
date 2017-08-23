@@ -2,37 +2,37 @@
 % Please edit documentation in R/rvdplyr.R
 \name{rvdplyr}
 \alias{rvdplyr}
-\alias{arrange}
-\alias{filter}
-\alias{slice}
-\alias{select}
-\alias{mutate}
-\alias{summarise}
-\alias{summarize}
-\alias{distinct}
-\alias{group_by}
-\alias{ungroup}
+\alias{arrange.rvtable}
+\alias{filter.rvtable}
+\alias{slice.rvtable}
+\alias{select.rvtable}
+\alias{mutate.rvtable}
+\alias{summarise.rvtable}
+\alias{summarize.rvtable}
+\alias{distinct.rvtable}
+\alias{group_by.rvtable}
+\alias{ungroup.rvtable}
 \title{Preserving rvtable class and attributes with dplyr}
 \usage{
-arrange(.data, ...)
+\method{arrange}{rvtable}(.data, ...)
 
-filter(.data, ...)
+\method{filter}{rvtable}(.data, ...)
 
-slice(.data, ...)
+\method{slice}{rvtable}(.data, ...)
 
-select(.data, ...)
+\method{select}{rvtable}(.data, ...)
 
-mutate(.data, ...)
+\method{mutate}{rvtable}(.data, ...)
 
-summarise(.data, ...)
+\method{summarise}{rvtable}(.data, ...)
 
-summarize(.data, ...)
+\method{summarize}{rvtable}(.data, ...)
 
-distinct(.data, ..., .keep_all = FALSE)
+\method{distinct}{rvtable}(.data, ..., .keep_all = FALSE)
 
-group_by(.data, ..., add = FALSE)
+\method{group_by}{rvtable}(.data, ..., add = FALSE)
 
-ungroup(x, ..., .keep_all = FALSE)
+\method{ungroup}{rvtable}(x, ...)
 }
 \arguments{
 \item{.data}{rvtable.}
@@ -68,8 +68,4 @@ by applying various \code{dplyr} operations indiscriminantly.
 These \code{rvtable} methods are provided for convenience only.
 It is recommended to only construct rvtables from data frames that clearly conform to rvtable requirements and expectations.
 If hacking at an rvtable with dplyr functions, consideration should be given to whether the result is still meaningful as an rvtable.
-
-The \code{rvtable} package exports its own generic methods for the above functions.
-Therefore, if strict \code{dplyr} methods for tibbles is preferred over \code{rvtable} class methods when working with \code{rvtable} objects,
-just load \code{library(dplyr)} after \code{library(rvtable)} to override the \code{rvtable} versions.
 }
