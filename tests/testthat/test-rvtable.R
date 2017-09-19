@@ -84,7 +84,5 @@ test_that("test error handling", {
   expect_error(rvtable(data.frame(x=1:10, y=1), Val="x", Prob="z"), "No column called z")
   expect_error(rvtable(data.frame(x=1:10, y=1), Val="z", Prob="y"), "No column called z")
   expect_error(rvtable(data.frame(x=1:10, y=1)), "No column called Val")
-  expect_error(rvtable(data.frame(Val=1:10, y=1)), "No column called Prob")
-  expect_error(rvtable(data.frame(Val=1:10)), "No column called Prob")
   expect_error(rvtable(data.frame(x=rep(1, 2), y=1), Val="x", Prob="y"), "Duplicated values in `x`.")
 })
