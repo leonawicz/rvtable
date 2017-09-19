@@ -111,9 +111,9 @@ rvtable <- function(x, y=NULL, Val, Prob, discrete=FALSE,
   if(!"tbl_df" %in% class(x)) x <- tibble::as_data_frame(x)
   id <- names(x)
   if(!(Val %in% id)) stop(paste("No column called", Val))
-  if(distr && !(Prob %in% id)) stop(paste("No column called", Prob))
+  if(distr && !forced && !(Prob %in% id)) stop(paste("No column called", Prob))
   stopifnot((is.numeric(x[[Val]]) || discrete) && !any(is.na(x[[Val]])))
-  if(distr){
+  if(distr & !forced){
     stopifnot(is.numeric(x[[Prob]]) && !any(is.na(x[[Prob]])))
     stopifnot(min(x[[Prob]]) >= 0)
   }
