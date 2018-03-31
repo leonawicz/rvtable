@@ -377,7 +377,7 @@ inverse_pmf(x2, 2, "id1")
 inverse_pmf(x2, 1:2, "id1")
 ```
 
-For more information about the `rvtable` package, see the [help documentation](http://leonawicz.github.io/rvtable/)
+For more information about the `rvtable` package, see the [help documentation](https://leonawicz.github.io/rvtable/)
 
 ## Density re-estimation and resampling
 
