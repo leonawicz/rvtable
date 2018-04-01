@@ -64,7 +64,7 @@ Please file a minimal reproducible example of any clear bug at [github](https://
 Learning rvtable
 ----------------
 
-Familiarity with dplyr is recommended. An introduction vignette for rvtable is [available online](http://leonawicz.github.io/rvtable/articles/rvtable.html) or:
+Familiarity with dplyr is recommended. An introduction vignette for rvtable is [available online](https://leonawicz.github.io/rvtable/articles/rvtable.html) or:
 
 ``` r
 browseVignettes(package = "rvtable")
