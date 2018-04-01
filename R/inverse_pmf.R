@@ -69,10 +69,17 @@ inverse_pmf <- function(x, values, id, sample.args){
         ) %>% dplyr::ungroup() %>% dplyr::select(denom)) %>%
     dplyr::ungroup()
 
+  id_factor <- is.factor(x$NEW[[1]])
+  if(id_factor){
+    lev <- levels(x$NEW[[1]])
+    x$NEW <- lapply(x$NEW, as.character)
+  }
   if("dummy" %in% names(x)) x <- dplyr::select_(x, .dots=list("-dummy"))
   names(x)[names(x)=="NEW"] <- id
   if(is.null(Prob)) Prob <- "Prob"
-  x <- tidyr::unnest(x) %>% dplyr::filter(denom != 0) %>%
+  x <- tidyr::unnest(x)
+  if(id_factor) x[[id]] <- factor(x[[id]], levels = lev)
+  x <- dplyr::filter(x, denom != 0) %>%
     dplyr::group_by_(.dots=dots) %>% dplyr::summarise(Prob=numer/denom) %>%
     dplyr::rename_(.dots=stats::setNames("Prob", Prob)) %>% dplyr::ungroup()
   if(nrow(x) == 0){
