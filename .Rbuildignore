@@ -12,3 +12,4 @@
 ^inst/\.lintr$
 ^appveyor\.yml$
 ^R-dev$
+^data-raw$
