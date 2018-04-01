@@ -1,13 +1,6 @@
 Package: rvtable
-Type: Package
+Version: 0.6.2.9000
 Title: Random Variable Data Tables
-Version: 0.6.1
-Date: 2017-08-23
-Author: Matthew Leonawicz [aut, cre]
-Maintainer: Matthew Leonawicz <mfleonawicz@alaska.edu>
-Authors@R: person("Matthew", "Leonawicz", role = c("aut", "cre"), email = "mfleonawicz@alaska.edu")
-URL: https://github.com/leonawicz/rvtable
-BugReports: https://github.com/leonawicz/rvtable/issues
 Description: Store distributions of random variables in long format data frames
     with the 'rvtable' class. The package provides a simplified and consistent
     interface for managing and manipulating random variables. Random variables can
@@ -15,6 +8,11 @@ Description: Store distributions of random variables in long format data frames
     ID columns. Functions provide the ability to condition on/subset, marginalize/
     integrate over, and draw random samples from an rvtable. Emphasis is on
     continuous probability density functions empirically estimated from large samples.
+Authors@R: c(person("Matthew", "Leonawicz", email = "mfleonawicz@alaska.edu", role = c("aut", "cre")),
+    person("Scenarios Network for Alaska and Arctic Planning", role = c("cph", "fnd"))
+    )
+URL: https://github.com/leonawicz/rvtable
+BugReports: https://github.com/leonawicz/rvtable/issues
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:

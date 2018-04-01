@@ -1,3 +1,13 @@
+# rvtable 0.6.2.9000
+
+* Minor bug fix.
+* Minor doc updates.
+
+# rvtable 0.6.2 (Release date: 2017-09-19)
+
+* Minor bug fixes.
+* Update unit tests.
+
 # rvtable 0.6.1 (Release date: 2017-08-23)
 
 * Minor changes and code and documentation clean up for release.
