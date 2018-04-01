@@ -8,14 +8,17 @@
 <title>Introduction to rvtable • rvtable</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-<!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to rvtable">
+<meta property="og:description" content="">
+<meta name="twitter:card" content="summary">
+<!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body>
-    <div class="container template-vignette">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -24,24 +27,28 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">rvtable</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">rvtable</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.6.2.9000</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/rvtable.html">Get Started</a>
+  <a href="../articles/rvtable.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li>
-  <a href="../news/index.html">News</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -61,17 +68,19 @@
 
       
       </header><div class="row">
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Introduction to rvtable</h1>
                         <h4 class="author">Matthew Leonawicz</h4>
             
-            <h4 class="date">2017-08-23</h4>
-          </div>
+            <h4 class="date">2018-03-31</h4>
+      
+      <small>Source: <a href="https://github.com/leonawicz/rvtable/blob/master/vignettes/rvtable.Rmd"><code>vignettes/rvtable.Rmd</code></a></small>
+
+    </div>
 
     
     
-<div class="contents">
 <!-- rvtable.md is generated from rvtable.Rmd. Please edit that file -->
 <p>The <code>rvtable</code> package provides a special type of data frame subclass with associated functionality for relatively convenient storage and manipulation of random variables. The emphasis is on distributions of continuous random variables derived from relatively large samples, though discrete random variables are also handled.</p>
 <p>An rvtable contains a column defining values representing or sampled from a probability distribution and, usually (see below for exception), a column of respective probabilities. Additional columns are treated as ID columns and represent factors or categorical variables.</p>
@@ -250,7 +259,7 @@ y2</code></pre></div>
 <span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">1</span>, <span class="st">"id1"</span>)
 <span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">2</span>, <span class="st">"id1"</span>)
 <span class="kw"><a href="../reference/inverse_pmf.html">inverse_pmf</a></span>(x2, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="st">"id1"</span>)</code></pre></div>
-<p>For more information about the <code>rvtable</code> package, see the <a href="http://leonawicz.github.io/rvtable/">help documentation</a></p>
+<p>For more information about the <code>rvtable</code> package, see the <a href="https://leonawicz.github.io/rvtable/">help documentation</a></p>
 </div>
 <div id="density-re-estimation-and-resampling" class="section level2">
 <h2 class="hasAnchor">
@@ -274,7 +283,6 @@ y2</code></pre></div>
 <p>At the other extreme, rather than applying judicious sampling and efficient data reduction methodologies, one might simply reduce everything in one go to statistics such as the mean and standard deviation. But like the previous instance, something new and unanticipated is often required later. Reducing all the data down to a set of statistics can preclude all kinds of analyses, requiring the analyst to revisit the burden of accessing the massive source data yet again, all the while wishing they could have foreseen the need last time for whatever they are accessing it for this time around.</p>
 <p><code>rvtable</code> bridges this gap for many use cases like this, where the happy medium, the Goldilocks zone, is to model and store empirical estimates of probability distributions from high resolution source data or massive sample or population data. Downstream analyses can depend on such a derived data set, not needing to go to the source to be able to compute arbitrary statistics from full distributional information, nor being hamstrung by overly aggregated data.</p>
 <p>Specifically, imagine using the R function, <code>density</code>, to empirically estimate the continuous probability distribution of a set of observations. It returns a list with <code>x</code> and <code>y</code> vectors that together describe the estimated density curve. If signal fidelity is of paramount importance and any further data aggregation should be postponed until later in an analysis pipeline, one can model a higher resolution estimated density with greater flexibility by increasing the number of points and/or decreasing the bandwidth. Whereas doing so might necessitate a <code>x</code> and <code>y</code> vectors containing 1,000 values each and there might be 1,000 of these for 1,000 different data sets, resulting in carrying 2 million total values through the bulk of a processing chain and steps of an analysis, these estimated density curves could capture all the information needed from source data sets that are far larger.</p>
-</div>
 </div>
 </div>
   </div>
@@ -306,15 +314,17 @@ y2</code></pre></div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Matthew Leonawicz.</p>
+  <p>Developed by Matthew Leonawicz, Scenarios Network for Alaska and Arctic Planning.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
 </div>
+
+  
 
   </body>
 </html>

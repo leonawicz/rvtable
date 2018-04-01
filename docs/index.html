@@ -8,14 +8,23 @@
 <title>Random Variable Data Tables • rvtable</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-<!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><meta property="og:title" content="Random Variable Data Tables">
+<meta property="og:description" content="Store distributions of random variables in long format data frames
+    with the 'rvtable' class. The package provides a simplified and consistent
+    interface for managing and manipulating random variables. Random variables can
+    be conditioned on levels of categorical variables stored in a table's
+    ID columns. Functions provide the ability to condition on/subset, marginalize/
+    integrate over, and draw random samples from an rvtable. Emphasis is on
+    continuous probability density functions empirically estimated from large samples.">
+<meta name="twitter:card" content="summary">
+<!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body>
-    <div class="container template-vignette">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -24,24 +33,28 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">rvtable</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="index.html">rvtable</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.6.2.9000</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="/index.html">
+  <a href="index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="articles/rvtable.html">Get Started</a>
+  <a href="articles/rvtable.html">Get started</a>
 </li>
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
 <li>
-  <a href="news/index.html">News</a>
+  <a href="news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -61,16 +74,16 @@
 
       
       </header><div class="row">
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     
 
     
     
-<div class="contents">
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <div id="rvtable" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#rvtable" class="anchor"></a>rvtable</h1></div>
+<a href="#rvtable" class="anchor"></a>rvtable <a hef="https://github.com/leonawicz/rvtable/blob/master/data-raw/rvtable.png?raw=true" _target="blank"><img src="https://github.com/leonawicz/rvtable/blob/master/inst/rvtable.png?raw=true" style="margin-bottom:5px;" width="120" align="right"></a>
+</h1></div>
 
 <p>rvtable is an R package for storing distributions of random variables in long format data frames with the <code>rvtable</code> class. The package provides a simplified and consistent interface for managing and manipulating random variables. The key purpose of rvtable is to carry distributions through an analysis from beginning to end where the distributions are empirically derived from a large data set that is impractical or impossible to keep in original form.</p>
 <p>The <code>rvtable</code> package provides a special type of data frame subclass with associated functionality for relatively convenient storage and manipulation of random variables. The emphasis is on distributions of continuous random variables derived from relatively large samples, though discrete random variables are also handled.</p>
@@ -123,7 +136,7 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <div id="learning-rvtable" class="section level2">
 <h2 class="hasAnchor">
 <a href="#learning-rvtable" class="anchor"></a>Learning rvtable</h2>
-<p>Familiarity with dplyr is recommended. An introduction vignette for rvtable is <a href="http://leonawicz.github.io/rvtable/articles/rvtable.html">available online</a> or:</p>
+<p>Familiarity with dplyr is recommended. An introduction vignette for rvtable is <a href="https://leonawicz.github.io/rvtable/articles/rvtable.html">available online</a> or:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">browseVignettes</span>(<span class="dt">package =</span> <span class="st">"rvtable"</span>)</code></pre></div>
 </div>
 <div id="license" class="section level2">
@@ -139,24 +152,34 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 </div>
 </div>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2 class="hasAnchor">
-<a href="#sidebar" class="anchor"></a>Links</h2>
+    <div class="links">
+<h2>Links</h2>
 <ul class="list-unstyled">
 <li>Browse source code at <br><a href="https://github.com/leonawicz/rvtable">https://​github.com/​leonawicz/​rvtable</a>
 </li>
 <li>Report a bug at <br><a href="https://github.com/leonawicz/rvtable/issues">https://​github.com/​leonawicz/​rvtable/​issues</a>
 </li>
 </ul>
+</div>
+<div class="license">
 <h2>License</h2>
-<p><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE.html">LICENSE</a></p>
+<ul class="list-unstyled">
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
+</ul>
+</div>
+<div class="developers">
 <h2>Developers</h2>
 <ul class="list-unstyled">
-<li>Matthew Leonawicz <br><small class="roles"> Author, maintainer </small> </li>
+<li>Matthew Leonawicz <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Scenarios Network for Alaska and Arctic Planning <br><small class="roles"> Copyright holder, funder </small>  </li>
 </ul>
+</div>
+
+      <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/leonawicz/rvtable"><img src="https://travis-ci.org/leonawicz/rvtable.svg?branch=master" alt="Travis-CI Build Status"></a></li>
@@ -164,20 +187,23 @@ devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocument
 <li><a href="https://codecov.io/github/leonawicz/rvtable?branch=master"><img src="https://img.shields.io/codecov/c/github/leonawicz/rvtable/master.svg" alt="Coverage Status"></a></li>
 </ul>
 </div>
+</div>
 
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Matthew Leonawicz.</p>
+  <p>Developed by Matthew Leonawicz, Scenarios Network for Alaska and Arctic Planning.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
 </div>
+
+  
 
   </body>
 </html>
